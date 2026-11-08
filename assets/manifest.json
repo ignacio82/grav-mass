@@ -1,0 +1,4463 @@
+{
+  "title": "Grav-Mass Day Marble Run Tree \u2014 Interactive 3D CAD, Simulator & Assembly Studio",
+  "binary_file": "assets/meshes.bin",
+  "binary_size_bytes": 30872952,
+  "toolheads": {
+    "1": {
+      "name": "Dark Wood Brown",
+      "hex": "#4A2F1D",
+      "type": "PLA"
+    },
+    "2": {
+      "name": "Translucent Emerald Green",
+      "hex": "#00A86B",
+      "type": "PETG"
+    },
+    "3": {
+      "name": "Silk Gold / Brass",
+      "hex": "#D4AF37",
+      "type": "PLA"
+    },
+    "4": {
+      "name": "Glossy Crimson Red",
+      "hex": "#C41E3A",
+      "type": "PLA"
+    }
+  },
+  "kinematics": {
+    "helix_bot_r": 145.0,
+    "helix_top_r": 60.0,
+    "helix_pitch": 79.0,
+    "helix_turns": 4.5,
+    "helix_total_deg": 1620.0,
+    "helix_z_start": 62.5,
+    "helix_z_end": 418.0,
+    "return_chute_end_deg": -62.0,
+    "return_chute_end_r": 25.0,
+    "top_feeder_start_deg": 1700.0,
+    "top_feeder_start_r": 35.0,
+    "top_feeder_rise_z": 17.55,
+    "auger_pitch": 48.0,
+    "auger_ball_orbit_r": 25.0,
+    "auger_z_start": 47.0,
+    "auger_z_end": 435.5
+  },
+  "assembled_meshes": [
+    {
+      "name": "asm_trunk_base",
+      "subsystem": "trunk_base",
+      "step": 1,
+      "sub_delay": 0.0,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        0.0,
+        0.0,
+        55.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Trunk Base #1 (\u00d8185mm Root Footprint, \u00d8135\u00d750mm Hollow Root Vault, \u00d828mm Motor Shroud & Snap-In Cradles)",
+      "cutaway_candidate": true,
+      "v_offset": 0,
+      "v_count": 24850,
+      "t_offset": 298200,
+      "t_count": 49756
+    },
+    {
+      "name": "asm_trunk_mid",
+      "subsystem": "trunk_mid",
+      "step": 5,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        0.0,
+        0.0,
+        115.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Trunk Middle #2 (Stack onto Trunk Base #1 Tenon \u2014 Aligns Ball Flute & 10\u00d78mm Rear Connector Conduit)",
+      "cutaway_candidate": true,
+      "v_offset": 895272,
+      "v_count": 9876,
+      "t_offset": 1013784,
+      "t_count": 19768
+    },
+    {
+      "name": "asm_trunk_top",
+      "subsystem": "trunk_top",
+      "step": 5,
+      "sub_delay": 0.85,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        0.0,
+        0.0,
+        115.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        75.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Trunk Top #3 (Stack onto Trunk Middle #2 Tenon \u2014 Houses Upper -Y Chute & 10\u00d78mm Rear Conduit)",
+      "cutaway_candidate": true,
+      "v_offset": 1251000,
+      "v_count": 8871,
+      "t_offset": 1357452,
+      "t_count": 17758
+    },
+    {
+      "name": "asm_Base_Bottom_Cover",
+      "subsystem": "trunk_base",
+      "step": 2,
+      "sub_delay": 1.75,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        0.0,
+        0.0,
+        -65.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        -145.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Base_Bottom_Cover (Twist-Lock / 4\u00d7 Captive Magnet Service Lid with Ventilation Louvers)",
+      "v_offset": 1570548,
+      "v_count": 2472,
+      "t_offset": 1600212,
+      "t_count": 4962
+    },
+    {
+      "name": "asm_Conduit_Cover_Strip_01",
+      "subsystem": "trunk_mid",
+      "step": 9,
+      "sub_delay": 0.3,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        -55.0,
+        0.0,
+        0.0
+      ],
+      "explode": [
+        -95.0,
+        0.0,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Conduit_Cover_Strip (Snap-On Brown Cover Strip for 10\u00d78mm Rear Connector-Pass-Through Conduit)",
+      "v_offset": 1659756,
+      "v_count": 24,
+      "t_offset": 1660044,
+      "t_count": 44
+    },
+    {
+      "name": "asm_Conduit_Cover_Strip_02",
+      "subsystem": "trunk_mid",
+      "step": 9,
+      "sub_delay": 0.3,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        -55.0,
+        0.0,
+        0.0
+      ],
+      "explode": [
+        -95.0,
+        0.0,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Conduit_Cover_Strip (Snap-On Brown Cover Strip for 10\u00d78mm Rear Connector-Pass-Through Conduit)",
+      "v_offset": 1660572,
+      "v_count": 24,
+      "t_offset": 1660860,
+      "t_count": 44
+    },
+    {
+      "name": "asm_Conduit_Cover_Strip_03",
+      "subsystem": "trunk_mid",
+      "step": 9,
+      "sub_delay": 0.3,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        -55.0,
+        0.0,
+        0.0
+      ],
+      "explode": [
+        -95.0,
+        0.0,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Conduit_Cover_Strip (Snap-On Brown Cover Strip for 10\u00d78mm Rear Connector-Pass-Through Conduit)",
+      "v_offset": 1661388,
+      "v_count": 24,
+      "t_offset": 1661676,
+      "t_count": 44
+    },
+    {
+      "name": "asm_auger_lower",
+      "subsystem": "auger_lower",
+      "step": 4,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        0.0,
+        0.0,
+        95.0
+      ],
+      "explode": [
+        -110.0,
+        0.0,
+        -20.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "auger_driven",
+      "opacity": 1.0,
+      "label": "Archimedes Auger Lower #1 (Female Hex Socket Seats onto Motor_Clutch_Driver; Top Hex Peg Engraved '1')",
+      "v_offset": 1662204,
+      "v_count": 10357,
+      "t_offset": 1786488,
+      "t_count": 20710
+    },
+    {
+      "name": "asm_auger_upper",
+      "subsystem": "auger_upper",
+      "step": 4,
+      "sub_delay": 0.85,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        0.0,
+        0.0,
+        110.0
+      ],
+      "explode": [
+        -110.0,
+        0.0,
+        50.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "auger_driven",
+      "opacity": 1.0,
+      "label": "Archimedes Auger Upper #2 (Couples onto Auger Lower #1's Hex Peg; Top Shaft Engraved '2')",
+      "v_offset": 2035008,
+      "v_count": 9566,
+      "t_offset": 2149800,
+      "t_count": 19128
+    },
+    {
+      "name": "asm_track_seg_01",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 0.0,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        41.57,
+        28.0
+      ],
+      "explode": [
+        57.500000000000014,
+        99.59292143521044,
+        -60.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 01 (Clicks into Seg 00's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 2379336,
+      "v_count": 16798,
+      "t_offset": 2580912,
+      "t_count": 33596
+    },
+    {
+      "name": "asm_track_seg_02",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 0.24,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        -48.0,
+        0.0,
+        28.0
+      ],
+      "explode": [
+        -115.0,
+        1.4083438190194563e-14,
+        -50.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 02 (Clicks into Seg 01's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 2984064,
+      "v_count": 14021,
+      "t_offset": 3152316,
+      "t_count": 28046
+    },
+    {
+      "name": "asm_track_seg_03",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 0.48,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        -41.57,
+        28.0
+      ],
+      "explode": [
+        57.500000000000014,
+        -99.59292143521044,
+        -40.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 03 (Clicks into Seg 02's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 3488868,
+      "v_count": 15481,
+      "t_offset": 3674640,
+      "t_count": 30970
+    },
+    {
+      "name": "asm_track_seg_04",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 0.72,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        41.57,
+        28.0
+      ],
+      "explode": [
+        57.49999999999997,
+        99.59292143521047,
+        -30.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 04 (Clicks into Seg 03's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 4046280,
+      "v_count": 13864,
+      "t_offset": 4212648,
+      "t_count": 27732
+    },
+    {
+      "name": "asm_track_seg_05",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 0.96,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        -48.0,
+        0.0,
+        28.0
+      ],
+      "explode": [
+        -115.0,
+        4.225031457058368e-14,
+        -20.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 05 (Clicks into Seg 04's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 4545432,
+      "v_count": 15151,
+      "t_offset": 4727244,
+      "t_count": 30310
+    },
+    {
+      "name": "asm_track_seg_06",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 1.2,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        -41.57,
+        28.0
+      ],
+      "explode": [
+        57.4999999999999,
+        -99.5929214352105,
+        -10.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 06 (Clicks into Seg 05's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 5090964,
+      "v_count": 15136,
+      "t_offset": 5272596,
+      "t_count": 30276
+    },
+    {
+      "name": "asm_track_seg_07",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 1.44,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        41.57,
+        28.0
+      ],
+      "explode": [
+        57.49999999999999,
+        99.59292143521046,
+        0.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 07 (Clicks into Seg 06's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 5635908,
+      "v_count": 13483,
+      "t_offset": 5797704,
+      "t_count": 26970
+    },
+    {
+      "name": "asm_track_seg_08",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 1.68,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        -48.0,
+        0.0,
+        28.0
+      ],
+      "explode": [
+        -115.0,
+        7.041719095097281e-14,
+        10.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 08 (Clicks into Seg 07's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 6121344,
+      "v_count": 14873,
+      "t_offset": 6299820,
+      "t_count": 29750
+    },
+    {
+      "name": "asm_track_seg_09",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 1.92,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        -41.57,
+        28.0
+      ],
+      "explode": [
+        57.50000000000005,
+        -99.59292143521041,
+        20.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 09 (Clicks into Seg 08's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 6656820,
+      "v_count": 13374,
+      "t_offset": 6817308,
+      "t_count": 26756
+    },
+    {
+      "name": "asm_track_seg_10",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 2.16,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        41.57,
+        28.0
+      ],
+      "explode": [
+        57.50000000000019,
+        99.59292143521034,
+        30.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 10 (Clicks into Seg 09's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 7138380,
+      "v_count": 14798,
+      "t_offset": 7315956,
+      "t_count": 29600
+    },
+    {
+      "name": "asm_track_seg_11",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 2.4,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        -48.0,
+        0.0,
+        28.0
+      ],
+      "explode": [
+        -115.0,
+        9.858406733136193e-14,
+        40.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 11 (Clicks into Seg 10's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 7671156,
+      "v_count": 13376,
+      "t_offset": 7831668,
+      "t_count": 26756
+    },
+    {
+      "name": "asm_track_seg_12",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 2.64,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        -41.57,
+        28.0
+      ],
+      "explode": [
+        57.50000000000003,
+        -99.59292143521043,
+        50.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 12 (Clicks into Seg 11's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 8152740,
+      "v_count": 15048,
+      "t_offset": 8333316,
+      "t_count": 30100
+    },
+    {
+      "name": "asm_track_seg_13",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 2.88,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        24.0,
+        41.57,
+        28.0
+      ],
+      "explode": [
+        57.50000000000022,
+        99.59292143521033,
+        60.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 13 (Clicks into Seg 12's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 8694516,
+      "v_count": 13522,
+      "t_offset": 8856780,
+      "t_count": 27048
+    },
+    {
+      "name": "asm_track_seg_14",
+      "subsystem": "track",
+      "step": 7,
+      "sub_delay": 3.12,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        -48.0,
+        0.0,
+        28.0
+      ],
+      "explode": [
+        -115.0,
+        1.2675094371175106e-13,
+        70.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 0.9,
+      "label": "Helical Track Segment 14 (Clicks into Seg 13's Twin \u00d83.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+      "v_offset": 9181356,
+      "v_count": 13301,
+      "t_offset": 9340968,
+      "t_count": 26606
+    },
+    {
+      "name": "asm_golden_apple_topper_apple_red_shell",
+      "subsystem": "topper",
+      "step": 9,
+      "sub_delay": 1.35,
+      "anim_dur": 0.75,
+      "insert_offset": [
+        0.0,
+        0.0,
+        80.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        175.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Sculpted Heart-Shaped Crimson Apple Topper (#4 \u2014 Contoured ~2.2 mm Thin-Walled Hollow Lantern Shell)",
+      "cutaway_candidate": true,
+      "v_offset": 9660240,
+      "v_count": 2374,
+      "t_offset": 9688728,
+      "t_count": 4744
+    },
+    {
+      "name": "asm_golden_apple_topper_apple_brown_stem",
+      "subsystem": "topper",
+      "step": 9,
+      "sub_delay": 1.35,
+      "anim_dur": 0.75,
+      "insert_offset": [
+        0.0,
+        0.0,
+        85.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        210.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Apple Topper Woody Stem (Toolhead 1 Brown \u2014 Branches into Sculpted Leaf)",
+      "cutaway_candidate": false,
+      "v_offset": 9745656,
+      "v_count": 364,
+      "t_offset": 9750024,
+      "t_count": 724
+    },
+    {
+      "name": "asm_golden_apple_topper_apple_brown_trunk_collar_1",
+      "subsystem": "topper",
+      "step": 9,
+      "sub_delay": 0.55,
+      "anim_dur": 0.75,
+      "insert_offset": [
+        0.0,
+        0.0,
+        65.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        175.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Upper Trunk Crown Collar (Wood Brown \u2014 Seats onto Trunk Top #3)",
+      "cutaway_candidate": true,
+      "v_offset": 9758712,
+      "v_count": 930,
+      "t_offset": 9769872,
+      "t_count": 1860
+    },
+    {
+      "name": "asm_golden_apple_topper_apple_green_leaf",
+      "subsystem": "topper",
+      "step": 9,
+      "sub_delay": 1.35,
+      "anim_dur": 0.75,
+      "insert_offset": [
+        0.0,
+        0.0,
+        85.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        210.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "static",
+      "opacity": 1.0,
+      "label": "Apple Topper 3D Sculpted Leaf (Toolhead 2 Emerald Green)",
+      "cutaway_candidate": false,
+      "v_offset": 9792192,
+      "v_count": 2487,
+      "t_offset": 9822036,
+      "t_count": 4970
+    },
+    {
+      "name": "asm_planet_mercury_mercury_basalt_core",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 9881676,
+      "v_count": 4625,
+      "t_offset": 9937176,
+      "t_count": 9258
+    },
+    {
+      "name": "asm_planet_mercury_mercury_gold_caloris_basin",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10048272,
+      "v_count": 1022,
+      "t_offset": 10060536,
+      "t_count": 2044
+    },
+    {
+      "name": "asm_planet_mercury_mercury_terracotta_craters_4",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10085064,
+      "v_count": 678,
+      "t_offset": 10093200,
+      "t_count": 1352
+    },
+    {
+      "name": "asm_planet_mercury_mercury_terracotta_craters_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10109424,
+      "v_count": 672,
+      "t_offset": 10117488,
+      "t_count": 1340
+    },
+    {
+      "name": "asm_planet_mercury_mercury_terracotta_craters_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10133568,
+      "v_count": 607,
+      "t_offset": 10140852,
+      "t_count": 1210
+    },
+    {
+      "name": "asm_planet_mercury_mercury_terracotta_craters_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10155372,
+      "v_count": 607,
+      "t_offset": 10162656,
+      "t_count": 1210
+    },
+    {
+      "name": "asm_planet_mercury_mercury_alabaster_polar_crown",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -31.18,
+        18.0,
+        36.0
+      ],
+      "explode": [
+        -160.2146997001211,
+        92.50000000000009,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mercury",
+      "label": "Planet Mercury (#1 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10177176,
+      "v_count": 24,
+      "t_offset": 10177464,
+      "t_count": 44
+    },
+    {
+      "name": "asm_planet_venus_venus_gold_cloud_deck",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10177992,
+      "v_count": 3643,
+      "t_offset": 10221708,
+      "t_count": 7286
+    },
+    {
+      "name": "asm_planet_venus_venus_alabaster_y_waves_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10309140,
+      "v_count": 24,
+      "t_offset": 10309428,
+      "t_count": 44
+    },
+    {
+      "name": "asm_planet_venus_venus_alabaster_y_waves_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10309956,
+      "v_count": 348,
+      "t_offset": 10314132,
+      "t_count": 696
+    },
+    {
+      "name": "asm_planet_venus_venus_alabaster_y_waves_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10322484,
+      "v_count": 597,
+      "t_offset": 10329648,
+      "t_count": 1198
+    },
+    {
+      "name": "asm_planet_venus_venus_umber_vortex_collars_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10344024,
+      "v_count": 516,
+      "t_offset": 10350216,
+      "t_count": 1032
+    },
+    {
+      "name": "asm_planet_venus_venus_umber_vortex_collars_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10362600,
+      "v_count": 687,
+      "t_offset": 10370844,
+      "t_count": 1374
+    },
+    {
+      "name": "asm_planet_venus_venus_crimson_superrotation",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000004,
+        -160.21469970012112,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_venus",
+      "label": "Planet Venus (#2 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10387332,
+      "v_count": 810,
+      "t_offset": 10397052,
+      "t_count": 1620
+    },
+    {
+      "name": "asm_planet_earth_earth_cobalt_ocean_globe",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#1E5AA8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10416492,
+      "v_count": 2966,
+      "t_offset": 10452084,
+      "t_count": 5944
+    },
+    {
+      "name": "asm_planet_earth_earth_emerald_continents",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10523412,
+      "v_count": 503,
+      "t_offset": 10529448,
+      "t_count": 1014
+    },
+    {
+      "name": "asm_planet_earth_earth_gold_mountain_ranges_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10541616,
+      "v_count": 57,
+      "t_offset": 10542300,
+      "t_count": 110
+    },
+    {
+      "name": "asm_planet_earth_earth_gold_mountain_ranges_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10543620,
+      "v_count": 30,
+      "t_offset": 10543980,
+      "t_count": 56
+    },
+    {
+      "name": "asm_planet_earth_earth_white_polar_ice_clouds_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10544652,
+      "v_count": 607,
+      "t_offset": 10551936,
+      "t_count": 1210
+    },
+    {
+      "name": "asm_planet_earth_earth_white_polar_ice_clouds_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10566456,
+      "v_count": 607,
+      "t_offset": 10573740,
+      "t_count": 1210
+    },
+    {
+      "name": "asm_planet_earth_earth_white_polar_ice_clouds_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000031,
+        160.21469970012097,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_earth",
+      "label": "Planet Earth (#3 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10588260,
+      "v_count": 152,
+      "t_offset": 10590084,
+      "t_count": 300
+    },
+    {
+      "name": "asm_planet_mars_mars_terracotta_body",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        1.1327982892113018e-13,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mars",
+      "label": "Planet Mars (#4 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10593684,
+      "v_count": 4103,
+      "t_offset": 10642920,
+      "t_count": 8206
+    },
+    {
+      "name": "asm_planet_mars_mars_ochre_tharsis_hellas",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        1.1327982892113018e-13,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mars",
+      "label": "Planet Mars (#4 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10741392,
+      "v_count": 1384,
+      "t_offset": 10758000,
+      "t_count": 2780
+    },
+    {
+      "name": "asm_planet_mars_mars_basalt_canyon_olympus_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        1.1327982892113018e-13,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mars",
+      "label": "Planet Mars (#4 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10791360,
+      "v_count": 607,
+      "t_offset": 10798644,
+      "t_count": 1210
+    },
+    {
+      "name": "asm_planet_mars_mars_basalt_canyon_olympus_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        1.1327982892113018e-13,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mars",
+      "label": "Planet Mars (#4 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10813164,
+      "v_count": 1422,
+      "t_offset": 10830228,
+      "t_count": 2844
+    },
+    {
+      "name": "asm_planet_mars_mars_alabaster_polar_cap",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 1.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        1.1327982892113018e-13,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_mars",
+      "label": "Planet Mars (#4 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10864356,
+      "v_count": 24,
+      "t_offset": 10864644,
+      "t_count": 44
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_gold_zones",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 10865172,
+      "v_count": 4453,
+      "t_offset": 10918608,
+      "t_count": 8906
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_alabaster_tropical_zones_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11025480,
+      "v_count": 504,
+      "t_offset": 11031528,
+      "t_count": 1008
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_alabaster_tropical_zones_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11043624,
+      "v_count": 1095,
+      "t_offset": 11056764,
+      "t_count": 2190
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_umber_temperate_belts_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11083044,
+      "v_count": 560,
+      "t_offset": 11089764,
+      "t_count": 1120
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_umber_temperate_belts_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11103204,
+      "v_count": 360,
+      "t_offset": 11107524,
+      "t_count": 720
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_umber_temperate_belts_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11116164,
+      "v_count": 510,
+      "t_offset": 11122284,
+      "t_count": 1016
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_crimson_great_red_spot_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11134476,
+      "v_count": 16,
+      "t_offset": 11134668,
+      "t_count": 28
+    },
+    {
+      "name": "asm_planet_jupiter_jupiter_crimson_great_red_spot_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.83,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.49999999999983,
+        -160.21469970012123,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_jupiter",
+      "label": "Planet Jupiter (#5 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11135004,
+      "v_count": 782,
+      "t_offset": 11144388,
+      "t_count": 1564
+    },
+    {
+      "name": "asm_planet_saturn_saturn_gold_globe_and_ring_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11163156,
+      "v_count": 676,
+      "t_offset": 11171268,
+      "t_count": 1352
+    },
+    {
+      "name": "asm_planet_saturn_saturn_gold_globe_and_ring_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11187492,
+      "v_count": 308,
+      "t_offset": 11191188,
+      "t_count": 616
+    },
+    {
+      "name": "asm_planet_saturn_saturn_gold_globe_and_ring_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11198580,
+      "v_count": 2691,
+      "t_offset": 11230872,
+      "t_count": 5378
+    },
+    {
+      "name": "asm_planet_saturn_saturn_alabaster_inner_ring_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11295408,
+      "v_count": 468,
+      "t_offset": 11301024,
+      "t_count": 936
+    },
+    {
+      "name": "asm_planet_saturn_saturn_alabaster_inner_ring_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#F5EFE6",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11312256,
+      "v_count": 308,
+      "t_offset": 11315952,
+      "t_count": 616
+    },
+    {
+      "name": "asm_planet_saturn_saturn_umber_cassini_division",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11323344,
+      "v_count": 308,
+      "t_offset": 11327040,
+      "t_count": 616
+    },
+    {
+      "name": "asm_planet_saturn_saturn_crimson_polar_hexagon_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11334432,
+      "v_count": 12,
+      "t_offset": 11334576,
+      "t_count": 20
+    },
+    {
+      "name": "asm_planet_saturn_saturn_crimson_polar_hexagon_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.58,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        -36.0,
+        0.0,
+        36.0
+      ],
+      "explode": [
+        -185.0,
+        6.79678973526781e-14,
+        25.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_saturn",
+      "label": "Planet Saturn (#6 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11334816,
+      "v_count": 468,
+      "t_offset": 11340432,
+      "t_count": 936
+    },
+    {
+      "name": "asm_planet_uranus_uranus_cyan_ice_globe",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11351664,
+      "v_count": 3062,
+      "t_offset": 11388408,
+      "t_count": 6120
+    },
+    {
+      "name": "asm_planet_uranus_uranus_cobalt_latitude_bands_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#1E5AA8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11461848,
+      "v_count": 517,
+      "t_offset": 11468052,
+      "t_count": 1034
+    },
+    {
+      "name": "asm_planet_uranus_uranus_cobalt_latitude_bands_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#1E5AA8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11480460,
+      "v_count": 4,
+      "t_offset": 11480508,
+      "t_count": 4
+    },
+    {
+      "name": "asm_planet_uranus_uranus_cobalt_latitude_bands_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#1E5AA8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11480556,
+      "v_count": 659,
+      "t_offset": 11488464,
+      "t_count": 1318
+    },
+    {
+      "name": "asm_planet_uranus_uranus_gold_epsilon_ring",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11504280,
+      "v_count": 437,
+      "t_offset": 11509524,
+      "t_count": 874
+    },
+    {
+      "name": "asm_planet_uranus_uranus_white_polar_hood_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11520012,
+      "v_count": 678,
+      "t_offset": 11528148,
+      "t_count": 1352
+    },
+    {
+      "name": "asm_planet_uranus_uranus_white_polar_hood_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.33,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        -31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        -160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_uranus",
+      "label": "Planet Uranus (#7 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11544372,
+      "v_count": 28,
+      "t_offset": 11544708,
+      "t_count": 52
+    },
+    {
+      "name": "asm_planet_neptune_neptune_cobalt_ice_globe",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 1,
+      "color": "#1E5AA8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11545332,
+      "v_count": 3414,
+      "t_offset": 11586300,
+      "t_count": 6824
+    },
+    {
+      "name": "asm_planet_neptune_neptune_teal_wind_belts_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11668188,
+      "v_count": 857,
+      "t_offset": 11678472,
+      "t_count": 1710
+    },
+    {
+      "name": "asm_planet_neptune_neptune_teal_wind_belts_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 2,
+      "color": "#00A86B",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11698992,
+      "v_count": 829,
+      "t_offset": 11708940,
+      "t_count": 1662
+    },
+    {
+      "name": "asm_planet_neptune_neptune_gold_dark_spot_ring",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11728884,
+      "v_count": 1345,
+      "t_offset": 11745024,
+      "t_count": 2694
+    },
+    {
+      "name": "asm_planet_neptune_neptune_white_cirrus_scooter_3",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11777352,
+      "v_count": 28,
+      "t_offset": 11777688,
+      "t_count": 52
+    },
+    {
+      "name": "asm_planet_neptune_neptune_white_cirrus_scooter_2",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11778312,
+      "v_count": 678,
+      "t_offset": 11786448,
+      "t_count": 1352
+    },
+    {
+      "name": "asm_planet_neptune_neptune_white_cirrus_scooter_1",
+      "subsystem": "planets",
+      "step": 10,
+      "sub_delay": 0.08,
+      "anim_dur": 0.5,
+      "insert_offset": [
+        18.0,
+        31.18,
+        36.0
+      ],
+      "explode": [
+        92.50000000000001,
+        160.21469970012114,
+        25.0
+      ],
+      "toolhead": 3,
+      "color": "#F0F4F8",
+      "kinematic_group": "planet_ornament",
+      "opacity": 1.0,
+      "planet_id": "planet_neptune",
+      "label": "Planet Neptune (#8 \u2014 Larger 4-Color Sculpted Planet with Self-Centering Snap-Click Socket & Magnetic Switch LED)",
+      "v_offset": 11802672,
+      "v_count": 678,
+      "t_offset": 11810808,
+      "t_count": 1352
+    },
+    {
+      "name": "asm_Magic_LED_Wand_wand_gold_star",
+      "subsystem": "planets",
+      "step": 11,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        22.0,
+        13.0,
+        80.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        95.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "magic_wand",
+      "opacity": 1.0,
+      "label": "Magic_LED_Wand (\u00d88\u00d72 mm Magnet in Star Tip \u2014 Docks Upright in +30\u00b0 Root-Flare Holster)",
+      "v_offset": 11827032,
+      "v_count": 552,
+      "t_offset": 11833656,
+      "t_count": 1104
+    },
+    {
+      "name": "asm_Magic_LED_Wand_wand_gold_pommel_1",
+      "subsystem": "planets",
+      "step": 11,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        22.0,
+        13.0,
+        80.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        95.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "magic_wand",
+      "opacity": 1.0,
+      "label": "Magic_LED_Wand (\u00d88\u00d72 mm Magnet in Star Tip \u2014 Docks Upright in +30\u00b0 Root-Flare Holster)",
+      "v_offset": 11846904,
+      "v_count": 252,
+      "t_offset": 11849928,
+      "t_count": 500
+    },
+    {
+      "name": "asm_Magic_LED_Wand_wand_brown_shaft",
+      "subsystem": "planets",
+      "step": 11,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        22.0,
+        13.0,
+        80.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        95.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "magic_wand",
+      "opacity": 1.0,
+      "label": "Magic_LED_Wand (\u00d88\u00d72 mm Magnet in Star Tip \u2014 Docks Upright in +30\u00b0 Root-Flare Holster)",
+      "v_offset": 11855928,
+      "v_count": 134,
+      "t_offset": 11857536,
+      "t_count": 264
+    },
+    {
+      "name": "asm_Magic_LED_Wand_wand_crimson_bezel",
+      "subsystem": "planets",
+      "step": 11,
+      "sub_delay": 0.0,
+      "anim_dur": 0.8,
+      "insert_offset": [
+        22.0,
+        13.0,
+        80.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        95.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "magic_wand",
+      "opacity": 1.0,
+      "label": "Magic_LED_Wand (\u00d88\u00d72 mm Magnet in Star Tip \u2014 Docks Upright in +30\u00b0 Root-Flare Holster)",
+      "v_offset": 11860704,
+      "v_count": 276,
+      "t_offset": 11864016,
+      "t_count": 552
+    },
+    {
+      "name": "asm_apple_marble_template",
+      "subsystem": "marbles",
+      "step": 12,
+      "sub_delay": 0.0,
+      "anim_dur": 0.55,
+      "insert_offset": [
+        0.0,
+        0.0,
+        55.0
+      ],
+      "explode": [
+        0.0,
+        -140.0,
+        120.0
+      ],
+      "toolhead": 4,
+      "color": "#C41E3A",
+      "kinematic_group": "dynamic_marble",
+      "opacity": 1.0,
+      "label": "Glowing 25 mm Rolling Apple Marble (Quarter-Turn Twist-Lock Hemispheres A+B + Bambu KC012/KC013 Y-Shape 3-LED)",
+      "v_offset": 11870640,
+      "v_count": 2702,
+      "t_offset": 11903064,
+      "t_count": 5396
+    },
+    {
+      "name": "asm_Motor_Clutch_Driver",
+      "label": "Motor_Clutch_Driver (Direct Mechanical Hex Motor Coupler \u2014 Presses onto N20 D-Shaft)",
+      "subsystem": "clutch",
+      "step": 3,
+      "sub_delay": 0.0,
+      "anim_dur": 0.85,
+      "insert_offset": [
+        0.0,
+        0.0,
+        68.0
+      ],
+      "explode": [
+        0.0,
+        -110.0,
+        -60.0
+      ],
+      "toolhead": 3,
+      "color": "#D4AF37",
+      "kinematic_group": "motor_driver",
+      "pivot": [
+        0.0,
+        0.0,
+        31.2
+      ],
+      "v_offset": 11967816,
+      "v_count": 1304,
+      "t_offset": 11983464,
+      "t_count": 2604
+    },
+    {
+      "name": "asm_Battery_Cover",
+      "label": "Battery_Cover (Bottom M5Stack ESPHome Bay Cover + \u00d85.0 mm Button/LED Port + 2\u00d7 M2.5 Screws)",
+      "subsystem": "trunk_base",
+      "step": 2,
+      "sub_delay": 1.45,
+      "anim_dur": 0.65,
+      "insert_offset": [
+        0.0,
+        -15.0,
+        -55.0
+      ],
+      "explode": [
+        0.0,
+        -85.0,
+        -135.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12014712,
+      "v_count": 1276,
+      "t_offset": 12030024,
+      "t_count": 2560
+    },
+    {
+      "name": "asm_Servo_Or_030_Adapter",
+      "label": "Servo_Or_030_Adapter (N20 Gear Motor Mounting Sleeve)",
+      "subsystem": "trunk_base",
+      "step": 1,
+      "sub_delay": 0.7,
+      "anim_dur": 0.7,
+      "insert_offset": [
+        0.0,
+        0.0,
+        -60.0
+      ],
+      "explode": [
+        0.0,
+        0.0,
+        -125.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12060744,
+      "v_count": 520,
+      "t_offset": 12066984,
+      "t_count": 1040
+    },
+    {
+      "name": "asm_bracket_01_tier4",
+      "label": "Cantilever Bracket #01 (Engraved '1') @ 60\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.0,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        42.50000000000001,
+        73.61215932167728,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12079464,
+      "v_count": 3425,
+      "t_offset": 12120564,
+      "t_count": 6850
+    },
+    {
+      "name": "asm_bracket_02_tier4",
+      "label": "Cantilever Bracket #02 (Engraved '2') @ 120\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.11,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        -42.49999999999998,
+        73.6121593216773,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12202764,
+      "v_count": 3429,
+      "t_offset": 12243912,
+      "t_count": 6858
+    },
+    {
+      "name": "asm_bracket_03_tier4",
+      "label": "Cantilever Bracket #03 (Engraved '3') @ 180\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.22,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -52.0,
+        0.0,
+        24.0
+      ],
+      "explode": [
+        -85.0,
+        1.0409497792752502e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12326208,
+      "v_count": 3429,
+      "t_offset": 12367356,
+      "t_count": 6858
+    },
+    {
+      "name": "asm_bracket_04_tier4",
+      "label": "Cantilever Bracket #04 (Engraved '4') @ 240\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.33,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        -42.500000000000036,
+        -73.61215932167727,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12449652,
+      "v_count": 3425,
+      "t_offset": 12490752,
+      "t_count": 6850
+    },
+    {
+      "name": "asm_bracket_05_tier4",
+      "label": "Cantilever Bracket #05 (Engraved '5') @ 300\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.44,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        42.50000000000001,
+        -73.61215932167728,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12572952,
+      "v_count": 3429,
+      "t_offset": 12614100,
+      "t_count": 6858
+    },
+    {
+      "name": "asm_bracket_06_tier4",
+      "label": "Cantilever Bracket #06 (Engraved '6') @ 360\u00b0 \u2014 Tier 4 Bottom (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.55,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        52.0,
+        -0.0,
+        24.0
+      ],
+      "explode": [
+        85.0,
+        -2.0818995585505004e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12696396,
+      "v_count": 3429,
+      "t_offset": 12737544,
+      "t_count": 6858
+    },
+    {
+      "name": "asm_bracket_07_tier3",
+      "label": "Cantilever Bracket #07 (Engraved '7') @ 420\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.66,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        42.49999999999998,
+        73.6121593216773,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12819840,
+      "v_count": 3411,
+      "t_offset": 12860772,
+      "t_count": 6822
+    },
+    {
+      "name": "asm_bracket_08_tier3",
+      "label": "Cantilever Bracket #08 (Engraved '8') @ 480\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.77,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        -42.499999999999936,
+        73.61215932167732,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 12942636,
+      "v_count": 3423,
+      "t_offset": 12983712,
+      "t_count": 6846
+    },
+    {
+      "name": "asm_bracket_09_tier3",
+      "label": "Cantilever Bracket #09 (Engraved '9') @ 540\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.88,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -52.0,
+        0.0,
+        24.0
+      ],
+      "explode": [
+        -85.0,
+        3.122849337825751e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13065864,
+      "v_count": 3423,
+      "t_offset": 13106940,
+      "t_count": 6846
+    },
+    {
+      "name": "asm_bracket_10_tier3",
+      "label": "Cantilever Bracket #10 (Engraved '10') @ 600\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 0.99,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        -42.499999999999986,
+        -73.6121593216773,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13189092,
+      "v_count": 3435,
+      "t_offset": 13230312,
+      "t_count": 6870
+    },
+    {
+      "name": "asm_bracket_11_tier3",
+      "label": "Cantilever Bracket #11 (Engraved '11') @ 660\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.1,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        42.49999999999992,
+        -73.61215932167732,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13312752,
+      "v_count": 3439,
+      "t_offset": 13354020,
+      "t_count": 6878
+    },
+    {
+      "name": "asm_bracket_12_tier3",
+      "label": "Cantilever Bracket #12 (Engraved '12') @ 720\u00b0 \u2014 Tier 3 Lower-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.21,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        52.0,
+        -0.0,
+        24.0
+      ],
+      "explode": [
+        85.0,
+        -4.163799117101001e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13436556,
+      "v_count": 3443,
+      "t_offset": 13477872,
+      "t_count": 6886
+    },
+    {
+      "name": "asm_bracket_13_tier2",
+      "label": "Cantilever Bracket #13 (Engraved '13') @ 780\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.32,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        42.49999999999999,
+        73.6121593216773,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13560504,
+      "v_count": 3437,
+      "t_offset": 13601748,
+      "t_count": 6874
+    },
+    {
+      "name": "asm_bracket_14_tier2",
+      "label": "Cantilever Bracket #14 (Engraved '14') @ 840\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.43,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        -42.50000000000005,
+        73.61215932167727,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13684236,
+      "v_count": 3433,
+      "t_offset": 13725432,
+      "t_count": 6866
+    },
+    {
+      "name": "asm_bracket_15_tier2",
+      "label": "Cantilever Bracket #15 (Engraved '15') @ 900\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.54,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -52.0,
+        0.0,
+        24.0
+      ],
+      "explode": [
+        -85.0,
+        5.2047488963762514e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13807824,
+      "v_count": 3437,
+      "t_offset": 13849068,
+      "t_count": 6874
+    },
+    {
+      "name": "asm_bracket_16_tier2",
+      "label": "Cantilever Bracket #16 (Engraved '16') @ 960\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.65,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        -42.500000000000135,
+        -73.61215932167721,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 13931556,
+      "v_count": 3437,
+      "t_offset": 13972800,
+      "t_count": 6874
+    },
+    {
+      "name": "asm_bracket_17_tier2",
+      "label": "Cantilever Bracket #17 (Engraved '17') @ 1020\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.76,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        42.500000000000036,
+        -73.61215932167727,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14055288,
+      "v_count": 3425,
+      "t_offset": 14096388,
+      "t_count": 6850
+    },
+    {
+      "name": "asm_bracket_18_tier2",
+      "label": "Cantilever Bracket #18 (Engraved '18') @ 1080\u00b0 \u2014 Tier 2 Upper-Mid (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.87,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        52.0,
+        -0.0,
+        24.0
+      ],
+      "explode": [
+        85.0,
+        -6.245698675651501e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14178588,
+      "v_count": 3437,
+      "t_offset": 14219832,
+      "t_count": 6874
+    },
+    {
+      "name": "asm_bracket_19_tier1",
+      "label": "Cantilever Bracket #19 (Engraved '19') @ 1140\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 1.98,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        42.50000000000014,
+        73.61215932167721,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14302320,
+      "v_count": 3431,
+      "t_offset": 14343492,
+      "t_count": 6862
+    },
+    {
+      "name": "asm_bracket_20_tier1",
+      "label": "Cantilever Bracket #20 (Engraved '20') @ 1200\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 2.09,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        45.03,
+        24.0
+      ],
+      "explode": [
+        -42.50000000000003,
+        73.61215932167727,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14425836,
+      "v_count": 3427,
+      "t_offset": 14466960,
+      "t_count": 6854
+    },
+    {
+      "name": "asm_bracket_21_tier1",
+      "label": "Cantilever Bracket #21 (Engraved '21') @ 1260\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 2.2,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -52.0,
+        0.0,
+        24.0
+      ],
+      "explode": [
+        -85.0,
+        7.286648454926751e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14549208,
+      "v_count": 3431,
+      "t_offset": 14590380,
+      "t_count": 6862
+    },
+    {
+      "name": "asm_bracket_22_tier1",
+      "label": "Cantilever Bracket #22 (Engraved '22') @ 1320\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 2.31,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        -26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        -42.50000000000015,
+        -73.6121593216772,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14672724,
+      "v_count": 3435,
+      "t_offset": 14713944,
+      "t_count": 6870
+    },
+    {
+      "name": "asm_bracket_23_tier1",
+      "label": "Cantilever Bracket #23 (Engraved '23') @ 1380\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 2.42,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        26.0,
+        -45.03,
+        24.0
+      ],
+      "explode": [
+        42.50000000000002,
+        -73.61215932167727,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14796384,
+      "v_count": 3437,
+      "t_offset": 14837628,
+      "t_count": 6874
+    },
+    {
+      "name": "asm_bracket_24_tier1",
+      "label": "Cantilever Bracket #24 (Engraved '24') @ 1440\u00b0 \u2014 Tier 1 Top (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+      "subsystem": "brackets",
+      "step": 6,
+      "sub_delay": 2.53,
+      "anim_dur": 0.45,
+      "insert_offset": [
+        52.0,
+        -0.0,
+        24.0
+      ],
+      "explode": [
+        85.0,
+        -8.327598234202001e-14,
+        0.0
+      ],
+      "toolhead": 1,
+      "color": "#4A2F1D",
+      "kinematic_group": "static",
+      "v_offset": 14920116,
+      "v_count": 3433,
+      "t_offset": 14961312,
+      "t_count": 6866
+    }
+  ],
+  "assembly_steps": [
+    {
+      "step": 1,
+      "title": "Step 1 \u2014 Place Trunk Base (#1), Mount Rear 12V DC Barrel Jack (J1) & Insert N20 Motor Into Shroud Tower",
+      "subtitle": "1a) Mount 5.5\u00d72.1mm DC Barrel Jack (J1) in rear -X \u00d811.40mm port \u2192 1b) Slide 12V 150RPM N20 Motor (Option B) or 6V LA002 (Option A) up into \u00d828.0 mm Shroud Tower",
+      "camera_target": [
+        0,
+        0,
+        42
+      ],
+      "camera_pos": [
+        195,
+        -205,
+        110
+      ],
+      "hardware": [
+        "1a. Place Bark-Textured Trunk_Base (#1, \u00d8185mm diagonal root footprint, \u00d8135\u00d750mm Hollow Root Vault) flat on build surface and thread the 5.5\u00d72.1mm DC Barrel Jack (J1, DC-099) into the rear -X \u00d811.40 mm port (Z = 10.0 mm)",
+        "1b. Slide the 12V 150rpm N20 Gear Motor (Option B primary drop-in, or 6V LA002 for Option A) + Servo_Or_030_Adapter up into the central \u00d828.0 mm Isolated Motor Shroud Tower (D-shaft pointing up through Z=27.2 mm roof bore)",
+        "1c. Route the 2-wire motor lead out the bottom -Y shroud wire exit notch (6.5\u00d77.6 mm) so loose cables in the vault can never rub against the spinning clutch or auger"
+      ],
+      "clearance_note": "The central \u00d828.0 mm Isolated Motor & Clutch Shroud Tower physically walls off the spinning N20 motor and coupler from the >150 cm\u00b3 open Cable Slack Dump Zone."
+    },
+    {
+      "step": 2,
+      "title": "Step 2 \u2014 Install 12V\u21925V Buck Converter, WAGO 221 Lever Nuts & M5Stack (A092 + C008) in Root Vault",
+      "subtitle": "2a) Seat A092+C008 & 12V\u21925V 5A Buck in vault cradles \u2192 2b) Wire WAGO-1..4 with inline fuses (cap Grove Red +5V!) \u2192 2c) Close Battery_Cover & Base_Bottom_Cover",
+      "camera_target": [
+        0,
+        -20,
+        22
+      ],
+      "camera_pos": [
+        175,
+        -195,
+        78
+      ],
+      "hardware": [
+        "2a. Seat M5Stack ATOM Lite (C008) + Atomic H-Driver Base (A092) into the -Y cradle (powered from WAGO-1 +12V_BUS via 2A fuse F1 into VIN/GND; A092's internal buck powers C008 with zero USB cable needed) and seat the 12V\u21925.0V 5A screw-terminal Buck Converter into the +X cradle (fed via 3A fuse F2)",
+        "2b. Clamp the 12V 150RPM N20 Motor leads into A092 M1/M2 (or wire Option A 12V\u21926V buck + H-bridge for 6V LA002), plug the A096 Grove2Dupont cable into C008 (leave A096 Red +5V wire CAPPED in an empty WAGO port to prevent 5V backfeeding!), and connect the 5V Buck output (+ 1000\u00b5F cap) to WAGO-3 (+5V_LED) & WAGO-4 (GND_LED)",
+        "2c. Secure Battery_Cover and snap on Base_Bottom_Cover (3.0 mm thick with ventilation louvers, 4\u00d7 captive-magnet tabs, and an upward \u00d823.60\u00d72.8 mm Snap-In Hollow Retaining Ring that clicks concentrically into Trunk_Base's central \u00d824.00 mm shroud bore with zero screws needed!)"
+      ],
+      "clearance_note": "With >150 cm\u00b3 of unobstructed perimeter volume inside the \u00d8135\u00d750 mm Hollow Root Vault and >= 18 mm finger gap around every cradle, WAGO 221 lever nuts and inline fuse holders fit cleanly with zero soldering."
+    },
+    {
+      "step": 3,
+      "title": "Step 3 \u2014 Press Gold Hex Coupler (Motor_Clutch_Driver) Onto N20 Motor D-Shaft",
+      "subtitle": "Lower Motor_Clutch_Driver straight down through the Trunk_Base bore onto the N20 motor's D-shaft at Z = 26.2 mm",
+      "camera_target": [
+        0,
+        0,
+        36
+      ],
+      "camera_pos": [
+        155,
+        -160,
+        95
+      ],
+      "hardware": [
+        "3a. Align the flat inside Motor_Clutch_Driver's bottom D-bore with the flat on the LA002 N20 motor shaft",
+        "3b. Press down firmly until seated at Z = 26.2 mm with its 4.85 mm AF male hex peg pointing straight up"
+      ],
+      "clearance_note": "Direct positive hex drive eliminates magnet slippage while allowing the auger to lift straight out from above."
+    },
+    {
+      "step": 4,
+      "title": "Step 4 \u2014 Couple Two-Piece Archimedes Auger (#1 Lower + #2 Upper)",
+      "subtitle": "4a) Lower auger_lower (#1) onto the Gold Hex Coupler \u2192 4b) Press auger_upper (#2) onto auger_lower's top hex peg (engraved '1')",
+      "camera_target": [
+        0,
+        0,
+        220
+      ],
+      "camera_pos": [
+        265,
+        -265,
+        255
+      ],
+      "hardware": [
+        "4a. Lower auger_lower (#1) into Trunk_Base so its bottom 5.15 mm AF female hex socket slides over Motor_Clutch_Driver's hex peg",
+        "4b. Align auger_upper (#2, engraved '2' on top shaft) with auger_lower's top male hex peg (engraved '1') and press together (hiding '1')"
+      ],
+      "clearance_note": "The phase-matched helical flight is continuous across the Z = 222.7 mm hex joint with 1.50 mm radial clearance inside the trunk bore."
+    },
+    {
+      "step": 5,
+      "title": "Step 5 \u2014 Stack Bark-Textured Trunk Middle (#2) & Trunk Top (#3)",
+      "subtitle": "5a) Lower trunk_mid (#2) over the auger onto trunk_base (#1) \u2192 5b) Lower trunk_top (#3) onto trunk_mid (#2)",
+      "camera_target": [
+        0,
+        0,
+        265
+      ],
+      "camera_pos": [
+        -255,
+        -265,
+        305
+      ],
+      "hardware": [
+        "5a. Slide trunk_mid (#2) down over the auger and seat onto trunk_base's keyed tenon (engraved '1' at Z = 150 mm becomes 100% hidden)",
+        "5b. Slide trunk_top (#3, with its upward \u00d859.4\u00d74.0 mm Crown Centering Tenon Collar) down onto trunk_mid's keyed tenon (engraved '2' at Z = 300 mm becomes 100% hidden)"
+      ],
+      "clearance_note": "The keyed tenon flats automatically align the internal \u00d8 26.6 mm (-Y) vertical ball flute, gothic viewing windows, and the oversized 10.0\u00d78.0 mm rear (-X) Connector-Pass-Through wiring conduit."
+    },
+    {
+      "step": 6,
+      "title": "Step 6 \u2014 Slide In All 24 Exact-Radius Cantilever Brackets (#1 at 60\u00b0 \u2192 #24 at 1440\u00b0)",
+      "subtitle": "Sort Plates 3 & 4's 24 brackets by their engraved top-saddle number (1 to 24) and slide each dovetail tenon down into its 60\u00b0 trunk socket",
+      "camera_target": [
+        0,
+        0,
+        215
+      ],
+      "camera_pos": [
+        310,
+        -295,
+        250
+      ],
+      "hardware": [
+        "6a. Lower 6 Stations (#1\u2013#6 on Plate 3, engraved '1'..'6' on the top saddle floor): slide into the lowest 6 trunk dovetail sockets (60\u00b0\u2013360\u00b0, radii 141.9 mm down to 126.1 mm)",
+        "6b. Middle 12 Stations (#7\u2013#12 on Plate 3 & #13\u2013#18 on Plate 4, engraved '7'..'18'): slide in ascending spiral order into the middle trunk sockets (420\u00b0\u20131080\u00b0, radii 123.0 mm down to 88.3 mm, including the precision cross-seam dovetails at Z = 150 mm and Z = 300 mm)",
+        "6c. Upper 6 Stations (#19\u2013#24 on Plate 4, engraved '19'..'24'): slide into the highest 6 trunk sockets (1140\u00b0\u20131440\u00b0, radii 85.2 mm down to 69.4 mm)"
+      ],
+      "clearance_note": "Every single bracket (#1\u2013#12 on Plate 3, #13\u2013#24 on Plate 4) is custom-sized to the exact conical helix radius at its 60\u00b0 station and prints upright on Z=0 with a flat bottom rib (zero supports!)."
+    },
+    {
+      "step": 7,
+      "title": "Step 7 \u2014 Snap Together Helical Track Segments 01 \u2192 14 (Built-In Male/Female Tenons + Seam Brackets)",
+      "subtitle": "Slide each segment's downhill Female Sockets onto the previous segment's Twin \u00d83.8mm Male Snap-Lock Tenon Pegs + Sidewall Tongues and click onto the 24 Bracket Pegs",
+      "camera_target": [
+        0,
+        0,
+        220
+      ],
+      "camera_pos": [
+        370,
+        -350,
+        275
+      ],
+      "hardware": [
+        "7a. Dock track_seg_01's bottom return ramp into Trunk_Base's -Y intake port (Z = 50 mm) and click its underside sockets onto the Tier #4 bracket pegs at 60\u00b0 and 120\u00b0",
+        "7b. Snap track_seg_02 \u2192 track_seg_13 together in ascending order: each segment's uphill end has Twin \u00d83.80\u00d75.0 mm Under-Shoulder Male Snap-Lock Tenon Pegs (u = \u00b114.2 mm, v = -4.2 mm, with \u00d84.08 mm detent rings) + Inner/Outer Sidewall Anti-Torsion Tongues that click directly into the next segment's \u00d84.30\u00d75.6 mm Female Sockets, while the even-60\u00b0 cantilever brackets lock into the underside seam sockets!",
+        "7c. Dock track_seg_14_top_entry into Trunk_Top's -Y discharge chute (Z = 431.4 mm) and snap its downhill socket onto track_seg_13's male tenon pegs at 1560\u00b0."
+      ],
+      "clearance_note": "Every track seam locks in 3D via Twin \u00d83.8mm Under-Shoulder Snap-Tenons + Sidewall Anti-Torsion Tongues (0.000 mm\u00b3 collision, 84.1 mm\u00b3 shear lock) and Even-60\u00b0 Underside Seam Bracket Sockets!"
+    },
+    {
+      "step": 8,
+      "title": "Step 8 \u2014 Snap In BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Wire (B0CCS11V7H) & Connect to Grove GPIO26 + WAGO-3/4",
+      "subtitle": "8a) Seat B0CCS11V7H starter pocket under track_seg_01 \u2192 8b) Snap 50-LED Pebble wire into 4.6mm dovetail throat up Seg 01\u219214 \u2192 8c) Connect Data to GPIO26 & Power to 5V Buck (WAGO-3/4)",
+      "camera_target": [
+        0,
+        -15,
+        195
+      ],
+      "camera_pos": [
+        340,
+        -340,
+        210
+      ],
+      "hardware": [
+        "8a. Seat the starter end of the BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Flexible Wire (B0CCS11V7H) into the 10.0\u00d716.0 mm starter pocket underneath track_seg_01 (theta = -70\u00b0)",
+        "8b. Press the 360\u00b0-flexible 3-wire cord and 6.2\u00d73.2 mm oval Pebble LEDs through the 4.6 mm snap-in throat into the 8.0\u00d73.6 mm internal dovetail chamber all the way up to Segment 14 (zero glue or tape needed!)",
+        "8c. Route the pre-terminated 3-pin JST-SM input plug (and power-injection pigtails) through Trunk_Base's cob_wire_conduit into the Hollow Root Vault: connect White Data to Grove GPIO26 and clamp Red (+5V) / Black (GND) into WAGO-3 (+5V_LED) & WAGO-4 (GND_LED) fed by the dedicated 12V\u21925V 5A buck converter"
+      ],
+      "clearance_note": "The track's 8.0\u00d73.6 mm underside dovetail chamber has a 4.6 mm snap-in throat (with 45\u00b0 self-supporting retention lips) that mechanically locks both the 6.2 mm oval Pebble LEDs and 3-wire cord in place with zero glue or tape."
+    },
+    {
+      "step": 9,
+      "title": "Step 9 \u2014 Thread Topper Cable Through 10\u00d78mm Conduit, Snap On Conduit_Cover_Strip & Seat Apple Topper (#4)",
+      "subtitle": "9a) Thread pre-terminated JST-SM plug straight through 10\u00d78mm rear (-X) conduit to GPIO32 & WAGO-3/4 \u2192 9b) Seat Sparkleiot 16-Bit Ring \u2192 9c) Place Apple Topper (#4)",
+      "camera_target": [
+        0,
+        0,
+        465
+      ],
+      "camera_pos": [
+        225,
+        -225,
+        525
+      ],
+      "hardware": [
+        "9a. Thread the pre-terminated 1m 3-Pin JST-SM Extension Cable (B0CT827QQC) straight down the oversized 10.0\u00d78.0 mm rear (-X) Connector-Pass-Through conduit into the Hollow Root Vault (connect Center Data to Grove Yellow GPIO32 and +5V/GND to WAGO-3 & WAGO-4), then press-fit the brown Conduit_Cover_Strip flush into the groove",
+        "9b. Seat the \u00d845.0 mm Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD) flat into the \u00d846.2\u00d72.5 mm recessed ring seat on the top rim of Trunk_Top (#3 at Z = 447.5 mm)",
+        "9c. Lower the Sculpted Heart-Shaped Crimson Apple Topper (#4, with Woody Stem & Emerald Leaf) onto Trunk_Top's upward \u00d859.40\u00d74.0 mm Crown Centering Tenon Collar (which telescopes inside the topper's \u00d860.00 mm base socket with 0.30 mm radial clearance so the topper locks concentrically onto the trunk!)"
+      ],
+      "clearance_note": "The upgraded 10.0 mm wide \u00d7 8.0 mm deep rear (-X) conduit lets pre-terminated JST-SM, PH2.0, SH1.0, and Dupont plugs pass straight through without cutting or de-pinning wires!"
+    },
+    {
+      "step": 10,
+      "title": "Step 10 \u2014 Insert 8 Magnetic Switch LEDs Into Upgraded 4-Color Planets #8 \u2192 #1 & Snap-Click Onto Balconies",
+      "subtitle": "For each larger 4-color sculpted planet (#8 Neptune at bottom to #1 Mercury at top): insert its wireless Magnetic Switch LED and snap-click onto Balcony Peg #8 \u2192 #1",
+      "camera_target": [
+        0,
+        0,
+        235
+      ],
+      "camera_pos": [
+        395,
+        -380,
+        290
+      ],
+      "hardware": [
+        "10a. Press 1\u00d7 wireless Bambu Single LED Magnetic Control Switch Light (\u00d87.5\u00d76.0 mm) through the 45\u00b0 self-centering entry funnel into the upper \u00d88.0\u00d76.0 mm LED chamber of each Planet (#8 Neptune \u2192 #1 Mercury)",
+        "10b. Match the hidden number inside each planet's bottom bore (8..1) with the number engraved on top of each Track Balcony Peg (8..1) and press down until the internal \u00d88.44 mm detent groove clicks onto the peg's \u00d88.12 mm snap bead"
+      ],
+      "clearance_note": "Each upgraded 4-color planet is 40\u201355% larger in diameter with an integrated \u00d813.6 mm Orbital Pedestal Foot Collar that raises the globe and rings above the track wall and rolling marbles (0.000 mm\u00b3 collision!)."
+    },
+    {
+      "step": 11,
+      "title": "Step 11 \u2014 Assemble Magic_LED_Wand & Dock in +30\u00b0 Root-Flare Holster",
+      "subtitle": "Press the \u00d88\u00d72 mm trigger magnet into the Magic_LED_Wand star tip and stand the wand upright in the +30\u00b0 Root-Flare Holster",
+      "camera_target": [
+        35,
+        20,
+        55
+      ],
+      "camera_pos": [
+        210,
+        -165,
+        125
+      ],
+      "hardware": [
+        "11a. Press the included \u00d88\u00d72 mm neodymium trigger magnet into the star tip of the 3-color Magic_LED_Wand",
+        "11b. Dock the wand upright in the integrated +30\u00b0 Root-Flare Holster socket (X = +45.0, Y = +26.0 mm) on Trunk_Base"
+      ],
+      "clearance_note": "Touching any planet with the Magic_LED_Wand star tip toggles its internal magnetic reed switch through ON -> Breathe -> Flash -> OFF."
+    },
+    {
+      "step": 12,
+      "title": "Step 12 \u2014 Twist-Lock the 6 Glowing Apple Marbles (A + Bambu Y-Shape or Single LED + B) & Run!",
+      "subtitle": "Drop a Bambu Y-Shape LED Light (\u00d818\u00d76.5 mm KC012/KC013) or Single LED + M8 nut into Apple_Hemisphere_B, align & drop Apple_Hemisphere_A into the 3 keyways, twist 45\u00b0 clockwise to lock, and tap ON with the Magic Wand!",
+      "camera_target": [
+        0,
+        0,
+        225
+      ],
+      "camera_pos": [
+        410,
+        -395,
+        310
+      ],
+      "hardware": [
+        "12a. Drop 1\u00d7 wireless Bambu Y-Shape LED Light with Magnetic Control Switch (\u00d818.0\u00d76.5 mm KC012/KC013, CR1632 battery) OR 1\u00d7 Single LED (\u00d87.5\u00d76.0 mm KA006) + M8 Hex Nut into the \u00d818.70 mm chamber of Apple_Hemisphere_B (marked 'B')",
+        "12b. Align the 3 male bayonet lugs on Apple_Hemisphere_A (marked 'A') with the 3 vertical entry keyway slots on Apple_Hemisphere_B\u2014the two halves drop flush together with zero force",
+        "12c. Twist Apple_Hemisphere_A 45\u00b0 clockwise ('righty-tighty') to lock the 3 lugs under the solid bayonet ceiling, tap each marble ON with the Magic_LED_Wand, and load onto the track!"
+      ],
+      "clearance_note": "The Quarter-Turn 3-Lug Bayonet Twist-Lock requires zero PLA bending to insert (+0.44 mm clearance) and locks under solid PLA ceilings so the halves never separate during rolling or drops!"
+    }
+  ],
+  "plates": [
+    {
+      "id": "Plate_1_SingleColor_Brown_Trunk_Base",
+      "title": "Plate 1 (Single-Color T1 Brown) \u2014 Trunk Base #1 & Bottom Service Cover",
+      "file_url": "/output/3mf/Plate_1_SingleColor_Brown_Trunk_Base.3mf",
+      "meshes": [
+        {
+          "name": "trunk_base",
+          "color": "#4A2F1D",
+          "v_offset": 15043704,
+          "v_count": 24847,
+          "t_offset": 15341868,
+          "t_count": 49750
+        },
+        {
+          "name": "Base_Bottom_Cover",
+          "color": "#4A2F1D",
+          "v_offset": 15938868,
+          "v_count": 2472,
+          "t_offset": 15968532,
+          "t_count": 4962
+        }
+      ]
+    },
+    {
+      "id": "Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers",
+      "title": "Plate 2 (Single-Color T1 Brown) \u2014 Trunk Mid #2, Trunk Top #3, Battery Cover, 3\u00d7 Conduit Covers & Motor Adapter",
+      "file_url": "/output/3mf/Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers.3mf",
+      "meshes": [
+        {
+          "name": "trunk_mid",
+          "color": "#4A2F1D",
+          "v_offset": 16028076,
+          "v_count": 9874,
+          "t_offset": 16146564,
+          "t_count": 19764
+        },
+        {
+          "name": "trunk_top",
+          "color": "#4A2F1D",
+          "v_offset": 16383732,
+          "v_count": 8870,
+          "t_offset": 16490172,
+          "t_count": 17756
+        },
+        {
+          "name": "Battery_Cover",
+          "color": "#4A2F1D",
+          "v_offset": 16703244,
+          "v_count": 1276,
+          "t_offset": 16718556,
+          "t_count": 2560
+        },
+        {
+          "name": "Servo_Or_030_Adapter",
+          "color": "#4A2F1D",
+          "v_offset": 16749276,
+          "v_count": 520,
+          "t_offset": 16755516,
+          "t_count": 1040
+        },
+        {
+          "name": "Conduit_Cover_Strip_01",
+          "color": "#4A2F1D",
+          "v_offset": 16767996,
+          "v_count": 24,
+          "t_offset": 16768284,
+          "t_count": 44
+        },
+        {
+          "name": "Conduit_Cover_Strip_02",
+          "color": "#4A2F1D",
+          "v_offset": 16768812,
+          "v_count": 24,
+          "t_offset": 16769100,
+          "t_count": 44
+        },
+        {
+          "name": "Conduit_Cover_Strip_03",
+          "color": "#4A2F1D",
+          "v_offset": 16769628,
+          "v_count": 24,
+          "t_offset": 16769916,
+          "t_count": 44
+        }
+      ]
+    },
+    {
+      "id": "Plate_3_SingleColor_Brown_Brackets_01_To_12",
+      "title": "Plate 3 (Single-Color T1 Brown) \u2014 12\u00d7 Exact-Radius Station Brackets (#1 to #12)",
+      "file_url": "/output/3mf/Plate_3_SingleColor_Brown_Brackets_01_To_12.3mf",
+      "meshes": [
+        {
+          "name": "bracket_01",
+          "color": "#4A2F1D",
+          "v_offset": 16770444,
+          "v_count": 3775,
+          "t_offset": 16815744,
+          "t_count": 7550
+        },
+        {
+          "name": "bracket_12",
+          "color": "#4A2F1D",
+          "v_offset": 16906344,
+          "v_count": 3791,
+          "t_offset": 16951836,
+          "t_count": 7582
+        },
+        {
+          "name": "bracket_02",
+          "color": "#4A2F1D",
+          "v_offset": 17042820,
+          "v_count": 3779,
+          "t_offset": 17088168,
+          "t_count": 7558
+        },
+        {
+          "name": "bracket_11",
+          "color": "#4A2F1D",
+          "v_offset": 17178864,
+          "v_count": 3787,
+          "t_offset": 17224308,
+          "t_count": 7574
+        },
+        {
+          "name": "bracket_03",
+          "color": "#4A2F1D",
+          "v_offset": 17315196,
+          "v_count": 3779,
+          "t_offset": 17360544,
+          "t_count": 7558
+        },
+        {
+          "name": "bracket_10",
+          "color": "#4A2F1D",
+          "v_offset": 17451240,
+          "v_count": 3786,
+          "t_offset": 17496672,
+          "t_count": 7572
+        },
+        {
+          "name": "bracket_04",
+          "color": "#4A2F1D",
+          "v_offset": 17587536,
+          "v_count": 3775,
+          "t_offset": 17632836,
+          "t_count": 7550
+        },
+        {
+          "name": "bracket_09",
+          "color": "#4A2F1D",
+          "v_offset": 17723436,
+          "v_count": 3774,
+          "t_offset": 17768724,
+          "t_count": 7548
+        },
+        {
+          "name": "bracket_05",
+          "color": "#4A2F1D",
+          "v_offset": 17859300,
+          "v_count": 3779,
+          "t_offset": 17904648,
+          "t_count": 7558
+        },
+        {
+          "name": "bracket_08",
+          "color": "#4A2F1D",
+          "v_offset": 17995344,
+          "v_count": 3771,
+          "t_offset": 18040596,
+          "t_count": 7542
+        },
+        {
+          "name": "bracket_06",
+          "color": "#4A2F1D",
+          "v_offset": 18131100,
+          "v_count": 3779,
+          "t_offset": 18176448,
+          "t_count": 7558
+        },
+        {
+          "name": "bracket_07",
+          "color": "#4A2F1D",
+          "v_offset": 18267144,
+          "v_count": 3759,
+          "t_offset": 18312252,
+          "t_count": 7518
+        }
+      ]
+    },
+    {
+      "id": "Plate_4_SingleColor_Brown_Brackets_13_To_24",
+      "title": "Plate 4 (Single-Color T1 Brown) \u2014 12\u00d7 Exact-Radius Station Brackets (#13 to #24)",
+      "file_url": "/output/3mf/Plate_4_SingleColor_Brown_Brackets_13_To_24.3mf",
+      "meshes": [
+        {
+          "name": "bracket_13",
+          "color": "#4A2F1D",
+          "v_offset": 18402468,
+          "v_count": 3788,
+          "t_offset": 18447924,
+          "t_count": 7576
+        },
+        {
+          "name": "bracket_24",
+          "color": "#4A2F1D",
+          "v_offset": 18538836,
+          "v_count": 3782,
+          "t_offset": 18584220,
+          "t_count": 7564
+        },
+        {
+          "name": "bracket_14",
+          "color": "#4A2F1D",
+          "v_offset": 18674988,
+          "v_count": 3784,
+          "t_offset": 18720396,
+          "t_count": 7568
+        },
+        {
+          "name": "bracket_23",
+          "color": "#4A2F1D",
+          "v_offset": 18811212,
+          "v_count": 3786,
+          "t_offset": 18856644,
+          "t_count": 7572
+        },
+        {
+          "name": "bracket_15",
+          "color": "#4A2F1D",
+          "v_offset": 18947508,
+          "v_count": 3788,
+          "t_offset": 18992964,
+          "t_count": 7576
+        },
+        {
+          "name": "bracket_22",
+          "color": "#4A2F1D",
+          "v_offset": 19083876,
+          "v_count": 3786,
+          "t_offset": 19129308,
+          "t_count": 7572
+        },
+        {
+          "name": "bracket_16",
+          "color": "#4A2F1D",
+          "v_offset": 19220172,
+          "v_count": 3788,
+          "t_offset": 19265628,
+          "t_count": 7576
+        },
+        {
+          "name": "bracket_21",
+          "color": "#4A2F1D",
+          "v_offset": 19356540,
+          "v_count": 3782,
+          "t_offset": 19401924,
+          "t_count": 7564
+        },
+        {
+          "name": "bracket_17",
+          "color": "#4A2F1D",
+          "v_offset": 19492692,
+          "v_count": 3776,
+          "t_offset": 19538004,
+          "t_count": 7552
+        },
+        {
+          "name": "bracket_20",
+          "color": "#4A2F1D",
+          "v_offset": 19628628,
+          "v_count": 3778,
+          "t_offset": 19673964,
+          "t_count": 7556
+        },
+        {
+          "name": "bracket_18",
+          "color": "#4A2F1D",
+          "v_offset": 19764636,
+          "v_count": 3786,
+          "t_offset": 19810068,
+          "t_count": 7572
+        },
+        {
+          "name": "bracket_19",
+          "color": "#4A2F1D",
+          "v_offset": 19900932,
+          "v_count": 3782,
+          "t_offset": 19946316,
+          "t_count": 7564
+        }
+      ]
+    },
+    {
+      "id": "Plate_5_SingleColor_Green_Track_01",
+      "title": "Plate 5 (Single-Color T2 Green) \u2014 Dedicated Full-Scale Track Segment 01 (Return Ramp, 230.8\u00d7230.1 mm)",
+      "file_url": "/output/3mf/Plate_5_SingleColor_Green_Track_01.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_01",
+          "color": "#00A86B",
+          "v_offset": 20037084,
+          "v_count": 16918,
+          "t_offset": 20240100,
+          "t_count": 33836
+        }
+      ]
+    },
+    {
+      "id": "Plate_6_SingleColor_Green_Track_02",
+      "title": "Plate 6 (Single-Color T2 Green) \u2014 Dedicated Full-Scale Track Segment 02",
+      "file_url": "/output/3mf/Plate_6_SingleColor_Green_Track_02.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_02",
+          "color": "#00A86B",
+          "v_offset": 20646132,
+          "v_count": 14127,
+          "t_offset": 20815656,
+          "t_count": 28258
+        }
+      ]
+    },
+    {
+      "id": "Plate_7_SingleColor_Green_Track_03",
+      "title": "Plate 7 (Single-Color T2 Green) \u2014 Dedicated Full-Scale Track Segment 03",
+      "file_url": "/output/3mf/Plate_7_SingleColor_Green_Track_03.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_03",
+          "color": "#00A86B",
+          "v_offset": 21154752,
+          "v_count": 15442,
+          "t_offset": 21340056,
+          "t_count": 30892
+        }
+      ]
+    },
+    {
+      "id": "Plate_8_SingleColor_Green_Track_04",
+      "title": "Plate 8 (Single-Color T2 Green) \u2014 Dedicated Full-Scale Track Segment 04",
+      "file_url": "/output/3mf/Plate_8_SingleColor_Green_Track_04.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_04",
+          "color": "#00A86B",
+          "v_offset": 21710760,
+          "v_count": 14008,
+          "t_offset": 21878856,
+          "t_count": 28020
+        }
+      ]
+    },
+    {
+      "id": "Plate_9_SingleColor_Green_Track_05_And_13",
+      "title": "Plate 9 (Single-Color T2 Green) \u2014 Full-Scale Track Segments 05 & 13 (Side-by-Side)",
+      "file_url": "/output/3mf/Plate_9_SingleColor_Green_Track_05_And_13.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_05",
+          "color": "#00A86B",
+          "v_offset": 22215096,
+          "v_count": 15235,
+          "t_offset": 22397916,
+          "t_count": 30478
+        },
+        {
+          "name": "track_seg_13",
+          "color": "#00A86B",
+          "v_offset": 22763652,
+          "v_count": 13480,
+          "t_offset": 22925412,
+          "t_count": 26964
+        }
+      ]
+    },
+    {
+      "id": "Plate_10_SingleColor_Green_Track_06_And_12",
+      "title": "Plate 10 (Single-Color T2 Green) \u2014 Full-Scale Track Segments 06 & 12 (Side-by-Side)",
+      "file_url": "/output/3mf/Plate_10_SingleColor_Green_Track_06_And_12.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_06",
+          "color": "#00A86B",
+          "v_offset": 23248980,
+          "v_count": 15336,
+          "t_offset": 23433012,
+          "t_count": 30676
+        },
+        {
+          "name": "track_seg_12",
+          "color": "#00A86B",
+          "v_offset": 23801124,
+          "v_count": 14930,
+          "t_offset": 23980284,
+          "t_count": 29864
+        }
+      ]
+    },
+    {
+      "id": "Plate_11_SingleColor_Green_Track_07_And_11",
+      "title": "Plate 11 (Single-Color T2 Green) \u2014 Full-Scale Track Segments 07 & 11 (Side-by-Side)",
+      "file_url": "/output/3mf/Plate_11_SingleColor_Green_Track_07_And_11.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_07",
+          "color": "#00A86B",
+          "v_offset": 24338652,
+          "v_count": 13462,
+          "t_offset": 24500196,
+          "t_count": 26928
+        },
+        {
+          "name": "track_seg_11",
+          "color": "#00A86B",
+          "v_offset": 24823332,
+          "v_count": 13417,
+          "t_offset": 24984336,
+          "t_count": 26838
+        }
+      ]
+    },
+    {
+      "id": "Plate_12_SingleColor_Green_Track_08_And_10",
+      "title": "Plate 12 (Single-Color T2 Green) \u2014 Full-Scale Track Segments 08 & 10 (Side-by-Side)",
+      "file_url": "/output/3mf/Plate_12_SingleColor_Green_Track_08_And_10.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_08",
+          "color": "#00A86B",
+          "v_offset": 25306392,
+          "v_count": 14883,
+          "t_offset": 25484988,
+          "t_count": 29770
+        },
+        {
+          "name": "track_seg_10",
+          "color": "#00A86B",
+          "v_offset": 25842228,
+          "v_count": 14789,
+          "t_offset": 26019696,
+          "t_count": 29582
+        }
+      ]
+    },
+    {
+      "id": "Plate_13_SingleColor_Green_Track_09_And_14",
+      "title": "Plate 13 (Single-Color T2 Green) \u2014 Full-Scale Track Segments 09 & 14 (Top Entry, Side-by-Side)",
+      "file_url": "/output/3mf/Plate_13_SingleColor_Green_Track_09_And_14.3mf",
+      "meshes": [
+        {
+          "name": "track_seg_09",
+          "color": "#00A86B",
+          "v_offset": 26374680,
+          "v_count": 13338,
+          "t_offset": 26534736,
+          "t_count": 26684
+        },
+        {
+          "name": "track_seg_14_top_entry",
+          "color": "#00A86B",
+          "v_offset": 26854944,
+          "v_count": 12578,
+          "t_offset": 27005880,
+          "t_count": 25160
+        }
+      ]
+    },
+    {
+      "id": "Plate_14_SingleColor_Gold_Auger_And_Drive",
+      "title": "Plate 14 (Single-Color T3 Gold) \u2014 Archimedes Auger Halves & Hex Coupler",
+      "file_url": "/output/3mf/Plate_14_SingleColor_Gold_Auger_And_Drive.3mf",
+      "meshes": [
+        {
+          "name": "auger_lower",
+          "color": "#D4AF37",
+          "v_offset": 27307800,
+          "v_count": 10357,
+          "t_offset": 27432084,
+          "t_count": 20710
+        },
+        {
+          "name": "auger_upper",
+          "color": "#D4AF37",
+          "v_offset": 27680604,
+          "v_count": 9566,
+          "t_offset": 27795396,
+          "t_count": 19128
+        },
+        {
+          "name": "Motor_Clutch_Driver",
+          "color": "#D4AF37",
+          "v_offset": 28024932,
+          "v_count": 1391,
+          "t_offset": 28041624,
+          "t_count": 2778
+        }
+      ]
+    },
+    {
+      "id": "Plate_15_SingleColor_Red_Apple_Marbles",
+      "title": "Plate 15 (Single-Color T4 Red) \u2014 12\u00d7 Glowing Apple Hemispheres A/B (6\u00d7 Complete Marbles)",
+      "file_url": "/output/3mf/Plate_15_SingleColor_Red_Apple_Marbles.3mf",
+      "meshes": [
+        {
+          "name": "apple_hemisphere_a_01",
+          "color": "#C41E3A",
+          "v_offset": 28074960,
+          "v_count": 1212,
+          "t_offset": 28089504,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_a_02",
+          "color": "#C41E3A",
+          "v_offset": 28118544,
+          "v_count": 1212,
+          "t_offset": 28133088,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_a_03",
+          "color": "#C41E3A",
+          "v_offset": 28162128,
+          "v_count": 1212,
+          "t_offset": 28176672,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_a_04",
+          "color": "#C41E3A",
+          "v_offset": 28205712,
+          "v_count": 1212,
+          "t_offset": 28220256,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_a_05",
+          "color": "#C41E3A",
+          "v_offset": 28249296,
+          "v_count": 1212,
+          "t_offset": 28263840,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_a_06",
+          "color": "#C41E3A",
+          "v_offset": 28292880,
+          "v_count": 1212,
+          "t_offset": 28307424,
+          "t_count": 2420
+        },
+        {
+          "name": "apple_hemisphere_b_01",
+          "color": "#C41E3A",
+          "v_offset": 28336464,
+          "v_count": 1509,
+          "t_offset": 28354572,
+          "t_count": 3014
+        },
+        {
+          "name": "apple_hemisphere_b_02",
+          "color": "#C41E3A",
+          "v_offset": 28390740,
+          "v_count": 1509,
+          "t_offset": 28408848,
+          "t_count": 3014
+        },
+        {
+          "name": "apple_hemisphere_b_03",
+          "color": "#C41E3A",
+          "v_offset": 28445016,
+          "v_count": 1509,
+          "t_offset": 28463124,
+          "t_count": 3014
+        },
+        {
+          "name": "apple_hemisphere_b_04",
+          "color": "#C41E3A",
+          "v_offset": 28499292,
+          "v_count": 1509,
+          "t_offset": 28517400,
+          "t_count": 3014
+        },
+        {
+          "name": "apple_hemisphere_b_05",
+          "color": "#C41E3A",
+          "v_offset": 28553568,
+          "v_count": 1509,
+          "t_offset": 28571676,
+          "t_count": 3014
+        },
+        {
+          "name": "apple_hemisphere_b_06",
+          "color": "#C41E3A",
+          "v_offset": 28607844,
+          "v_count": 1509,
+          "t_offset": 28625952,
+          "t_count": 3014
+        }
+      ]
+    },
+    {
+      "id": "Plate_16_MultiColor_Topper_And_Wand",
+      "title": "Plate 16 (4-Color Tree Palette) \u2014 Unified Apple Topper (with Stem & Leaf) & Magic LED Wand",
+      "file_url": "/output/3mf/Plate_16_MultiColor_Topper_And_Wand.3mf",
+      "meshes": [
+        {
+          "name": "golden_apple_topper (apple_red_shell)",
+          "color": "#C41E3A",
+          "v_offset": 28662120,
+          "v_count": 2374,
+          "t_offset": 28690608,
+          "t_count": 4744
+        },
+        {
+          "name": "golden_apple_topper (apple_brown_stem)",
+          "color": "#4A2F1D",
+          "v_offset": 28747536,
+          "v_count": 378,
+          "t_offset": 28752072,
+          "t_count": 752
+        },
+        {
+          "name": "golden_apple_topper (apple_brown_trunk_collar_1)",
+          "color": "#4A2F1D",
+          "v_offset": 28761096,
+          "v_count": 930,
+          "t_offset": 28772256,
+          "t_count": 1860
+        },
+        {
+          "name": "golden_apple_topper (apple_green_leaf)",
+          "color": "#00A86B",
+          "v_offset": 28794576,
+          "v_count": 2485,
+          "t_offset": 28824396,
+          "t_count": 4966
+        },
+        {
+          "name": "Magic_LED_Wand (wand_gold_star)",
+          "color": "#D4AF37",
+          "v_offset": 28883988,
+          "v_count": 552,
+          "t_offset": 28890612,
+          "t_count": 1104
+        },
+        {
+          "name": "Magic_LED_Wand (wand_gold_pommel_1)",
+          "color": "#D4AF37",
+          "v_offset": 28903860,
+          "v_count": 252,
+          "t_offset": 28906884,
+          "t_count": 500
+        },
+        {
+          "name": "Magic_LED_Wand (wand_brown_shaft)",
+          "color": "#4A2F1D",
+          "v_offset": 28912884,
+          "v_count": 134,
+          "t_offset": 28914492,
+          "t_count": 264
+        },
+        {
+          "name": "Magic_LED_Wand (wand_crimson_bezel)",
+          "color": "#C41E3A",
+          "v_offset": 28917660,
+          "v_count": 276,
+          "t_offset": 28920972,
+          "t_count": 552
+        }
+      ]
+    },
+    {
+      "id": "Plate_17_MultiColor_Planets_Warm_And_Gas_Giants",
+      "title": "Plate 17 (4-Color Warm Palette: Umber/Alabaster/Gold/Crimson) \u2014 Mercury, Venus, Mars, Jupiter & Saturn",
+      "file_url": "/output/3mf/Plate_17_MultiColor_Planets_Warm_And_Gas_Giants.3mf",
+      "meshes": [
+        {
+          "name": "planet_mercury (mercury_basalt_core)",
+          "color": "#4A2F1D",
+          "v_offset": 28927596,
+          "v_count": 4625,
+          "t_offset": 28983096,
+          "t_count": 9258
+        },
+        {
+          "name": "planet_mercury (mercury_gold_caloris_basin)",
+          "color": "#D4AF37",
+          "v_offset": 29094192,
+          "v_count": 1022,
+          "t_offset": 29106456,
+          "t_count": 2044
+        },
+        {
+          "name": "planet_mercury (mercury_terracotta_craters_4)",
+          "color": "#C41E3A",
+          "v_offset": 29130984,
+          "v_count": 678,
+          "t_offset": 29139120,
+          "t_count": 1352
+        },
+        {
+          "name": "planet_mercury (mercury_terracotta_craters_3)",
+          "color": "#C41E3A",
+          "v_offset": 29155344,
+          "v_count": 672,
+          "t_offset": 29163408,
+          "t_count": 1340
+        },
+        {
+          "name": "planet_mercury (mercury_terracotta_craters_2)",
+          "color": "#C41E3A",
+          "v_offset": 29179488,
+          "v_count": 607,
+          "t_offset": 29186772,
+          "t_count": 1210
+        },
+        {
+          "name": "planet_mercury (mercury_terracotta_craters_1)",
+          "color": "#C41E3A",
+          "v_offset": 29201292,
+          "v_count": 607,
+          "t_offset": 29208576,
+          "t_count": 1210
+        },
+        {
+          "name": "planet_mercury (mercury_alabaster_polar_crown)",
+          "color": "#F5EFE6",
+          "v_offset": 29223096,
+          "v_count": 24,
+          "t_offset": 29223384,
+          "t_count": 44
+        },
+        {
+          "name": "planet_venus (venus_gold_cloud_deck)",
+          "color": "#D4AF37",
+          "v_offset": 29223912,
+          "v_count": 3643,
+          "t_offset": 29267628,
+          "t_count": 7286
+        },
+        {
+          "name": "planet_venus (venus_alabaster_y_waves_3)",
+          "color": "#F5EFE6",
+          "v_offset": 29355060,
+          "v_count": 24,
+          "t_offset": 29355348,
+          "t_count": 44
+        },
+        {
+          "name": "planet_venus (venus_alabaster_y_waves_2)",
+          "color": "#F5EFE6",
+          "v_offset": 29355876,
+          "v_count": 348,
+          "t_offset": 29360052,
+          "t_count": 696
+        },
+        {
+          "name": "planet_venus (venus_alabaster_y_waves_1)",
+          "color": "#F5EFE6",
+          "v_offset": 29368404,
+          "v_count": 597,
+          "t_offset": 29375568,
+          "t_count": 1198
+        },
+        {
+          "name": "planet_venus (venus_umber_vortex_collars_2)",
+          "color": "#4A2F1D",
+          "v_offset": 29389944,
+          "v_count": 516,
+          "t_offset": 29396136,
+          "t_count": 1032
+        },
+        {
+          "name": "planet_venus (venus_umber_vortex_collars_1)",
+          "color": "#4A2F1D",
+          "v_offset": 29408520,
+          "v_count": 687,
+          "t_offset": 29416764,
+          "t_count": 1374
+        },
+        {
+          "name": "planet_venus (venus_crimson_superrotation)",
+          "color": "#C41E3A",
+          "v_offset": 29433252,
+          "v_count": 810,
+          "t_offset": 29442972,
+          "t_count": 1620
+        },
+        {
+          "name": "planet_mars (mars_terracotta_body)",
+          "color": "#C41E3A",
+          "v_offset": 29462412,
+          "v_count": 4103,
+          "t_offset": 29511648,
+          "t_count": 8206
+        },
+        {
+          "name": "planet_mars (mars_ochre_tharsis_hellas)",
+          "color": "#D4AF37",
+          "v_offset": 29610120,
+          "v_count": 1384,
+          "t_offset": 29626728,
+          "t_count": 2780
+        },
+        {
+          "name": "planet_mars (mars_basalt_canyon_olympus_2)",
+          "color": "#4A2F1D",
+          "v_offset": 29660088,
+          "v_count": 607,
+          "t_offset": 29667372,
+          "t_count": 1210
+        },
+        {
+          "name": "planet_mars (mars_basalt_canyon_olympus_1)",
+          "color": "#4A2F1D",
+          "v_offset": 29681892,
+          "v_count": 1422,
+          "t_offset": 29698956,
+          "t_count": 2844
+        },
+        {
+          "name": "planet_mars (mars_alabaster_polar_cap)",
+          "color": "#F5EFE6",
+          "v_offset": 29733084,
+          "v_count": 24,
+          "t_offset": 29733372,
+          "t_count": 44
+        },
+        {
+          "name": "planet_jupiter (jupiter_gold_zones)",
+          "color": "#D4AF37",
+          "v_offset": 29733900,
+          "v_count": 4453,
+          "t_offset": 29787336,
+          "t_count": 8906
+        },
+        {
+          "name": "planet_jupiter (jupiter_alabaster_tropical_zones_2)",
+          "color": "#F5EFE6",
+          "v_offset": 29894208,
+          "v_count": 504,
+          "t_offset": 29900256,
+          "t_count": 1008
+        },
+        {
+          "name": "planet_jupiter (jupiter_alabaster_tropical_zones_1)",
+          "color": "#F5EFE6",
+          "v_offset": 29912352,
+          "v_count": 1095,
+          "t_offset": 29925492,
+          "t_count": 2190
+        },
+        {
+          "name": "planet_jupiter (jupiter_umber_temperate_belts_3)",
+          "color": "#4A2F1D",
+          "v_offset": 29951772,
+          "v_count": 560,
+          "t_offset": 29958492,
+          "t_count": 1120
+        },
+        {
+          "name": "planet_jupiter (jupiter_umber_temperate_belts_2)",
+          "color": "#4A2F1D",
+          "v_offset": 29971932,
+          "v_count": 360,
+          "t_offset": 29976252,
+          "t_count": 720
+        },
+        {
+          "name": "planet_jupiter (jupiter_umber_temperate_belts_1)",
+          "color": "#4A2F1D",
+          "v_offset": 29984892,
+          "v_count": 510,
+          "t_offset": 29991012,
+          "t_count": 1016
+        },
+        {
+          "name": "planet_jupiter (jupiter_crimson_great_red_spot_2)",
+          "color": "#C41E3A",
+          "v_offset": 30003204,
+          "v_count": 16,
+          "t_offset": 30003396,
+          "t_count": 28
+        },
+        {
+          "name": "planet_jupiter (jupiter_crimson_great_red_spot_1)",
+          "color": "#C41E3A",
+          "v_offset": 30003732,
+          "v_count": 782,
+          "t_offset": 30013116,
+          "t_count": 1564
+        },
+        {
+          "name": "planet_saturn (saturn_gold_globe_and_ring_3)",
+          "color": "#D4AF37",
+          "v_offset": 30031884,
+          "v_count": 676,
+          "t_offset": 30039996,
+          "t_count": 1352
+        },
+        {
+          "name": "planet_saturn (saturn_gold_globe_and_ring_2)",
+          "color": "#D4AF37",
+          "v_offset": 30056220,
+          "v_count": 308,
+          "t_offset": 30059916,
+          "t_count": 616
+        },
+        {
+          "name": "planet_saturn (saturn_gold_globe_and_ring_1)",
+          "color": "#D4AF37",
+          "v_offset": 30067308,
+          "v_count": 2691,
+          "t_offset": 30099600,
+          "t_count": 5378
+        },
+        {
+          "name": "planet_saturn (saturn_alabaster_inner_ring_2)",
+          "color": "#F5EFE6",
+          "v_offset": 30164136,
+          "v_count": 468,
+          "t_offset": 30169752,
+          "t_count": 936
+        },
+        {
+          "name": "planet_saturn (saturn_alabaster_inner_ring_1)",
+          "color": "#F5EFE6",
+          "v_offset": 30180984,
+          "v_count": 308,
+          "t_offset": 30184680,
+          "t_count": 616
+        },
+        {
+          "name": "planet_saturn (saturn_umber_cassini_division)",
+          "color": "#4A2F1D",
+          "v_offset": 30192072,
+          "v_count": 308,
+          "t_offset": 30195768,
+          "t_count": 616
+        },
+        {
+          "name": "planet_saturn (saturn_crimson_polar_hexagon_2)",
+          "color": "#C41E3A",
+          "v_offset": 30203160,
+          "v_count": 12,
+          "t_offset": 30203304,
+          "t_count": 20
+        },
+        {
+          "name": "planet_saturn (saturn_crimson_polar_hexagon_1)",
+          "color": "#C41E3A",
+          "v_offset": 30203544,
+          "v_count": 468,
+          "t_offset": 30209160,
+          "t_count": 936
+        }
+      ]
+    },
+    {
+      "id": "Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants",
+      "title": "Plate 18 (4-Color Ocean/Ice Palette: Cobalt/Emerald/Ice White/Gold) \u2014 Earth, Uranus & Neptune",
+      "file_url": "/output/3mf/Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants.3mf",
+      "meshes": [
+        {
+          "name": "planet_earth (earth_cobalt_ocean_globe)",
+          "color": "#1E5AA8",
+          "v_offset": 30220392,
+          "v_count": 2966,
+          "t_offset": 30255984,
+          "t_count": 5944
+        },
+        {
+          "name": "planet_earth (earth_emerald_continents)",
+          "color": "#00A86B",
+          "v_offset": 30327312,
+          "v_count": 503,
+          "t_offset": 30333348,
+          "t_count": 1014
+        },
+        {
+          "name": "planet_earth (earth_gold_mountain_ranges_2)",
+          "color": "#D4AF37",
+          "v_offset": 30345516,
+          "v_count": 57,
+          "t_offset": 30346200,
+          "t_count": 110
+        },
+        {
+          "name": "planet_earth (earth_gold_mountain_ranges_1)",
+          "color": "#D4AF37",
+          "v_offset": 30347520,
+          "v_count": 30,
+          "t_offset": 30347880,
+          "t_count": 56
+        },
+        {
+          "name": "planet_earth (earth_white_polar_ice_clouds_3)",
+          "color": "#F0F4F8",
+          "v_offset": 30348552,
+          "v_count": 607,
+          "t_offset": 30355836,
+          "t_count": 1210
+        },
+        {
+          "name": "planet_earth (earth_white_polar_ice_clouds_2)",
+          "color": "#F0F4F8",
+          "v_offset": 30370356,
+          "v_count": 607,
+          "t_offset": 30377640,
+          "t_count": 1210
+        },
+        {
+          "name": "planet_earth (earth_white_polar_ice_clouds_1)",
+          "color": "#F0F4F8",
+          "v_offset": 30392160,
+          "v_count": 152,
+          "t_offset": 30393984,
+          "t_count": 300
+        },
+        {
+          "name": "planet_uranus (uranus_cyan_ice_globe)",
+          "color": "#00A86B",
+          "v_offset": 30397584,
+          "v_count": 3062,
+          "t_offset": 30434328,
+          "t_count": 6120
+        },
+        {
+          "name": "planet_uranus (uranus_cobalt_latitude_bands_3)",
+          "color": "#1E5AA8",
+          "v_offset": 30507768,
+          "v_count": 517,
+          "t_offset": 30513972,
+          "t_count": 1034
+        },
+        {
+          "name": "planet_uranus (uranus_cobalt_latitude_bands_2)",
+          "color": "#1E5AA8",
+          "v_offset": 30526380,
+          "v_count": 4,
+          "t_offset": 30526428,
+          "t_count": 4
+        },
+        {
+          "name": "planet_uranus (uranus_cobalt_latitude_bands_1)",
+          "color": "#1E5AA8",
+          "v_offset": 30526476,
+          "v_count": 659,
+          "t_offset": 30534384,
+          "t_count": 1318
+        },
+        {
+          "name": "planet_uranus (uranus_gold_epsilon_ring)",
+          "color": "#D4AF37",
+          "v_offset": 30550200,
+          "v_count": 437,
+          "t_offset": 30555444,
+          "t_count": 874
+        },
+        {
+          "name": "planet_uranus (uranus_white_polar_hood_2)",
+          "color": "#F0F4F8",
+          "v_offset": 30565932,
+          "v_count": 678,
+          "t_offset": 30574068,
+          "t_count": 1352
+        },
+        {
+          "name": "planet_uranus (uranus_white_polar_hood_1)",
+          "color": "#F0F4F8",
+          "v_offset": 30590292,
+          "v_count": 28,
+          "t_offset": 30590628,
+          "t_count": 52
+        },
+        {
+          "name": "planet_neptune (neptune_cobalt_ice_globe)",
+          "color": "#1E5AA8",
+          "v_offset": 30591252,
+          "v_count": 3414,
+          "t_offset": 30632220,
+          "t_count": 6824
+        },
+        {
+          "name": "planet_neptune (neptune_teal_wind_belts_2)",
+          "color": "#00A86B",
+          "v_offset": 30714108,
+          "v_count": 857,
+          "t_offset": 30724392,
+          "t_count": 1710
+        },
+        {
+          "name": "planet_neptune (neptune_teal_wind_belts_1)",
+          "color": "#00A86B",
+          "v_offset": 30744912,
+          "v_count": 829,
+          "t_offset": 30754860,
+          "t_count": 1662
+        },
+        {
+          "name": "planet_neptune (neptune_gold_dark_spot_ring)",
+          "color": "#D4AF37",
+          "v_offset": 30774804,
+          "v_count": 1345,
+          "t_offset": 30790944,
+          "t_count": 2694
+        },
+        {
+          "name": "planet_neptune (neptune_white_cirrus_scooter_3)",
+          "color": "#F0F4F8",
+          "v_offset": 30823272,
+          "v_count": 28,
+          "t_offset": 30823608,
+          "t_count": 52
+        },
+        {
+          "name": "planet_neptune (neptune_white_cirrus_scooter_2)",
+          "color": "#F0F4F8",
+          "v_offset": 30824232,
+          "v_count": 678,
+          "t_offset": 30832368,
+          "t_count": 1352
+        },
+        {
+          "name": "planet_neptune (neptune_white_cirrus_scooter_1)",
+          "color": "#F0F4F8",
+          "v_offset": 30848592,
+          "v_count": 678,
+          "t_offset": 30856728,
+          "t_count": 1352
+        }
+      ]
+    }
+  ]
+}
