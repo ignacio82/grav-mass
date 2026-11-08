@@ -1,13 +1,12 @@
 # ==============================================================================
 # Grav-Mass Day "Falling Apple Cascade" Marble Run Tree — ESPHome Configuration
 # Hardware: M5Stack Atomic H-Bridge Driver Base (A092) + ATOM Lite ESP32 (C008)
-#   - External PSU : Single Regulated 12.0V DC Power Adapter (MEAN WELL GST60A12-P1J 5A/60W or GST36A12-P1J 3A/36W)
-#                    entering Rear (-X) Panel-Mount 5.5 × 2.1 mm DC Barrel Jack (J1)
-#   - Branch 1     : 12V -> Fuse F1 (2A) -> A092 VIN (9–24V rated) -> Internal MP1584EN 5V Buck -> C008 ATOM Lite
-#   - Branch 2     : 12V -> Fuse F2 (3A) -> Dedicated 12V->5.0V 5A (25W) Screw-Terminal Buck Converter (DFR0205)
+#   - External PSU : Single Regulated 12.0V DC 5A (60W) Power Adapter (BTF-LIGHTING B01D8FLSV8)
+#                    entering Rear (-X) Panel-Mount 5.5 × 2.1 mm DC Barrel Jack (J1, B07C7VSRBG)
+#   - Branch 1     : 12V -> Fuse F1 (2A, B087BT1PH3) -> A092 VIN (9–24V rated) -> Internal MP1584EN 5V Buck -> C008 ATOM Lite
+#   - Branch 2     : 12V -> Fuse F2 (3A) -> Dedicated UCTRONICS 12V->5.0V 5A (25W) Screw-Terminal Buck Converter (B07XXWQ49N)
 #                    -> Powers BOTH Zone 1 Topper Ring & Zone 2 Track Pebble Wire (Isolated from C008 5V rail!)
-#   - Branch 3     : 12V 150 RPM N20 Gear Motor on A092 M1/M2 (TI DRV8876: IN1=GPIO19, IN2=GPIO23, nFAULT=GPIO22)
-#                    (or Option A: 6V LA002 Motor via Fuse F3 1A + 12V->6V Buck + External H-Bridge on GPIO19/23)
+#   - Branch 3     : 12V 150 RPM N20 Gear Motor (B0BFRPMSW6) on A092 M1/M2 (TI DRV8876: IN1=GPIO19, IN2=GPIO23, nFAULT=GPIO22)
 #   - Track LEDs   : BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Flexible Wire (B0CCS11V7H, 50 LEDs) on Grove GPIO26 (White)
 #   - Topper LED   : Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD, Ø45mm, 16 LEDs) on Grove GPIO32 (Yellow)
 #   - Physical Btn : Built-in Atom Button (GPIO39) accessible through Battery_Cover / Base_Bottom_Cover Ø5mm port
