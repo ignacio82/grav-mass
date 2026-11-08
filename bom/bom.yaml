@@ -1,0 +1,305 @@
+electronics:
+  - id: psu-12v-5a
+    qty: 1
+    sku: B01D8FLSV8
+    name: "BTF-LIGHTING Regulated `12V DC 5A (60W)` Power Supply Adapter"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B01D8FLSV8
+    alt_skus: []
+    spec: "`100–240V AC` in → Regulated `12.0V DC, 5.0A (60W)` out, `5.5 × 2.1 mm` center-positive plug, AC wall cord included"
+    where_used: "Single external power cord plugging into the rear `-X` `5.5 × 2.1 mm` DC barrel jack on [`trunk_base`](../cad/trunk.py) (`26.5W` max simultaneous peak load)"
+    category: power
+    optional: false
+    notes: "status: **Required *(New — Single External Supply)*** | link_text: Amazon — BTF-LIGHTING `12V 5A 60W` Power Supply Adapter (`B01D8FLSV8`)"
+
+  - id: dc-barrel-jack
+    qty: 1
+    sku: B07C7VSRBG
+    name: "Pre-Wired `5.5 × 2.1 mm` Threaded Panel-Mount DC Barrel Jack (`18 AWG` Leads)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B07C7VSRBG
+    alt_skus: []
+    spec: "`12–24V DC`, `5A–10A` rated, `M11 × 0.75` (`Ø 11.0 mm`) thread with hex nut & pre-attached `18 AWG` red/black leads"
+    where_used: "Mounts into the **`Ø 11.4 mm` rear `-X` DC jack port** (`Z = 10.0 mm`) on [`trunk_base`](../cad/trunk.py); pigtails route internally into the Hollow Root Vault"
+    category: power
+    optional: false
+    notes: "status: **Required *(New — Panel DC Entry)*** | link_text: Amazon — 5.5 × 2.1 mm Threaded Panel-Mount DC Barrel Jack with Pre-Wired 18 AWG Leads (`B07C7VSRBG`)"
+
+  - id: buck-12v-to-5v
+    qty: 1
+    sku: B07XXWQ49N
+    name: "UCTRONICS `DC 9V–36V to 5.0V 5A (25W)` Buck Converter Module with Screw Terminals (`U6223`)"
+    vendor: Amazon
+    url: https://www.amazon.com/UCTRONICS-Converter-Transformer-Voltage-Regulator/dp/B07XXWQ49N
+    alt_skus:
+      - U6223
+    spec: "`9–36V DC` in → Fixed **`5.0V DC, 5.0A (25W)`** out (`63 × 20 × 10 mm`) with onboard `VIN+/GND` and `OUT+/GND` screw terminals"
+    where_used: "Seats inside the `Ø 135 × 50 mm` Hollow Root Vault on Branch 2 (`F2 = 3A` fuse) to power all 66 WS2812B LEDs without loading `C008`'s USB diode"
+    category: power
+    optional: false
+    notes: "status: **Required *(New — 5V LED Rail)*** | link_text: Amazon — UCTRONICS `DC 9V–36V to 5V 5A` Screw-Terminal Buck Converter (`B07XXWQ49N`)"
+
+  - id: wago-221-pack
+    qty: 1
+    sku: B07NKT2P2F
+    name: "WAGO `221` Lever-Nut 15-Piece Assortment Pocket Pack (`221-412`, `221-413`, `221-415`)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B07NKT2P2F
+    alt_skus:
+      - "221-412"
+      - "221-413"
+      - "221-415"
+    spec: "Includes `5× 221-415` (5-port), `5× 221-413` (3-port), and `5× 221-412` (2-port) lever connectors (`24–12 AWG`)"
+    where_used: "Uses `2× 221-415` (`WAGO-1 +12V` & `WAGO-2 Star GND`) + `2× 221-413` (`WAGO-3 +5V LED` & `WAGO-4 LED GND`) for 100% tool-free distribution"
+    category: power-distribution
+    optional: false
+    notes: "qty_display: **1× Pack** | status: **Required *(New — Solder-Free Bus)*** | link_text: Amazon — WAGO `221` Lever-Nut 15-Piece Assortment Pocket Pack (`B07NKT2P2F`)"
+
+  - id: inline-blade-fuses
+    qty: 1
+    sku: B087BT1PH3
+    name: "Bst4U 6-Pack Inline Blade Fuse Holders + 100-Piece Blade Fuse Assortment Kit (`2A, 3A, 5A` Included)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B087BT1PH3
+    alt_skus: []
+    spec: "`6×` pre-wired inline blade fuse holders with protective caps + `100×` blade fuses (`2A, 3A, 5A, 7.5A, 10A, 15A, 20A, 25A, 30A, 35A`)"
+    where_used: "Uses `3×` inline fuse holders inside the Hollow Root Vault: **`F0 = 5A`** (main `12V` input), **`F1 = 2A`** (`A092` controller/motor), and **`F2 = 3A`** (`5V` LED buck)"
+    category: protection
+    optional: false
+    notes: "qty_display: **1× Kit** | status: **Required *(New — Branch Fuses)*** | link_text: Amazon — Bst4U 6-Pack Inline Blade Fuse Holders + 100pc Fuse Kit (`B087BT1PH3`)"
+
+  - id: bulk-cap-1000uf
+    qty: 1
+    sku: B07WPWFSNQ
+    name: "BOJACK `1000 µF 16V` `105 °C` Radial Electrolytic Capacitors (10-Pack)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B07WPWFSNQ
+    alt_skus: []
+    spec: "`1000 µF`, `16V DC`, `105 °C` low-ESR radial aluminum electrolytic capacitor (`Ø 10 × 17 mm`)"
+    where_used: "**1×** capacitor has its `+` and `-` leads clamped directly into the `OUT+` and `GND` screw terminals of the `B07XXWQ49N` `5V` buck converter"
+    category: power
+    optional: false
+    notes: "qty_display: **1× Pack** | status: **Required *(New — 5V Bulk Cap)*** | link_text: Amazon — BOJACK `1000 µF 16V 105°C` Radial Electrolytic Capacitors (`B07WPWFSNQ`)"
+
+  - id: m5stack-hdriver-base
+    qty: 1
+    sku: A092
+    name: "M5Stack Atomic H-Bridge Driver Base (`DRV8876`)"
+    vendor: M5Stack Store
+    url: https://shop.m5stack.com/products/atomic-h-bridge-driver-base-drv8876
+    alt_skus: []
+    spec: "`48.0 × 24.0 × 18.0 mm`, **`9–24V DC` input**, TI `DRV8876` H-Bridge (`1.5A` cont / `2.0A` peak), internal `MP1584EN` `12V→5V` buck for `C008`, `HT3.96-4P` screw terminals (`M1`, `M2`, `VIN`, `GND`)"
+    where_used: "Seats into the stepped `-Y` bottom ESPHome bay (`49.2 × 25.2 × 20.3 mm`) of [`trunk_base`](../cad/trunk.py); powered by **`12.0V DC`** on `VIN`/`GND` via Fuse `F1 (2A)`"
+    category: controller
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: M5Stack Store — Atomic H-Bridge Driver Base (`A092`)"
+
+  - id: m5stack-atom-lite
+    qty: 1
+    sku: C008
+    name: "M5Stack ATOM Lite ESP32 Development Kit"
+    vendor: M5Stack Store
+    url: https://shop.m5stack.com/products/atom-lite-esp32-development-kit
+    alt_skus: []
+    spec: "`24.0 × 24.0 × 9.5 mm` `ESP32-PICO-D4` Wi-Fi/BLE controller with `HY2.0-4P` Grove port, `SK6812` RGB LED & button"
+    where_used: "Snaps onto `A092` (powered internally from `A092`'s `12V→5V` regulator; USB-C needed only for initial flashing of [`esphome/grav-mass-tree.yaml`](../esphome/grav-mass-tree.yaml))"
+    category: controller
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: M5Stack Store — ATOM Lite ESP32 (`C008`)"
+
+  - id: m5stack-grove2dupont
+    qty: 1
+    sku: A096
+    name: "M5Stack Grove2Dupont Conversion Cable (`20 cm, 5 Pairs`)"
+    vendor: M5Stack Store
+    url: https://shop.m5stack.com/products/grove2dupont-conversion-cable-20cm-5pairs
+    alt_skus: []
+    spec: "Male `HY2.0-4P` Grove plug to 4× 2.54 mm DuPont pins (`Black=GND`, `White=G26`, `Yellow=G32`, `Red=+5V` capped/isolated)"
+    where_used: "Plugs into `C008` Grove port to carry **`White = GPIO26` Track Data**, **`Yellow = GPIO32` Topper Data**, and **`Black = Signal GND`** (`Red +5V` is capped to prevent backfeeding!)"
+    category: wiring
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: M5Stack Store — Grove2Dupont Conversion Cable (`A096`)"
+
+  - id: motor-n20-12v-150rpm
+    qty: 1
+    sku: B0BFRPMSW6
+    name: "`12V DC 150 RPM N20` Micro Metal Gear Motor (`Ø 3.0 mm` D-Shaft)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B0BFRPMSW6
+    alt_skus:
+      - LA002
+    spec: "`10 × 12 × 25 mm` metal gearbox (100% identical size to `LA002`), **`12.0V DC` rated**, `150 RPM`, `0.90 kg·cm` torque, `Ø 3.0 mm` D-shaft"
+    where_used: "Drops directly into [`trunk_base`](../cad/trunk.py) & [`Servo_Or_030_Adapter`](../cad/auger.py) and clamps straight into `A092` **`M1` & `M2`** (`12V` native PWM)!"
+    category: motor
+    optional: false
+    notes: "status: **Required *(New — 12V Auger Motor)*** | link_text: Amazon — `12V DC 150 RPM N20` Micro Metal Gear Motor, `Ø 3mm` D-Shaft (`B0BFRPMSW6`)"
+
+  - id: led-track-pebble-ws2812b
+    qty: 1
+    sku: B0CCS11V7H
+    name: "BTF-LIGHTING `DC5V` Addressable `WS2812B` RGB Pebble / Seed Pixel Flexible Wire (`16.4ft / 50 LEDs`, Track)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B0CCS11V7H
+    alt_skus: []
+    spec: "`360°`-flexible 3-wire cord with `50×` `6.2 × 3.2 mm` oval epoxy RGB LED drops (`5V`, `5W` nominal / `9W` max white), 3-pin `JST-SM` + start/end power-injection leads"
+    where_used: "Snaps into the **`8.0 × 3.6 mm` dovetail channel (`4.6 mm` throat)** under [`track_seg_01`](../cad/track.py)..[`14`](../cad/track.py); powered from `5V` Buck (`WAGO-3/4`), Data from **`GPIO26` (White)**"
+    category: lighting-wired
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: Amazon — BTF-LIGHTING `DC5V` `WS2812B` Pebble/Seed Pixel Flexible Wire (`B0CCS11V7H`)"
+
+  - id: led-topper-ring-ws2812
+    qty: 1
+    sku: B09YTMNGTD
+    name: "Sparkleiot 16-Bit WS2812 RGB LED Ring with `SM2.54-3P` Wire (Apple Topper)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B09YTMNGTD
+    alt_skus: []
+    spec: "`Ø 45.0 mm` OD × `Ø 32.0 mm` ID addressable 16-LED 5V RGB ring (`4.8W` max white) with pre-wired 3-pin `JST-SM` (`SM2.54-3P`) plug"
+    where_used: "Seats flat in the **`Ø 46.2 × 2.5 mm` top rim recess** of [`trunk_top`](../cad/trunk.py) (`Z = 447.5 mm`) inside [`golden_apple_topper`](../cad/topper_planets.py); powered from `5V` Buck, Data from **`GPIO32` (Yellow)**"
+    category: lighting-wired
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: Amazon — Sparkleiot 16-Bit WS2812 RGB LED Ring (`B09YTMNGTD`)"
+
+  - id: jst-sm-3pin-ext-1m
+    qty: 1
+    sku: B0CT827QQC
+    name: "3-Pin `JST-SM` (`SM2.54-3P`) Male-to-Female Extension Cable (`1 m`)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B0CT827QQC
+    alt_skus: []
+    spec: "3-pin `JST-SM` plug-and-play extension wire (`5V`, `GND`, `DATA`)"
+    where_used: "Plugs into the Sparkleiot Topper Ring (`zero soldering`), threads down the **`10 × 8 mm` rear `-X` trunk conduit**, and connects to `WAGO-3/4` (`5V`/`GND`) + **`GPIO32` (Yellow)**"
+    category: wiring
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: Amazon — BTF-LIGHTING 3-Pin JST-SM Extension Cable (`B0CT827QQC`)"
+
+  - id: led-marble-y-shape
+    qty: 6
+    sku: KC013
+    name: "Bambu Lab Y-Shape LED Light with Magnetic Control Switch — Warm White (6 Rolling Apple Marbles)"
+    vendor: Bambu Lab Store
+    url: https://us.store.bambulab.com/products/y-shape-led-light-with-magnetic-control-switch
+    alt_skus:
+      - KC012
+    spec: "`Ø 18.0 × 6.5 mm` 3-LED Y-board (`CR1632` battery + `Ø 8 × 2 mm` magnet included)"
+    where_used: "**6×** drop into the **`Ø 18.70 × 7.30 mm`** equatorial chamber of the 6 Quarter-Turn Bayonet Twist-Lock Marbles (`Apple_Hemisphere_A` + `B`)"
+    category: lighting-wireless
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: Bambu Lab Store — Y-Shape LED Light with Magnetic Control Switch (`KC013`)"
+
+  - id: led-planet-single
+    qty: 8
+    sku: KA006
+    name: "Bambu Lab Single LED Magnetic Control Switch Light (8 Solar System Planets)"
+    vendor: Bambu Lab Store
+    url: https://us.store.bambulab.com/products/single-led-magnetic-control-switch-light
+    alt_skus: []
+    spec: "`Ø 7.5 × 6.0 mm` single-LED (`CR927` battery + `Ø 8 × 2 mm` magnet included)"
+    where_used: "**8×** press-fit into the `Ø 8.0 × 10.0 mm` bottom bores of the 8 Solar System planets (`planet_mercury..neptune`); **1×** magnet presses into [`Magic_LED_Wand`](../cad/topper_planets.py)"
+    category: lighting-wireless
+    optional: false
+    notes: "status: **Existing *(Retained)*** | link_text: Bambu Lab Store — Single LED Magnetic Control Switch Light (`KA006`)"
+
+  - id: m5stack-ina226-sensor
+    qty: 1
+    sku: U190
+    name: "M5Stack Unit `INA226-10A` High-Precision Current/Voltage/Power Sensor"
+    vendor: M5Stack Store
+    url: https://shop.m5stack.com/products/ina226-voltage-and-current-measurement-unit-10a
+    alt_skus: []
+    spec: "`0–30V DC`, `±10A`, `HT3.96-4P` screw terminals + Grove `HY2.0-4P` I2C (`0x41`)"
+    where_used: "Clamps inline with the `5V` LED buck output (`GPIO21`/`GPIO25` I2C header) for real hardware current/power measurement in ESPHome"
+    category: telemetry
+    optional: true
+    notes: "qty_display: *Optional* | status: *Optional Telemetry* | link_text: M5Stack Store — Unit `INA226-10A` (`U190`)"
+
+  - id: coin-cell-cr1632
+    qty: 1
+    sku: B07V5CW1MG
+    name: "LiCB `CR1632` 3V Lithium Coin Cell Batteries (5-Pack)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B07V5CW1MG
+    alt_skus:
+      - CR1632
+    spec: "`CR1632` (`Ø 16.0 × 3.2 mm`, `3V`) for `KC013` Y-Shape Marble LEDs"
+    where_used: "Spare coin-cell batteries for the 6 wireless glowing marbles (`KC013`)"
+    category: battery
+    optional: true
+    notes: "qty_display: *Optional* | status: *Spare Marble Cells* | link_text: Amazon — LiCB `CR1632` 3V Lithium Coin Cells, 5-Pack (`B07V5CW1MG`)"
+
+  - id: coin-cell-cr927
+    qty: 1
+    sku: B0CMCFGXSL
+    name: "Tenergy `CR927` 3V Lithium Button Cell Batteries"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B0CMCFGXSL
+    alt_skus:
+      - CR927
+    spec: "`CR927` (`Ø 9.5 × 2.7 mm`, `3V`) for `KA006` Planet LEDs"
+    where_used: "Spare coin-cell batteries for the 8 wireless Solar System planets (`KA006`)"
+    category: battery
+    optional: true
+    notes: "qty_display: *Optional* | status: *Spare Planet Cells* | link_text: Amazon — Tenergy `CR927` 3V Lithium Button Cells (`B0CMCFGXSL`)"
+
+fasteners:
+  - id: screw-m25x6-bhcs
+    qty: 2
+    sku: B0BYF4X65F
+    name: "MonsterBolts `M2.5 × 6 mm` Button Head Cap Machine Screws (BHCS)"
+    vendor: Amazon
+    url: https://www.amazon.com/dp/B0BYF4X65F
+    alt_skus: []
+    spec: "`M2.5 × 6 mm` stainless steel button head machine screws"
+    where_used: "Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base`"
+    category: fastener
+    optional: false
+    notes: "link_text: Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)"
+
+filament:
+  - toolhead: "**Core Tree `T1`** *(Plates 1–4, 16, 17)*"
+    color_name: "Matte Dark Brown (`11801`)"
+    hex: "#4A2F1D"
+    material: PLA
+    est_weight_g: 1150
+    spools: 2
+    vendor_url: https://us.store.bambulab.com/products/pla-matte
+
+  - toolhead: "**Core Tree `T2`** *(Plates 5–13, 16, 18)*"
+    color_name: "Translucent Teal (`32501`)"
+    hex: "#00A86B"
+    material: PETG
+    est_weight_g: 1080
+    spools: 2
+    vendor_url: https://us.store.bambulab.com/products/petg-translucent
+
+  - toolhead: "**Core Tree `T3`** *(Plates 14, 16, 17, 18)*"
+    color_name: "Silk+ Gold (`13405`)"
+    hex: "#D4AF37"
+    material: PLA
+    est_weight_g: 125
+    spools: 1
+    vendor_url: https://us.store.bambulab.com/products/pla-silk-upgrade
+
+  - toolhead: "**Core Tree `T4`** *(Plates 15, 16, 17)*"
+    color_name: "Basic Red (`10200`)"
+    hex: "#C41E3A"
+    material: PLA
+    est_weight_g: 155
+    spools: 1
+    vendor_url: https://us.store.bambulab.com/products/pla-basic-filament
+
+  - toolhead: "**Planet Accent** *(Plate 17 `T2` & Plate 18 `T3`)*"
+    color_name: "Matte Ivory White (`11100`)"
+    hex: "#F5EFE6"
+    material: PLA
+    est_weight_g: 35
+    spools: 1
+    vendor_url: https://us.store.bambulab.com/products/pla-matte
+
+  - toolhead: "**Ocean/Ice Planet Accent** *(Plate 18 `T1`)*"
+    color_name: "Matte Marine Blue (`11600`)"
+    hex: "#1E5AA8"
+    material: PLA
+    est_weight_g: 30
+    spools: 1
+    vendor_url: https://us.store.bambulab.com/products/pla-matte
