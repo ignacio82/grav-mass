@@ -1,0 +1,904 @@
+# ==============================================================================
+# Grav-Mass Day "Falling Apple Cascade" Marble Run Tree — ESPHome Configuration
+# Hardware: M5Stack Atomic H-Bridge Driver Base (A092) + ATOM Lite ESP32 (C008)
+#   - External PSU : Single Regulated 12.0V DC Power Adapter (MEAN WELL GST60A12-P1J 5A/60W or GST36A12-P1J 3A/36W)
+#                    entering Rear (-X) Panel-Mount 5.5 × 2.1 mm DC Barrel Jack (J1)
+#   - Branch 1     : 12V -> Fuse F1 (2A) -> A092 VIN (9–24V rated) -> Internal MP1584EN 5V Buck -> C008 ATOM Lite
+#   - Branch 2     : 12V -> Fuse F2 (3A) -> Dedicated 12V->5.0V 5A (25W) Screw-Terminal Buck Converter (DFR0205)
+#                    -> Powers BOTH Zone 1 Topper Ring & Zone 2 Track Pebble Wire (Isolated from C008 5V rail!)
+#   - Branch 3     : 12V 150 RPM N20 Gear Motor on A092 M1/M2 (TI DRV8876: IN1=GPIO19, IN2=GPIO23, nFAULT=GPIO22)
+#                    (or Option A: 6V LA002 Motor via Fuse F3 1A + 12V->6V Buck + External H-Bridge on GPIO19/23)
+#   - Track LEDs   : BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Flexible Wire (B0CCS11V7H, 50 LEDs) on Grove GPIO26 (White)
+#   - Topper LED   : Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD, Ø45mm, 16 LEDs) on Grove GPIO32 (Yellow)
+#   - Physical Btn : Built-in Atom Button (GPIO39) accessible through Battery_Cover / Base_Bottom_Cover Ø5mm port
+#   - Status LED   : Built-in Atom SK6812 RGB LED (GPIO27) visible through center port
+#   - Optional I2C : M5Stack Unit INA226-10A (SKU: U190, I2C 0x41 on Header GPIO21=SDA / GPIO25=SCL) for hardware current telemetry
+#
+# ELECTRICAL & SOFTWARE PROTECTION ARCHITECTURE (See POWER_ARCHITECTURE.md):
+#   1. Hardware Protection (Primary):
+#      - Main 5A Fuse (F0) + Branch Fuses F1 (2A Controller/Motor) and F2 (3A 5V LED Buck Input)
+#      - TI DRV8876 Hardware Overcurrent/Stall/Thermal Protection (`nFAULT` on GPIO22)
+#      - Dedicated 5.0V 5A Synchronous Buck Converter with 1000 µF Bulk Decoupling Capacitor
+#   2. 12V Bus Voltage Monitoring (`GPIO33` 1:10 ADC Divider):
+#      - Continuously monitors incoming 12.0V rail (`10.8V–13.5V` nominal window); flags undervoltage
+#        (`4.0V..10.8V`, e.g., if a 5V/9V brick is mistakenly connected) or overvoltage (`> 13.5V`).
+#   3. Secondary Software 5V LED Current Governor (`interval: 250ms`):
+#      - Secondary safeguard (not a substitute for hardware fuses) that bounds 5V LED buck current to
+#        `g_max_current_ma` (default 2000 mA nominal, up to 3000 mA max) with NO artificial minimum
+#        brightness floor that could violate the configured current limit.
+# ==============================================================================
+
+substitutions:
+  name: grav-mass-tree
+  friendly_name: "Grav-Mass Apple Marble Tree"
+  # 50 addressable WS2812B LEDs for the 16.4ft BTF-LIGHTING Pebble/Seed Pixel Wire (B0CCS11V7H)
+  strip_num_leds: "50"
+  # 16 addressable WS2812B LEDs for the Ø45mm Sparkleiot 16-Bit Topper Ring (B09YTMNGTD)
+  topper_num_leds: "16"
+  # Default 5V LED Buck software current ceiling (mA) on the dedicated 5V 5A (25W) buck converter rail
+  default_max_current_ma: "2000"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: "Motorized Isaac Newton Falling Apple & Solar System Marble Run Tree (12V Single-Cable Architecture)"
+
+esp32:
+  board: m5stack-atom
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Grav-Mass-Tree Fallback"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# ------------------------------------------------------------------------------
+# Optional I2C Bus on A092 Bottom Header (GPIO21=SDA, GPIO25=SCL) for
+# Plug-and-Play M5Stack Unit INA226-10A (SKU: U190, Address 0x41) Hardware Telemetry
+# ------------------------------------------------------------------------------
+i2c:
+  sda: GPIO21
+  scl: GPIO25
+  scan: true
+  id: bus_a092_header
+
+# ------------------------------------------------------------------------------
+# Global State Variables for Scene Cycling & Secondary 5V Buck Current Budgeting
+# ------------------------------------------------------------------------------
+globals:
+  - id: g_scene_index
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: g_max_current_ma
+    type: float
+    restore_value: yes
+    initial_value: "${default_max_current_ma}"
+  - id: g_estimated_current_ma
+    type: float
+    restore_value: no
+    initial_value: "36.0"
+
+# ------------------------------------------------------------------------------
+# 1. DRV8876 H-Bridge PWM Outputs (Auger Lift Motor LA002 on M1 / M2 Terminals)
+# ------------------------------------------------------------------------------
+output:
+  - platform: ledc
+    id: auger_in1_pwm
+    pin: GPIO19
+    frequency: 19531Hz
+  - platform: ledc
+    id: auger_in2_pwm
+    pin: GPIO23
+    frequency: 19531Hz
+
+fan:
+  - platform: hbridge
+    id: auger_motor
+    name: "Auger Lift Motor"
+    icon: "mdi:screw-machine-flat-top"
+    pin_a: auger_in1_pwm
+    pin_b: auger_in2_pwm
+    decay_mode: SLOW
+    restore_mode: ALWAYS_OFF
+
+# ------------------------------------------------------------------------------
+# 2. Addressable RGB Under-Track Pebble Wire (BTF-LIGHTING B0CCS11V7H on Grove GPIO26),
+#    Topper 16-LED Ring (Sparkleiot B09YTMNGTD on Grove GPIO32) & Status LED (GPIO27)
+# ------------------------------------------------------------------------------
+light:
+  # ============================================================================
+  # ZONE 2: Helical Spiral Track (50× WS2812B Pebble LEDs on Grove GPIO26 White)
+  # ============================================================================
+  - platform: esp32_rmt_led_strip
+    id: track_cob_strip
+    name: "Helical Track RGBIC COB Strip"
+    icon: "mdi:led-strip-variant"
+    pin: GPIO26
+    num_leds: ${strip_num_leds}
+    chipset: WS2812
+    rgb_order: GRB
+    max_refresh_rate: 33ms
+    default_transition_length: 800ms
+    gamma_correct: 2.2
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      # 1. Newton's Prism Spectrum (Power-Safe Rainbow Cascade)
+      - addressable_rainbow:
+          name: "Newton Rainbow Cascade"
+          speed: 10
+          width: 24
+
+      # 2. Classic Falling Apple Color Wipe (Crimson Apple + Emerald Track)
+      - addressable_color_wipe:
+          name: "Falling Apple Cascade"
+          colors:
+            - red: 85%
+              green: 8%
+              blue: 12%
+              num_leds: 6
+            - red: 0%
+              green: 55%
+              blue: 32%
+              num_leds: 14
+          add_led_interval: 85ms
+          reverse: false
+
+      # 3. Physics-Simulated Accelerating Apple Gravity Comet (s = 1/2 g t^2!)
+      - addressable_lambda:
+          name: "Gravity Accelerating Apple Comet"
+          update_interval: 30ms
+          lambda: |-
+            static float t_phase = 0.0f;
+            t_phase += 0.022f;
+            if (t_phase > 1.0f) t_phase -= 1.0f;
+            // Quadratic Galilean acceleration: pos = N * t^2 (from top LED 49 down to bottom LED 0)
+            const int n = it.size();
+            float head = (float)(n - 1) * (1.0f - (t_phase * t_phase));
+            for (int i = 0; i < n; i++) {
+              float dist = (float)i - head; // positive behind the falling apple
+              if (dist >= -1.2f && dist <= 7.5f) {
+                float intensity = (dist < 0.0f) ? (1.0f + dist / 1.2f) : (1.0f - dist / 7.5f);
+                intensity = intensity * intensity;
+                // Bright crimson-gold apple core with warm amber tail
+                uint8_t r = (uint8_t)(210.0f * intensity);
+                uint8_t g = (uint8_t)(65.0f * intensity * (dist > 1.5f ? 1.2f : 0.4f));
+                uint8_t b = (uint8_t)(18.0f * intensity);
+                it[i] = Color(r, g, b);
+              } else {
+                // Subtle emerald canopy background (low power: ~2 mA total)
+                it[i] = Color(0, 18, 10);
+              }
+            }
+
+      # 4. Solar System 8-Planet Orbit (Mercury -> Neptune Colors Drifting Along the Helix)
+      - addressable_lambda:
+          name: "Solar System 8-Planet Orbit"
+          update_interval: 40ms
+          lambda: |-
+            static float offset = 0.0f;
+            offset += 0.14f;
+            // 8 Planetary RGB colors (power-balanced):
+            // Mercury(Gold), Venus(Amber), Earth(Blue), Mars(Red), Jupiter(Orange), Saturn(Yellow), Uranus(Cyan), Neptune(Indigo)
+            const uint8_t p_rgb[8][3] = {
+              {180, 140,  40}, // 1. Mercury
+              {190, 110,  20}, // 2. Venus
+              { 20, 120, 200}, // 3. Earth
+              {200,  35,  20}, // 4. Mars
+              {195,  85,  25}, // 5. Jupiter
+              {185, 155,  35}, // 6. Saturn
+              { 25, 165, 165}, // 7. Uranus
+              { 30,  60, 200}  // 8. Neptune
+            };
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              // Deep space faint starlight base
+              uint8_t r = 2, g = 4, b = 12;
+              for (int p = 0; p < 8; p++) {
+                float p_pos = fmodf(p * (n / 8.0f) + offset, (float)n);
+                float d = fabsf((float)i - p_pos);
+                if (d > n * 0.5f) d = (float)n - d;
+                if (d < 2.2f) {
+                  float w = (1.0f - d / 2.2f);
+                  w = w * w;
+                  r = (uint8_t)fminf(220.0f, r + p_rgb[p][0] * w);
+                  g = (uint8_t)fminf(220.0f, g + p_rgb[p][1] * w);
+                  b = (uint8_t)fminf(220.0f, b + p_rgb[p][2] * w);
+                }
+              }
+              it[i] = Color(r, g, b);
+            }
+
+      # 5. Grav-Mass Holiday Spiral (Rotating Crimson, Gold & Emerald Barber-Pole)
+      - addressable_lambda:
+          name: "Grav-Mass Candy Cane Spiral"
+          update_interval: 45ms
+          lambda: |-
+            static float step = 0.0f;
+            step += 0.18f;
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              int phase = ((int)floorf((float)i + step)) % 12;
+              if (phase < 0) phase += 12;
+              if (phase < 4) {
+                // Crimson Apple Red
+                it[i] = Color(150, 12, 22);
+              } else if (phase < 6) {
+                // Newton Silk Gold
+                it[i] = Color(135, 95, 12);
+              } else if (phase < 10) {
+                // Emerald Pine Green
+                it[i] = Color(8, 130, 65);
+              } else {
+                // Dark spacer for crisp stripe contrast & low power draw
+                it[i] = Color(6, 12, 8);
+              }
+            }
+
+      # 6. Cozy Firelight Hearth (Organic Warm Amber & Crimson Candle Flicker)
+      - addressable_lambda:
+          name: "Warm Firelight Hearth"
+          update_interval: 55ms
+          lambda: |-
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              uint8_t flicker = random_uint32() % 55;
+              uint8_t r = 135 - (flicker / 2);
+              uint8_t g = (r > 55) ? ((r - 55) / 2) : 10;
+              uint8_t b = 4;
+              it[i] = Color(r, g, b);
+            }
+
+      # 7. Aurora Borealis (Dreamy Northern Lights Waves)
+      - addressable_lambda:
+          name: "Aurora Borealis Wave"
+          update_interval: 45ms
+          lambda: |-
+            static float t = 0.0f;
+            t += 0.05f;
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              float w1 = 0.5f + 0.5f * sinf((float)i * 0.22f - t);
+              float w2 = 0.5f + 0.5f * cosf((float)i * 0.15f + t * 0.7f);
+              uint8_t r = (uint8_t)(45.0f * (1.0f - w1) * w2);
+              uint8_t g = (uint8_t)(125.0f * w1);
+              uint8_t b = (uint8_t)(95.0f * w2);
+              it[i] = Color(r, g, b);
+            }
+
+      # 8. Galileo Timing Gate Beacons (Highlights G0..G5 Gates + Timer Pulse)
+      - addressable_lambda:
+          name: "Galileo Timing Gate Beacons"
+          update_interval: 35ms
+          lambda: |-
+            static int pulse_idx = 49;
+            pulse_idx = (pulse_idx <= 0) ? 49 : (pulse_idx - 1);
+            const int gates[6] = {0, 9, 19, 29, 39, 49}; // G5(bottom) .. G0(top)
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              it[i] = Color(3, 8, 22); // Midnight lab background
+            }
+            for (int g = 0; g < 6; g++) {
+              int idx = gates[g];
+              if (idx >= 0 && idx < n) {
+                it[idx] = Color(180, 135, 15); // Gold Gate Beacon
+              }
+            }
+            if (pulse_idx >= 0 && pulse_idx < n) {
+              it[pulse_idx] = Color(200, 30, 45); // Rolling Crimson Marble Pulse
+            }
+
+      # 9. Emerald Orbit Scanner
+      - addressable_scan:
+          name: "Emerald Orbit Pulse"
+          move_interval: 60ms
+          scan_width: 6
+
+      # 10. Solar System Starlight Twinkle
+      - addressable_twinkle:
+          name: "Solar System Starlight"
+          twinkle_probability: 8%
+          progress_interval: 32ms
+
+      # 11. Grav-Mass Fireworks
+      - addressable_fireworks:
+          name: "Grav-Mass Fireworks"
+          update_interval: 32ms
+          spark_probability: 12%
+          use_random_color: true
+          fade_out_rate: 120
+
+  # ============================================================================
+  # ZONE 1: Golden Apple Topper Ring (16× WS2812B LEDs on Grove GPIO32 Yellow)
+  # ============================================================================
+  - platform: esp32_rmt_led_strip
+    id: apple_topper_ring
+    name: "Golden Apple Topper Ring"
+    icon: "mdi:food-apple"
+    pin: GPIO32
+    num_leds: ${topper_num_leds}
+    chipset: WS2812
+    rgb_order: GRB
+    max_refresh_rate: 33ms
+    default_transition_length: 800ms
+    gamma_correct: 2.2
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      # 1. Crimson & Gold Heartbeat Pulse
+      - pulse:
+          name: "Crimson & Gold Heartbeat"
+          transition_length: 1.5s
+          update_interval: 1.5s
+          min_brightness: 30%
+          max_brightness: 65%
+
+      # 2. Spinning Golden Sun Halo (Twin Opposite Solar Flares Orbiting the Crown)
+      - addressable_lambda:
+          name: "Spinning Golden Sun Halo"
+          update_interval: 40ms
+          lambda: |-
+            static float angle = 0.0f;
+            angle += 0.16f;
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              float rad = ((float)i / (float)n) * 6.2831853f + angle;
+              float wave = 0.5f + 0.5f * cosf(rad * 2.0f); // 2 opposite flares
+              wave = wave * wave;
+              uint8_t r = (uint8_t)(45.0f + 135.0f * wave);
+              uint8_t g = (uint8_t)(8.0f + 85.0f * wave * wave);
+              uint8_t b = (uint8_t)(4.0f + 12.0f * wave);
+              it[i] = Color(r, g, b);
+            }
+
+      # 3. Newton Prism Halo Spin
+      - addressable_rainbow:
+          name: "Newton Halo Spin"
+          speed: 8
+          width: 16
+
+      # 4. Flickering Apple Lantern
+      - addressable_lambda:
+          name: "Flickering Apple Lantern"
+          update_interval: 60ms
+          lambda: |-
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              uint8_t flk = random_uint32() % 45;
+              uint8_t r = 145 - flk;
+              uint8_t g = 28 - (flk / 3);
+              it[i] = Color(r, g, 6);
+            }
+
+      # 5. Aurora Crown
+      - addressable_lambda:
+          name: "Aurora Crown"
+          update_interval: 45ms
+          lambda: |-
+            static float a = 0.0f;
+            a += 0.07f;
+            const int n = it.size();
+            for (int i = 0; i < n; i++) {
+              float w = 0.5f + 0.5f * sinf((float)i * 0.39f + a);
+              it[i] = Color((uint8_t)(40.0f * (1.0f - w)), (uint8_t)(120.0f * w), (uint8_t)(85.0f * (1.0f - 0.5f * w)));
+            }
+
+      # 6. Starlight Crown Twinkle
+      - addressable_twinkle:
+          name: "Starlight Crown"
+          twinkle_probability: 15%
+          progress_interval: 40ms
+
+  # ============================================================================
+  # Built-in M5Stack ATOM Lite Status RGB LED (SK6812 on GPIO27)
+  # ============================================================================
+  - platform: esp32_rmt_led_strip
+    id: atom_status_led
+    name: "Base Status LED"
+    pin: GPIO27
+    num_leds: 1
+    chipset: SK6812
+    rgb_order: GRB
+    internal: false
+
+# ------------------------------------------------------------------------------
+# 3. Secondary Software 5V LED Buck Current Governor & Limit Selector
+#    Secondary safeguard on the dedicated 12V -> 5.0V 5A (25W) LED buck rail
+#    (Primary protection is hardware fuse F2 = 3A @ 12V).
+# ------------------------------------------------------------------------------
+select:
+  - platform: template
+    id: power_supply_mode
+    name: "5V LED Buck Current Limit Profile"
+    icon: "mdi:current-dc"
+    optimistic: true
+    restore_value: true
+    options:
+      - "Nominal 5V Buck Mode (2000 mA LED Cap — Default)"
+      - "Eco / Cool Continuous Mode (1200 mA LED Cap)"
+      - "Full Unthrottled 5V 5A Buck Mode (3000 mA LED Cap)"
+    initial_option: "Nominal 5V Buck Mode (2000 mA LED Cap — Default)"
+    on_value:
+      then:
+        - lambda: |-
+            if (x == "Eco / Cool Continuous Mode (1200 mA LED Cap)") {
+              id(g_max_current_ma) = 1200.0f;
+            } else if (x == "Full Unthrottled 5V 5A Buck Mode (3000 mA LED Cap)") {
+              id(g_max_current_ma) = 3000.0f;
+            } else {
+              id(g_max_current_ma) = 2000.0f;
+            }
+
+  # Master 1-Tap Scene Selector in Home Assistant
+  - platform: template
+    id: tree_lighting_scene
+    name: "Tree Master Scene"
+    icon: "mdi:pine-tree-variant"
+    optimistic: true
+    options:
+      - "Off"
+      - "Falling Apple Cascade (Motor 65% + Gravity Comet)"
+      - "Solar System Grand Tour (Motor 70% + 8-Planet Orbit + Sun Halo)"
+      - "Grav-Mass Holiday Spiral (Motor 65% + Candy Cane + Heartbeat)"
+      - "Newton Opticks Prism (Motor 80% + Rainbow Cascade + Prism Halo)"
+      - "Cozy Firelight Evening (Motor 45% Quiet + Hearth Flicker)"
+      - "Aurora Borealis Nightlight (Motor Off + Northern Lights)"
+      - "Galileo Gravity Lab Mode (Motor 60% + Timing Gate Beacons)"
+    initial_option: "Off"
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return x == "Off";'
+            then:
+              - fan.turn_off: auger_motor
+              - light.turn_off: track_cob_strip
+              - light.turn_off: apple_topper_ring
+              - light.turn_off: atom_status_led
+        - if:
+            condition:
+              lambda: 'return x == "Falling Apple Cascade (Motor 65% + Gravity Comet)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 65
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 55%
+                  effect: "Gravity Accelerating Apple Comet"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 60%
+                  red: 100%
+                  green: 25%
+                  blue: 8%
+                  effect: "Crimson & Gold Heartbeat"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 35%
+                  red: 100%
+                  green: 15%
+                  blue: 20%
+        - if:
+            condition:
+              lambda: 'return x == "Solar System Grand Tour (Motor 70% + 8-Planet Orbit + Sun Halo)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 70
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 58%
+                  effect: "Solar System 8-Planet Orbit"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 60%
+                  effect: "Spinning Golden Sun Halo"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 35%
+                  red: 15%
+                  green: 65%
+                  blue: 100%
+        - if:
+            condition:
+              lambda: 'return x == "Grav-Mass Holiday Spiral (Motor 65% + Candy Cane + Heartbeat)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 65
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 55%
+                  effect: "Grav-Mass Candy Cane Spiral"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 58%
+                  red: 100%
+                  green: 20%
+                  blue: 10%
+                  effect: "Crimson & Gold Heartbeat"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 35%
+                  red: 0%
+                  green: 85%
+                  blue: 45%
+        - if:
+            condition:
+              lambda: 'return x == "Newton Opticks Prism (Motor 80% + Rainbow Cascade + Prism Halo)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 80
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 52%
+                  effect: "Newton Rainbow Cascade"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 55%
+                  effect: "Newton Halo Spin"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 35%
+                  red: 85%
+                  green: 65%
+                  blue: 10%
+        - if:
+            condition:
+              lambda: 'return x == "Cozy Firelight Evening (Motor 45% Quiet + Hearth Flicker)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 45
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 50%
+                  effect: "Warm Firelight Hearth"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 55%
+                  effect: "Flickering Apple Lantern"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 30%
+                  red: 100%
+                  green: 45%
+                  blue: 5%
+        - if:
+            condition:
+              lambda: 'return x == "Aurora Borealis Nightlight (Motor Off + Northern Lights)";'
+            then:
+              - fan.turn_off: auger_motor
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 48%
+                  effect: "Aurora Borealis Wave"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 50%
+                  effect: "Aurora Crown"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 25%
+                  red: 0%
+                  green: 90%
+                  blue: 70%
+        - if:
+            condition:
+              lambda: 'return x == "Galileo Gravity Lab Mode (Motor 60% + Timing Gate Beacons)";'
+            then:
+              - fan.turn_on:
+                  id: auger_motor
+                  speed: 60
+                  direction: FORWARD
+              - delay: 350ms
+              - light.turn_on:
+                  id: track_cob_strip
+                  brightness: 60%
+                  effect: "Galileo Timing Gate Beacons"
+              - light.turn_on:
+                  id: apple_topper_ring
+                  brightness: 55%
+                  effect: "Spinning Golden Sun Halo"
+              - light.turn_on:
+                  id: atom_status_led
+                  brightness: 35%
+                  red: 100%
+                  green: 80%
+                  blue: 10%
+
+# Real-time 250ms Secondary Software 5V LED Buck Current Governor
+# (Models worst-case 36 mA/pebble on Zone 2 Track + 60 mA/pixel on Zone 1 Topper Ring,
+#  with NO minimum-brightness clamp that could violate `g_max_current_ma`!)
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          // Quiescent standby draw of 66x WS2812B ICs on the dedicated 5V LED buck rail (~0.55 mA/IC = 36.3 mA)
+          // (Note: C008 ESP32 is powered separately by A092's internal 12V->5V MP1584EN regulator on Branch 1)
+          const float quiescent_led_ma = 36.3f;
+          float track_ma = 0.0f;
+          float topper_ma = 0.0f;
+
+          if (id(track_cob_strip).current_values.is_on()) {
+            float br = id(track_cob_strip).current_values.get_brightness();
+            float r = id(track_cob_strip).current_values.get_red();
+            float g = id(track_cob_strip).current_values.get_green();
+            float b = id(track_cob_strip).current_values.get_blue();
+            std::string eff = id(track_cob_strip).get_effect_name();
+            // Solid color uses actual (r + g + b) in [0..3]; animated effects average ~1.15 channels active
+            float ch_sum = (eff == "None") ? (r + g + b) : 1.15f;
+            // 50 Pebble LEDs (B0CCS11V7H) @ 12.0 mA per channel (36.0 mA/pixel max @ 100% solid white = 1800 mA)
+            track_ma = 50.0f * 12.0f * ch_sum * br;
+          }
+
+          if (id(apple_topper_ring).current_values.is_on()) {
+            float br = id(apple_topper_ring).current_values.get_brightness();
+            float r = id(apple_topper_ring).current_values.get_red();
+            float g = id(apple_topper_ring).current_values.get_green();
+            float b = id(apple_topper_ring).current_values.get_blue();
+            std::string eff = id(apple_topper_ring).get_effect_name();
+            float ch_sum = (eff == "None") ? (r + g + b) : 1.15f;
+            // 16 SMD5050 WS2812B LEDs (B09YTMNGTD) @ 20.0 mA per channel (60.0 mA/pixel max @ 100% solid white = 960 mA)
+            topper_ma = 16.0f * 20.0f * ch_sum * br;
+          }
+
+          float total_led_ma = track_ma + topper_ma;
+          float max_led_budget_ma = id(g_max_current_ma) - quiescent_led_ma;
+          if (max_led_budget_ma < 0.0f) max_led_budget_ma = 0.0f;
+
+          // Proportional brightness scaling with NO artificial 10%/12% minimum clamp
+          // so software-governed LED current strictly never exceeds `g_max_current_ma`:
+          if (total_led_ma > max_led_budget_ma && total_led_ma > 0.1f) {
+            float scale = (max_led_budget_ma * 0.95f) / total_led_ma;
+            if (scale < 0.0f) scale = 0.0f;
+            if (id(track_cob_strip).current_values.is_on()) {
+              float cur_br = id(track_cob_strip).current_values.get_brightness();
+              float new_br = cur_br * scale;
+              if (new_br < 0.01f) {
+                id(track_cob_strip).turn_off().perform();
+              } else {
+                auto call = id(track_cob_strip).turn_on();
+                call.set_brightness(new_br);
+                call.set_transition_length(150);
+                call.perform();
+              }
+            }
+            if (id(apple_topper_ring).current_values.is_on()) {
+              float cur_br = id(apple_topper_ring).current_values.get_brightness();
+              float new_br = cur_br * scale;
+              if (new_br < 0.01f) {
+                id(apple_topper_ring).turn_off().perform();
+              } else {
+                auto call = id(apple_topper_ring).turn_on();
+                call.set_brightness(new_br);
+                call.set_transition_length(150);
+                call.perform();
+              }
+            }
+            total_led_ma *= scale;
+          }
+
+          id(g_estimated_current_ma) = quiescent_led_ma + total_led_ma;
+
+# ------------------------------------------------------------------------------
+# 4. Convenience Preset & Anti-Jam Buttons in Home Assistant
+# ------------------------------------------------------------------------------
+button:
+  - platform: template
+    name: "Quiet Evening Mode (50% Auger + Warm Glow)"
+    icon: "mdi:weather-night"
+    on_press:
+      - select.set:
+          id: tree_lighting_scene
+          option: "Cozy Firelight Evening (Motor 45% Quiet + Hearth Flicker)"
+
+  - platform: template
+    name: "Full Cascade Mode (100% Auger + Rainbow)"
+    icon: "mdi:rocket-launch"
+    on_press:
+      - fan.turn_on:
+          id: auger_motor
+          speed: 100
+          direction: FORWARD
+      - delay: 350ms
+      - light.turn_on:
+          id: track_cob_strip
+          brightness: 55%
+          effect: "Newton Rainbow Cascade"
+      - light.turn_on:
+          id: apple_topper_ring
+          brightness: 58%
+          effect: "Newton Halo Spin"
+
+  - platform: template
+    name: "Unjam Auger (Reverse 1.5s & Resume)"
+    icon: "mdi:Cached"
+    on_press:
+      - fan.turn_on:
+          id: auger_motor
+          speed: 75
+          direction: REVERSE
+      - delay: 1500ms
+      - fan.turn_on:
+          id: auger_motor
+          speed: 75
+          direction: FORWARD
+
+# ------------------------------------------------------------------------------
+# 5. Multi-Function Physical Base Button (GPIO39) & DRV8876 Fault Protection
+#    - Single Short Click : Cycle through the 6 signature Lighting & Motor Scenes
+#    - Double Click       : Toggle Auger Motor ON / OFF (keep lights on as lamp!)
+#    - Long Press (1.2s+) : Turn Entire Tree OFF
+# ------------------------------------------------------------------------------
+binary_sensor:
+  - platform: gpio
+    id: atom_button
+    name: "Tree Base Button"
+    pin:
+      number: GPIO39
+      inverted: true
+    on_multi_click:
+      # Long Press (>= 1.2s): Turn Everything OFF
+      - timing:
+          - ON for at least 1.2s
+        then:
+          - select.set:
+              id: tree_lighting_scene
+              option: "Off"
+      # Double Click: Toggle Auger Motor Only (Lamp-Only vs. Marble Run Mode)
+      - timing:
+          - ON for at most 0.5s
+          - OFF for at most 0.4s
+          - ON for at most 0.5s
+          - OFF for at least 0.2s
+        then:
+          - if:
+              condition:
+                fan.is_on: auger_motor
+              then:
+                - fan.turn_off: auger_motor
+              else:
+                - fan.turn_on:
+                    id: auger_motor
+                    speed: 65
+                    direction: FORWARD
+      # Single Short Click: Cycle Next Master Scene
+      - timing:
+          - ON for at most 0.6s
+          - OFF for at least 0.45s
+        then:
+          - lambda: |-
+              const char* scenes[] = {
+                "Falling Apple Cascade (Motor 65% + Gravity Comet)",
+                "Solar System Grand Tour (Motor 70% + 8-Planet Orbit + Sun Halo)",
+                "Grav-Mass Holiday Spiral (Motor 65% + Candy Cane + Heartbeat)",
+                "Newton Opticks Prism (Motor 80% + Rainbow Cascade + Prism Halo)",
+                "Cozy Firelight Evening (Motor 45% Quiet + Hearth Flicker)",
+                "Aurora Borealis Nightlight (Motor Off + Northern Lights)",
+                "Galileo Gravity Lab Mode (Motor 60% + Timing Gate Beacons)"
+              };
+              int idx = id(g_scene_index) % 7;
+              id(g_scene_index) = (idx + 1) % 7;
+              auto call = id(tree_lighting_scene).make_call();
+              call.set_option(scenes[idx]);
+              call.perform();
+
+  # DRV8876 Active-Low Hardware Fault Pin (Overcurrent / Stall / Thermal Fault)
+  - platform: gpio
+    id: motor_driver_fault
+    name: "Auger Motor Fault / Stall Alert"
+    device_class: problem
+    pin:
+      number: GPIO22
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    on_press:
+      then:
+        - logger.log:
+            level: WARN
+            format: "DRV8876 fault detected (marble jam or overcurrent) — stopping auger!"
+        - fan.turn_off: auger_motor
+
+  # 12.0V Nominal Supply Rail Health Monitor (Alerts if 12V VIN sags < 10.8V or exceeds > 13.5V)
+  - platform: template
+    id: supply_12v_rail_fault
+    name: "12V Supply Voltage Out of Range Alert"
+    device_class: problem
+    lambda: |-
+      if (!id(vin_12v_bus_voltage).has_state()) return false;
+      float v = id(vin_12v_bus_voltage).state;
+      // Ignore < 1.5V when bench-flashing C008 via USB-C with 12V adapter unplugged
+      if (v < 1.5f) return false;
+      return (v < 10.8f || v > 13.5f);
+
+# ------------------------------------------------------------------------------
+# 6. Live 12V Bus Voltage (GPIO33), Hardware INA226 Telemetry & Software Estimate
+# ------------------------------------------------------------------------------
+sensor:
+  - platform: adc
+    id: vin_12v_bus_voltage
+    pin: GPIO33
+    name: "Motor Bus Voltage (12V VIN)"
+    unit_of_measurement: "V"
+    icon: "mdi:flash-triangle-outline"
+    attenuation: 12db
+    update_interval: 5s
+    filters:
+      - multiply: 10.0  # A092 onboard 1:10 voltage divider (100k / 10k -> 12.0V = 1.20V at GPIO33)
+    on_value_range:
+      - above: 2.0
+        below: 10.8
+        then:
+          - logger.log:
+              level: WARN
+              format: "12V input bus undervoltage detected (< 10.8V) — verify 12V DC adapter rating; reducing LED current cap to 800 mA!"
+          - lambda: 'id(g_max_current_ma) = 800.0f;'
+      - above: 13.5
+        then:
+          - logger.log:
+              level: WARN
+              format: "12V input bus overvoltage detected (> 13.5V) — stopping motor and dimming LEDs to protect hardware!"
+          - fan.turn_off: auger_motor
+
+  # Optional Plug-and-Play Hardware Current/Voltage/Power Sensor:
+  # M5Stack Unit INA226-10A (SKU: U190, Screw-Terminal High-Side Monitor on I2C 0x41)
+  - platform: ina226
+    i2c_id: bus_a092_header
+    address: 0x41
+    shunt_resistance: 0.005 ohm
+    max_current: 10.0 A
+    adc_time: 1100us
+    adc_averaging: 16
+    update_interval: 2s
+    current:
+      name: "Measured 5V LED Buck Current (INA226 Hardware)"
+      icon: "mdi:current-dc"
+    bus_voltage:
+      name: "Measured 5V LED Buck Voltage (INA226 Hardware)"
+      icon: "mdi:sine-wave"
+    power:
+      name: "Measured 5V LED Buck Power (INA226 Hardware)"
+      icon: "mdi:flash"
+
+  # Approximate Software Model Estimate (Clearly labeled as software estimate per engineering guidelines)
+  - platform: template
+    name: "Estimated 5V LED Current (Approximate Software Model)"
+    icon: "mdi:calculator-variant-outline"
+    unit_of_measurement: "mA"
+    accuracy_decimals: 0
+    update_interval: 2s
+    lambda: |-
+      return id(g_estimated_current_ma);
+
+  - platform: wifi_signal
+    name: "Tree Wi-Fi Signal"
+    update_interval: 60s

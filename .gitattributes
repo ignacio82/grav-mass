@@ -1,0 +1,17 @@
+# Normalize text files to LF
+* text=auto eol=lf
+
+# Treat 3D CAD, slicer plates, and WebGL binary mesh buffers as binary
+# (Kept as native Git objects rather than Git LFS so GitHub Pages at
+# newton.martinez.fyi, GitHub 'Download ZIP', and unlimited free clones
+# work natively without hitting GitHub's 1 GB/month LFS bandwidth quota).
+*.stl binary
+*.step binary
+*.stp binary
+*.3mf binary
+*.bin binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary

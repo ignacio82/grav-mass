@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Grav-Mass Day Marble Run Tree — 3D CAD, Simulator &amp; Assembly Studio</title>
+  <link rel="stylesheet" href="styles.css?v=37" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.min.js",
+        "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="loader-card">
+      <div class="loader-spinner"></div>
+      <h2>Loading Grav-Mass Day Marble Run Tree</h2>
+      <p id="loading-status">Unpacking B-Rep CAD meshes &amp; 18 Snapmaker U1 build plates...</p>
+      <div class="progress-bar-track">
+        <div id="loading-progress-bar" class="progress-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-badge">SIMPLIFIED EDITION</span>
+      <div>
+        <h1>Grav-Mass Day Marble Run Tree</h1>
+        <p class="subtitle">Streamlined Closed-Loop Marble Run — Snapmaker U1 4-Toolhead CAD &amp; Assembly Studio</p>
+      </div>
+    </div>
+
+    <nav class="mode-tabs" role="tablist">
+      <button class="mode-tab active" data-mode="simulate">
+        <span class="tab-num">1</span> Live Closed-Loop Physics Simulator
+      </button>
+      <button class="mode-tab" data-mode="assembly">
+        <span class="tab-num">2</span> Step-by-Step Assembly &amp; Exploded View
+      </button>
+      <button class="mode-tab" data-mode="plates">
+        <span class="tab-num">3</span> Snapmaker U1 18-Plate Inspector
+      </button>
+    </nav>
+
+    <div class="quick-actions">
+      <label class="toggle-pill" title="Make Trunk &amp; Topper translucent to see the internal Archimedes auger &amp; direct hex coupler">
+        <input type="checkbox" id="chk-xray" />
+        <span>X-Ray Cutaway</span>
+      </label>
+      <label class="toggle-pill" title="Show internal N20 motor, M5Stack Atomic H-Driver + Atom Lite ESP32 (A092+C008), BTF-LIGHTING B0CCS11V7H WS2812B Pebble Wire &amp; Sparkleiot 16-Bit Apple Topper Ring">
+        <input type="checkbox" id="chk-electronics" checked />
+        <span>Hardware Overlay</span>
+      </label>
+      <label class="toggle-pill" title="Show 3D Track-to-Track Snap-Lock Tenon Markers (Seg 01→14) and Trunk Base/Top Marble Port Callouts">
+        <input type="checkbox" id="chk-track-joints" checked />
+        <span>Track Joints</span>
+      </label>
+      <label class="toggle-pill" title="Follow Marble #1 with the 3D camera">
+        <input type="checkbox" id="chk-follow-cam" />
+        <span>Follow Marble Cam</span>
+      </label>
+      <button id="btn-reset-cam" class="btn-secondary">Reset View</button>
+      <a href="https://github.com/ignacio82/grav-mass" target="_blank" rel="noopener noreferrer" class="btn-github" title="View CAD Python Source, STL/3MF Files, Shopping List &amp; Documentation on GitHub">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        <span>GitHub Repo ↗</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+    <!-- Left Control & Inspection Panel (Bottom Sheet on Mobile) -->
+    <aside class="side-panel" id="side-panel">
+      <button id="btn-mobile-drawer" class="mobile-drawer-bar" type="button" aria-label="Toggle Controls Panel">
+        <span class="drawer-pill-handle"></span>
+        <span id="lbl-mobile-drawer">▼ Minimize Controls (Larger 3D View)</span>
+      </button>
+      <!-- PANEL 1: SIMULATOR MODE -->
+      <section id="panel-simulate" class="mode-panel active">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Closed-Loop Drive &amp; Kinematics</h3>
+            <span class="status-pill online" id="sim-run-badge">RUNNING</span>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>ESPHome Drive (M5Stack A092+C008) &amp; Queue Test</span>
+              <strong id="lbl-power-status" class="text-emerald">ON (Closed-Loop Active)</strong>
+            </div>
+            <button id="btn-power-toggle" class="btn-action full-width active">
+              ⚡ ESPHome Motor: ON — Click to Pause Auger &amp; Test Bottom Queue
+            </button>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Archimedes Auger Speed (N20 Motor)</span>
+              <strong id="lbl-auger-rpm">90 RPM (69.0 mm/s lift)</strong>
+            </div>
+            <input type="range" id="slider-rpm" min="30" max="150" value="90" step="5" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>3D Rigid-Body Physics Surface Preset</span>
+              <strong id="lbl-phys-preset" class="text-emerald">Standard PLA (μ=0.015)</strong>
+            </div>
+            <select id="sel-phys-preset" class="grav-select">
+              <option value="standard" selected>Standard 3D-Printed PLA + Y-Shape LED (μ_r = 0.015, μ_wall = 0.18, κ = 1.48)</option>
+              <option value="fast">Low-Friction Fast Steel-Core Marble (μ_r = 0.008, μ_wall = 0.12, κ = 1.42)</option>
+              <option value="rough">Rough Layer Lines / High-Friction Stress-Test (μ_r = 0.025, μ_wall = 0.26, κ = 1.54)</option>
+            </select>
+            <p class="helper-text" style="margin: 4px 0 0;">
+              Real-time 240 Hz sub-stepped coupled 3D rigid-body solver with gravitational slope acceleration (<code>g·sin α</code>), centrifugal outer-wall banking (<code>ϕ = atan(v²/gR)</code>), wall friction drag, and inelastic sphere-to-sphere collisions (<code>e = 0.52</code>).
+            </p>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <span class="t-label">Live / Peak Speed</span>
+              <strong class="t-val" id="stat-phys-speed">685 / 763 mm/s</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Centrifugal Bank (G)</span>
+              <strong class="t-val" id="stat-phys-bank">0.94 G (43.2°)</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Outer-Wall Margin</span>
+              <strong class="t-val text-emerald" id="stat-phys-margin">+10.7 mm SAFE</strong>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Magnetic Switch LEDs (8 Planets + 6 Marbles)</span>
+              <strong id="lbl-wand-status" class="text-emerald">14× Steady Glow</strong>
+            </div>
+            <div class="segmented-buttons" style="margin-bottom: 6px;">
+              <button id="btn-wand-tap-next" class="seg-btn active">🪄 Tap Next Planet with Wand</button>
+              <button id="btn-wand-cycle-all" class="seg-btn">✨ Cycle All 14 LEDs Mode</button>
+            </div>
+            <p class="helper-text" style="margin: 2px 0 0;">
+              Each of the 6 rolling Apple Marbles houses a wireless <code>Ø18.0×6.5 mm</code> Bambu Y-Shape 3-LED Light (<code>KC012/KC013</code>) and each of the 8 planets houses a Single LED Magnetic Switch Light (<code>KA006</code>). Click any planet or rolling marble in 3D to tap it with the star-tipped <code>Magic_LED_Wand</code>!
+            </p>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>ESPHome RGB Track Strip &amp; Topper Ring</span>
+              <strong id="lbl-light-mode" class="text-emerald">🌈 Rainbow RGBIC Cascade</strong>
+            </div>
+            <div class="segmented-buttons">
+              <button class="seg-btn active" data-light="rainbow">🌈 Rainbow RGBIC</button>
+              <button class="seg-btn" data-light="warm">🍎 Crimson &amp; Gold</button>
+              <button class="seg-btn" data-light="studio">☀️ Studio Daylight</button>
+            </div>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <span class="t-label">Marbles in Auger</span>
+              <strong class="t-val" id="stat-auger-count">2</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Rolling / Queued</span>
+              <strong class="t-val" id="stat-track-count">4 (0 Queued)</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Completed Loops</span>
+              <strong class="t-val" id="stat-loop-count">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>🍎 Newton Gravity Lab (g-Estimator)</h3>
+            <span class="status-pill online" id="grav-lab-badge">AUTO-TIMING</span>
+          </div>
+          <p class="helper-text" style="margin: 0 0 8px;">
+            Measure marble transit times across the 6 molded rail Timing Gates (<code>G0–G5</code> + <code>100 mm</code> arc ticks &amp; <code>0.35 mm</code> Phyphox acoustic click ribs) and front trunk elevation scale (<code>Δh</code>) to estimate Earth's gravitational acceleration <strong>g ≈ 9.81 m/s²</strong>!
+          </p>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Timing Gate Interval (s &amp; Δh)</span>
+              <strong id="lbl-grav-span">Δs = 2868 mm | Δh = 349 mm</strong>
+            </div>
+            <select id="sel-grav-gates" class="grav-select">
+              <option value="0-5" selected>G0 → G5 (Full 4.5-Turn Helix: Δs = 2868.3 mm, Δh = 348.9 mm)</option>
+              <option value="1-4">G1 → G4 (Front Spine 3-Turn Drop: Δs = 1947.8 mm, Δh = 237.0 mm)</option>
+              <option value="1-3">G1 → G3 (Front Spine 2-Turn Drop: Δs = 1180.8 mm, Δh = 158.0 mm)</option>
+              <option value="2-4">G2 → G4 (Lower Front 2-Turn Drop: Δs = 1416.2 mm, Δh = 158.0 mm)</option>
+              <option value="1-2">G1 → G2 (Upper Front 1-Turn Drop: Δs = 531.6 mm, Δh = 79.0 mm)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Marble Core Rotational Inertia (κ)</span>
+              <strong id="lbl-grav-kappa">κ = 1.48 (Y-Shape LED KC012)</strong>
+            </div>
+            <select id="sel-grav-marble" class="grav-select">
+              <option value="1.48" selected>Bambu Y-Shape 3-LED Light KC012/KC013 + CR1632 (κ = 1.48)</option>
+              <option value="1.46">Single LED KA006 + M8 Steel Hex Nut Ring (κ = 1.46)</option>
+              <option value="1.42">Ø12.7 mm Chrome Steel Ball Bearing Core (κ = 1.42)</option>
+              <option value="1.54">Hollow PLA Shell + Single LED Only (κ = 1.54)</option>
+            </select>
+          </div>
+
+          <div class="segmented-buttons" style="margin-bottom: 6px;">
+            <button id="btn-grav-stopwatch" class="seg-btn">⏱️ Tap Start Gate (Physical)</button>
+            <button id="btn-grav-auto" class="seg-btn active">🤖 Auto-Log 3D Sim: ON</button>
+            <button id="btn-grav-reset" class="seg-btn">↺ Reset</button>
+          </div>
+
+          <div class="grav-manual-row">
+            <input type="number" id="inp-grav-dt" class="grav-dt-input" placeholder="Enter Phyphox / video Δt (e.g. 4.18 s)" step="0.001" min="0.1" max="30" />
+            <button id="btn-grav-log-dt" class="seg-btn active" type="button">+ Log Δt (s)</button>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <span class="t-label">Trials (N)</span>
+              <strong class="t-val" id="stat-grav-trials">0</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Mean Time (t̄)</span>
+              <strong class="t-val" id="stat-grav-time">—</strong>
+            </div>
+            <div class="telemetry-card">
+              <span class="t-label">Estimated ĝ</span>
+              <strong class="t-val text-emerald" id="stat-grav-g">9.81 m/s²</strong>
+            </div>
+          </div>
+
+          <div class="grav-formula-note" id="lbl-grav-detail">
+            Waiting for first marble to cross <strong>G0 → G5</strong> (or click <em>Tap Start Gate</em> to time your physical print)...
+          </div>
+
+          <details class="grav-guide-details">
+            <summary>📖 How to Measure Gravity (g) with Your Printed Model</summary>
+            <div class="grav-guide-body">
+              <p>
+                Like Galileo's inclined plane, the <strong>4.5-turn conical spiral track</strong> dilutes vertical free-fall (<code>Δh = 348.9 mm</code>) over a <code>2,868.3 mm</code> helical path (<code>~7.0°</code> slope), slowing the descent to <code>~4.18 s</code> so you can accurately measure Earth's gravity <strong>g ≈ 9.81 m/s²</strong>:
+              </p>
+              <ol class="grav-guide-steps">
+                <li>
+                  <strong>Built-In Physical Scales:</strong> The outer track rail has <strong>6 Timing Gates (<code>G0–G5</code>)</strong> with top-rim V-notches, <code>100 mm</code> spiral distance ticks (<code>s</code>), and <strong><code>0.35 mm</code> acoustic click ribs</strong> inside the trough floor. The front trunk windows have <strong><code>25 mm</code> vertical elevation ticks (<code>Δh</code>)</strong>.
+                </li>
+                <li>
+                  <strong>3 Ways to Time Marble Drops (Δt):</strong>
+                  <ul>
+                    <li><strong>📱 Phyphox App (±1 ms Acoustic Stopwatch):</strong> Run the free <a href="https://phyphox.org/" target="_blank" rel="noopener noreferrer">Phyphox</a> app beside the tree—the <code>0.35 mm</code> floor ribs emit crisp audio clicks at <code>G0–G5</code>. Enter your measured <code>Δt</code> above and click <strong>+ Log Δt (s)</strong>.</li>
+                    <li><strong>🎥 Slow-Mo Video (120 / 240 fps):</strong> Film the front <code>-Y</code> spine where <code>G1, G2, G3, G4</code> are aligned vertically (<code>Δt = Δframes / fps</code>).</li>
+                    <li><strong>⏱️ Live Stopwatch:</strong> Click <strong>⏱️ Tap Start Gate</strong> as a marble crosses your start gate and <strong>🛑 Tap Finish Gate</strong> at the end gate. Repeat <code>N = 5–10</code> times to average out reaction time by <code>1/√N</code>!</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Galilean Inclined-Spiral Formula &amp; Core Inertia (κ):</strong>
+                  <div class="grav-eq-box">
+                    <code>ĝ = [ 2 · κ · Δs · (√s_B − √s_A)² ] / [ Δh · (Δt̄)² ]</code>
+                    <span>(From rest at G0 where s_A = 0: <code>ĝ = 2 · κ · s² / (Δh · Δt̄²)</code>)</span>
+                  </div>
+                  Because a rolling sphere splits potential energy <code>mgΔh</code> into translational + rotational kinetic energy, select your marble's rotational inertia factor <code>κ = 1 + I/(m·r_eff²)</code> above: <strong><code>1.46</code></strong> (LED + M8 Nut), <strong><code>1.42</code></strong> (12.7 mm Steel Ball), or <strong><code>1.54</code></strong> (Hollow PLA + LED).
+                </li>
+              </ol>
+              <table class="grav-gate-table">
+                <thead>
+                  <tr><th>Gate</th><th>Track Seg</th><th>Angle θ</th><th>Z (mm)</th><th>Δh (mm)</th><th>s (mm)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>G0</strong></td><td>Seg 14 (Top)</td><td>1605°</td><td>414.7</td><td>0.0</td><td>0.0</td></tr>
+                  <tr><td><strong>G1</strong></td><td>Seg 12 (-Y)</td><td>1350°</td><td>358.8</td><td>56.0</td><td>305.8</td></tr>
+                  <tr><td><strong>G2</strong></td><td>Seg 09 (-Y)</td><td>990°</td><td>279.8</td><td>135.0</td><td>837.4</td></tr>
+                  <tr><td><strong>G3</strong></td><td>Seg 06 (-Y)</td><td>630°</td><td>200.8</td><td>214.0</td><td>1486.6</td></tr>
+                  <tr><td><strong>G4</strong></td><td>Seg 03 (-Y)</td><td>270°</td><td>121.8</td><td>293.0</td><td>2253.6</td></tr>
+                  <tr><td><strong>G5</strong></td><td>Seg 01 (Exit)</td><td>15°</td><td>65.8</td><td>348.9</td><td>2868.3</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Quick Explode &amp; Subsystem Filter</h3>
+            <span id="lbl-sim-explode">0%</span>
+          </div>
+          <input type="range" id="slider-sim-explode" min="0" max="100" value="0" step="1" />
+          <div id="subsystem-toggles" class="subsystem-list"></div>
+        </div>
+      </section>
+
+      <!-- PANEL 2: STEP-BY-STEP ASSEMBLY & EXPLODED VIEW -->
+      <section id="panel-assembly" class="mode-panel">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>12-Step Guided Assembly Tutorial</h3>
+            <span class="step-counter" id="lbl-step-badge">Step 1 / 12</span>
+          </div>
+
+          <div class="wizard-nav">
+            <button id="btn-step-prev" class="btn-secondary">◀ Prev Step</button>
+            <button id="btn-step-play" class="btn-primary">▶ Auto-Play All Steps</button>
+            <button id="btn-step-next" class="btn-secondary">Next Step ▶</button>
+          </div>
+
+          <div class="step-dots" id="step-dots"></div>
+
+          <!-- Piece-by-Piece Sequential Connection Controller -->
+          <div class="piece-connection-box">
+            <div class="piece-status-row">
+              <span class="piece-badge" id="lbl-piece-counter">Piece 1 / 3</span>
+              <span class="piece-live-label" id="lbl-piece-active">Connecting: Trunk Base #1</span>
+            </div>
+            <div class="piece-progress-track">
+              <div class="piece-progress-fill" id="asm-piece-progress-fill"></div>
+            </div>
+            <div class="piece-nav-row">
+              <button id="btn-piece-prev" class="seg-btn" title="Step back to previous piece connection">⏮ Prev Piece</button>
+              <button id="btn-step-replay" class="seg-btn active" title="Replay piece-by-piece connection animation for this step">🔄 Replay Step</button>
+              <button id="btn-piece-next" class="seg-btn" title="Connect next piece in this step">Next Piece ⏭</button>
+            </div>
+          </div>
+
+          <!-- Dedicated Interactive Track Segment (Seg 01 -> Seg 14) & First/Last Port Inspector -->
+          <div id="track-inspector-box" class="track-inspector-box">
+            <div class="track-insp-header">
+              <div>
+                <h4>🎢 Track Segment Connections (<code>Seg 01 → Seg 14</code>)</h4>
+                <span class="track-insp-sub">Click any segment below to fly the 3D camera to its joint &amp; inspect how it locks in</span>
+              </div>
+              <label class="track-cam-toggle" title="Automatically fly the 3D camera to each track joint when stepping through Seg 01 → Seg 14">
+                <input type="checkbox" id="chk-track-autocam" checked />
+                <span>🎥 Auto-Zoom Joint</span>
+              </label>
+            </div>
+
+            <!-- Special Focus Buttons for First (Seg 01) and Last (Seg 14) Connections -->
+            <div class="track-port-focus-grid">
+              <button type="button" class="track-port-btn first-port" id="btn-focus-seg01-port">
+                <span class="port-tag emerald">START PORT (-90°)</span>
+                <strong>🟢 Seg 01 ↔ Trunk Base Intake</strong>
+                <span>Inward chute hugs R=34mm trunk into Z=54.5mm auger flute</span>
+              </button>
+              <button type="button" class="track-port-btn first-seam" id="btn-focus-seg01-seam">
+                <span class="port-tag gold">FIRST SEAM (120°)</span>
+                <strong>🔗 Seg 01 → Seg 02 Snap Joint</strong>
+                <span>Twin Ø3.8mm male tenons + sidewall tongues + 120° bracket</span>
+              </button>
+              <button type="button" class="track-port-btn last-seam" id="btn-focus-seg14-seam">
+                <span class="port-tag gold">LAST SEAM (1560°)</span>
+                <strong>🔗 Seg 13 → Seg 14 Snap Joint</strong>
+                <span>Seg 14 female sockets click onto Seg 13 male tenons + bracket</span>
+              </button>
+              <button type="button" class="track-port-btn last-port" id="btn-focus-seg14-port">
+                <span class="port-tag crimson">END PORT (1710°)</span>
+                <strong>🔴 Trunk Top Spout ↔ Seg 14</strong>
+                <span>Enclosed catch basin hugs R=34mm trunk under Z=435.5mm spout</span>
+              </button>
+            </div>
+
+            <!-- 15-Chip Segment Selector (Seg 01 .. Seg 14 + Clip) -->
+            <div id="track-seg-chips" class="track-seg-chips"></div>
+
+            <!-- Live Per-Segment Connection Detail Breakdown -->
+            <div id="track-joint-detail-card" class="track-joint-detail-card"></div>
+          </div>
+
+          <div class="step-card">
+            <h4 id="asm-step-title">Step 1 — Place Trunk Base (#1) &amp; Insert N20 Motor + Switch</h4>
+            <p id="asm-step-subtitle" class="step-sub"></p>
+            <div class="bom-box">
+              <h5>Step-by-Step Connections (Printed + Electronic Parts):</h5>
+              <ul id="asm-step-hardware"></ul>
+            </div>
+            <!-- Dynamic Step-Specific Pinout & Electronics Wiring Card -->
+            <div id="asm-wiring-card" class="wiring-card hidden"></div>
+            <div class="clearance-box">
+              <strong>💡 Assembly &amp; Alignment Tip:</strong>
+              <p id="asm-step-clearance"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dedicated Electronics & M5Stack ATOM Lite Pinout Guide -->
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>🔌 ATOM Lite (C008) &amp; Electronics Wiring Guide</h3>
+            <span class="status-pill online">ZERO SOLDER</span>
+          </div>
+          <p class="helper-text" style="margin: 0 0 8px;">
+            Both color lights plug into the <strong>M5Stack ATOM Lite's single 4-pin Grove (<code>HY2.0-4P</code>) port</strong> using the <strong><code>A096</code> Grove2Dupont cable</strong> (which breaks out two independent data pins: <code>White = GPIO26</code> &amp; <code>Yellow = GPIO32</code>). Click any step below to jump the 3D view directly to that connection:
+          </p>
+          <div class="elec-jump-grid">
+            <button type="button" class="elec-jump-btn" data-elec-step="7" style="grid-column: 1 / -1; border-color: rgba(16, 185, 129, 0.55); background: rgba(6, 78, 59, 0.35);">
+              🎢 Step 7: Inspect Track Connections (Seg 01 → Seg 14 + Trunk Intake &amp; Spout Ports)
+              <span>Interactive segment-by-segment 3D joint zoom, Twin Ø3.8mm snap tenons, Seg 01 intake &amp; Seg 14 catch basin</span>
+            </button>
+            <button type="button" class="elec-jump-btn" data-elec-step="1">
+              🔩 Step 1: N20 Motor
+              <span>Slides into Ø28mm shroud tower</span>
+            </button>
+            <button type="button" class="elec-jump-btn" data-elec-step="2">
+              🧠 Step 2: ATOM Lite + A092
+              <span>M1/M2 terminals &amp; Grove plug</span>
+            </button>
+            <button type="button" class="elec-jump-btn" data-elec-step="8">
+              🌈 Step 8: Track Wire (G26)
+              <span>50-LED Pebble Wire → White G26</span>
+            </button>
+            <button type="button" class="elec-jump-btn" data-elec-step="9">
+              🍎 Step 9: Topper Ring (G32)
+              <span>16-LED Ring → Yellow G32</span>
+            </button>
+          </div>
+
+          <details class="grav-guide-details" open>
+            <summary>📌 Complete Pin-by-Pin Connection Map (12V Single-Cable + 5V Buck + A092 + C008)</summary>
+            <div class="grav-guide-body">
+              <div class="pinout-list">
+                <div class="pinout-row">
+                  <span class="wire-pill wire-white">⚪ White (G26)</span>
+                  <div class="pinout-desc">
+                    <strong>Zone 2 — Helical Track Pebble Wire (<code>B0CCS11V7H</code>, 50 LEDs):</strong> Plugs into the <strong>Center <code>DATA</code> pin</strong> of the Track Wire's 3-pin <code>JST-SM</code> connector (routed through <code>cob_wire_conduit</code>).
+                  </div>
+                </div>
+                <div class="pinout-row">
+                  <span class="wire-pill wire-yellow">🟡 Yellow (G32)</span>
+                  <div class="pinout-desc">
+                    <strong>Zone 1 — Apple Topper 16-LED Ring (<code>B09YTMNGTD</code>):</strong> Plugs into the <strong>Center <code>DATA</code> pin</strong> of the <code>1 m</code> 3-pin <code>JST-SM</code> extension cable (<code>B0CT827QQC</code>) threaded straight down the <code>10×8 mm</code> rear (<code>-X</code>) trunk conduit.
+                  </div>
+                </div>
+                <div class="pinout-row">
+                  <span class="wire-pill wire-red">🔴 +5V Buck (WAGO-3)</span>
+                  <div class="pinout-desc">
+                    <strong>Dedicated <code>12V → 5.0V 5A</code> Buck Converter Rail (<code>WAGO-3</code>):</strong> Powers both the Track Wire (start &amp; end power-injection leads) and Topper Ring with zero voltage sag. <strong>Leave the <code>A096</code> Grove <code>Red (+5V)</code> wire CAPPED / UNCONNECTED</strong> so the external 5V buck never backfeeds <code>A092</code>'s internal 5V regulator!
+                  </div>
+                </div>
+                <div class="pinout-row">
+                  <span class="wire-pill wire-black">⚫ Star GND (WAGO-2/4)</span>
+                  <div class="pinout-desc">
+                    <strong>Common Star Ground (<code>WAGO-2</code> &amp; <code>WAGO-4</code>):</strong> Ties the rear <code>12V</code> DC Barrel Jack (<code>J1</code>), <code>A092 GND</code>, <code>A096 Grove Black (GND)</code>, the <code>5V</code> Buck Converter <code>-OUT</code>, and both LED ground leads to a single common reference.
+                  </div>
+                </div>
+                <div class="pinout-row">
+                  <span class="wire-pill wire-motor">🔩 12V VIN &amp; M1/M2</span>
+                  <div class="pinout-desc">
+                    <strong>Single <code>12V DC</code> Rear Barrel Jack (<code>J1</code>) &amp; N20 Auger Motor:</strong> Rear <code>-X</code> <code>5.5×2.1mm</code> jack feeds <code>WAGO-1 (+12V_BUS)</code> (via <code>5A</code> fuse <code>F0</code>) → <code>A092 VIN/GND</code> (via <code>2A</code> fuse <code>F1</code>, powering both <code>A092</code> and <code>C008</code>). Clamp a <strong><code>12V 150 RPM N20</code> motor (Option B)</strong> into <code>A092 M1/M2</code> (or use a <code>12V→6V</code> buck + external H-bridge for a <code>6V LA002</code> motor in Option A).
+                  </div>
+                </div>
+                <div class="pinout-row">
+                  <span class="wire-pill wire-wireless">🪄 Wireless</span>
+                  <div class="pinout-desc">
+                    <strong>8 Planets (<code>KA006</code>) &amp; 6 Rolling Marbles (<code>KC012/KC013</code>):</strong> Self-contained battery-powered magnetic switch LEDs—zero wires! Tap with <code>Magic_LED_Wand</code> to toggle modes.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Exploded View &amp; Ghost Options</h3>
+            <strong id="lbl-asm-explode">0% Assembled</strong>
+          </div>
+          <input type="range" id="slider-asm-explode" min="0" max="100" value="0" step="1" />
+          <div class="segmented-buttons" style="margin-top:8px;">
+            <button class="seg-btn" id="btn-explode-0">0% Compact</button>
+            <button class="seg-btn" id="btn-explode-45">45% Cutaway</button>
+            <button class="seg-btn" id="btn-explode-100">100% Full Explode</button>
+          </div>
+          <label class="checkbox-row" style="margin-top:10px;">
+            <input type="checkbox" id="chk-ghost-future" />
+            <span>Ghost future steps' parts (uncheck so pieces appear only as connected)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- PANEL 3: SNAPMAKER U1 18-PLATE INSPECTOR -->
+      <section id="panel-plates" class="mode-panel">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Snapmaker U1 18-Plate Selector</h3>
+            <span class="status-pill online">MAX 4 COLORS / PLATE &bull; 270×270 mm</span>
+          </div>
+          <p class="helper-text">
+            <strong>Plates 1–15 are 100% single-color plates</strong> (zero filament swaps, <code>enable_prime_tower=0</code>, spacious <code>&gt;=12.5 mm</code> part clearance, and zero convex-hull overlap in OrcaSlicer!) and <strong>Plates 16–18 are dedicated 4-color plates</strong> (each using at most 4 colors/toolheads).
+          </p>
+
+          <!-- Dedicated High-Contrast Plate Inspector Lighting Controls -->
+          <div class="plate-lighting-box">
+            <div class="control-label-row">
+              <span>💡 Plate Inspector Lighting Mode</span>
+              <strong id="lbl-plate-light-mode" class="text-emerald">☀️ High-Contrast Studio</strong>
+            </div>
+            <div class="segmented-buttons" style="margin-bottom: 8px;">
+              <button type="button" class="seg-btn active" data-plate-light="studio">☀️ Studio Bright</button>
+              <button type="button" class="seg-btn" data-plate-light="detail">🔍 Grazing Socket Detail</button>
+              <button type="button" class="seg-btn" data-plate-light="soft">💡 Soft Shadowless</button>
+            </div>
+            <div class="control-label-row">
+              <span>🔆 Inspection Exposure / Brightness</span>
+              <strong id="lbl-plate-exposure">135%</strong>
+            </div>
+            <input type="range" id="slider-plate-exposure" min="90" max="200" value="135" step="5" />
+          </div>
+
+          <div id="plate-selector-list" class="plate-btn-list"></div>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Cross-Section Layer Slicer</h3>
+            <strong id="lbl-slice-z">Full Height (Z = 220.0 mm)</strong>
+          </div>
+          <input type="range" id="slider-slice-z" min="0.4" max="220" value="220" step="0.2" />
+          <div class="pause-preset-grid">
+            <button class="btn-pause-preset" data-z="2.0">
+              🔩 <strong>Z = 2.00 mm Cross-Section</strong>
+              <span>Inspect Planet Ø8.44 mm internal snap-detent groove &amp; 45° entry funnel</span>
+            </button>
+            <button class="btn-pause-preset" data-z="19.0">
+              ⚪ <strong>Z = 19.00 mm Cross-Section</strong>
+              <span>Inspect Ø13.10 mm steel ball core inside Apple_Captive_Pause_Marble</span>
+            </button>
+            <button class="btn-pause-preset" data-z="220.0">
+              🔼 <strong>Show Full Print Height (100%)</strong>
+              <span>Disable Z clipping plane</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h3>Download Production .3MF Build Plates (18 Plates — Snapmaker U1 0.4 mm Nozzle)</h3>
+          <div class="download-links">
+            <a href="output/3mf/GravMass_Tree_Ultimate_U1.3mf" download class="dl-link primary">
+              📦 <strong>GravMass_Tree_Ultimate_U1.3mf</strong> <span>All-in-One 18-Plate OrcaSlicer Project (Snapmaker U1 0.4 mm Nozzle, 15 Single-Color + 3× 4-Color Plates)</span>
+            </a>
+            <a href="output/3mf/Plate_1_SingleColor_Brown_Trunk_Base.3mf" download class="dl-link">
+              🟫 <strong>Plate 1 — Brown Trunk Base #1 &amp; Bottom Service Cover (.3mf)</strong> <span>Single-Color T1 PLA (2 Parts, Support-Free, 0 Prime Tower)</span>
+            </a>
+            <a href="output/3mf/Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers.3mf" download class="dl-link">
+              🟫 <strong>Plate 2 — Brown Trunk Mid #2, Top #3, 3× Conduit Covers &amp; Covers (.3mf)</strong> <span>Single-Color T1 PLA (7 Parts, Support-Free, 0 Prime Tower)</span>
+            </a>
+            <a href="output/3mf/Plate_3_SingleColor_Brown_Brackets_01_To_12.3mf" download class="dl-link">
+              🟫 <strong>Plate 3 — 12× Station Brackets #1 to #12 (.3mf)</strong> <span>Single-Color T1 PLA (Upright Z=0 Flat Rib, 14.6 mm Gap, 0 Supports)</span>
+            </a>
+            <a href="output/3mf/Plate_4_SingleColor_Brown_Brackets_13_To_24.3mf" download class="dl-link">
+              🟫 <strong>Plate 4 — 12× Station Brackets #13 to #24 (.3mf)</strong> <span>Single-Color T1 PLA (Upright Z=0 Flat Rib, 14.6 mm Gap, 0 Supports)</span>
+            </a>
+            <a href="output/3mf/Plate_5_SingleColor_Green_Track_01.3mf" download class="dl-link">
+              🟩 <strong>Plate 5 — Dedicated Track Seg 01 (Return Ramp, .3mf)</strong> <span>Single-Color T2 PETG (Solo Centered 230.8×230.1 mm, Z_min=0.000 mm)</span>
+            </a>
+            <a href="output/3mf/Plate_6_SingleColor_Green_Track_02.3mf" download class="dl-link">
+              🟩 <strong>Plate 6 — Dedicated Track Segment 02 (.3mf)</strong> <span>Single-Color T2 PETG (Solo Centered 203.4×202.2 mm)</span>
+            </a>
+            <a href="output/3mf/Plate_7_SingleColor_Green_Track_03.3mf" download class="dl-link">
+              🟩 <strong>Plate 7 — Dedicated Track Segment 03 (.3mf)</strong> <span>Single-Color T2 PETG (Solo Centered 195.6×194.4 mm)</span>
+            </a>
+            <a href="output/3mf/Plate_8_SingleColor_Green_Track_04.3mf" download class="dl-link">
+              🟩 <strong>Plate 8 — Dedicated Track Segment 04 (.3mf)</strong> <span>Single-Color T2 PETG (Solo Centered 187.8×186.6 mm)</span>
+            </a>
+            <a href="output/3mf/Plate_9_SingleColor_Green_Track_05_And_13.3mf" download class="dl-link">
+              🟩 <strong>Plate 9 — Track Segments 05 &amp; 13 (.3mf)</strong> <span>Single-Color T2 PETG (Side-by-Side, Zero Convex-Hull Overlap)</span>
+            </a>
+            <a href="output/3mf/Plate_10_SingleColor_Green_Track_06_And_12.3mf" download class="dl-link">
+              🟩 <strong>Plate 10 — Track Segments 06 &amp; 12 (.3mf)</strong> <span>Single-Color T2 PETG (Side-by-Side, Zero Convex-Hull Overlap)</span>
+            </a>
+            <a href="output/3mf/Plate_11_SingleColor_Green_Track_07_And_11.3mf" download class="dl-link">
+              🟩 <strong>Plate 11 — Track Segments 07 &amp; 11 (.3mf)</strong> <span>Single-Color T2 PETG (Side-by-Side, Zero Convex-Hull Overlap)</span>
+            </a>
+            <a href="output/3mf/Plate_12_SingleColor_Green_Track_08_And_10.3mf" download class="dl-link">
+              🟩 <strong>Plate 12 — Track Segments 08 &amp; 10 (.3mf)</strong> <span>Single-Color T2 PETG (Side-by-Side, Zero Convex-Hull Overlap)</span>
+            </a>
+            <a href="output/3mf/Plate_13_SingleColor_Green_Track_09_And_14.3mf" download class="dl-link">
+              🟩 <strong>Plate 13 — Track Segments 09 &amp; 14 Top Entry (.3mf)</strong> <span>Single-Color T2 PETG (Side-by-Side, Zero Convex-Hull Overlap)</span>
+            </a>
+            <a href="output/3mf/Plate_14_SingleColor_Gold_Auger_And_Drive.3mf" download class="dl-link">
+              🟨 <strong>Plate 14 — Gold Auger Halves &amp; Hex Coupler (.3mf)</strong> <span>Single-Color T3 Silk Gold PLA (Support-Free, 0 Swaps)</span>
+            </a>
+            <a href="output/3mf/Plate_15_SingleColor_Red_Apple_Marbles.3mf" download class="dl-link">
+              🟥 <strong>Plate 15 — 12× Red Apple Hemispheres A/B = 6× Marbles (.3mf)</strong> <span>Single-Color T4 Red PLA (Support-Free, 0 Swaps)</span>
+            </a>
+            <a href="output/3mf/Plate_16_MultiColor_Topper_And_Wand.3mf" download class="dl-link">
+              🍎 <strong>Plate 16 — 4-Color Apple Topper (with Stem &amp; Leaf) &amp; Wand (.3mf)</strong> <span>4-Color Tree Palette: Brown / Green / Gold / Red</span>
+            </a>
+            <a href="output/3mf/Plate_17_MultiColor_Planets_Warm_And_Gas_Giants.3mf" download class="dl-link">
+              🪐 <strong>Plate 17 — 4-Color Warm &amp; Gas-Giant Planets (.3mf)</strong> <span>Mercury, Venus, Mars, Jupiter &amp; Saturn (Umber / Alabaster / Gold / Crimson)</span>
+            </a>
+            <a href="output/3mf/Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants.3mf" download class="dl-link">
+              🌍 <strong>Plate 18 — 4-Color Ocean &amp; Ice-Giant Planets (.3mf)</strong> <span>Earth, Uranus &amp; Neptune (Cobalt Blue / Emerald / Ice White / Gold)</span>
+            </a>
+            <a href="output/3mf/GravMass_Tree_Complete_Assembly.3mf" download class="dl-link">
+              🌲 <strong>GravMass_Tree_Complete_Assembly.3mf</strong> <span>Full Multi-Color 3D Reference Assembly</span>
+            </a>
+            <a href="https://github.com/ignacio82/grav-mass" target="_blank" rel="noopener noreferrer" class="dl-link">
+              🐙 <strong>GitHub Repository (ignacio82/grav-mass) ↗</strong> <span>Full Python build123d CAD Source, STL/STEP Files, BOM &amp; Gravity Lab Guide</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Center 3D WebGL Canvas Viewport -->
+    <div class="viewport-container">
+      <canvas id="three-canvas"></canvas>
+
+      <!-- Floating Toolhead Legend Bar -->
+      <div class="toolhead-legend">
+        <div class="th-chip"><span class="swatch" style="background:#4A2F1D"></span>T1 Matte Wood Brown (PLA)</div>
+        <div class="th-chip"><span class="swatch" style="background:#00A86B"></span>T2 Emerald Green (PETG)</div>
+        <div class="th-chip"><span class="swatch" style="background:#D4AF37"></span>T3 Silk Gold / Brass (PLA)</div>
+        <div class="th-chip"><span class="swatch" style="background:#C41E3A"></span>T4 Glossy Crimson Red (PLA)</div>
+      </div>
+
+      <!-- Hover Part Tooltip -->
+      <div id="part-tooltip" class="part-tooltip hidden"></div>
+    </div>
+  </main>
+
+  <script type="module" src="app.js?v=42"></script>
+</body>
+</html>

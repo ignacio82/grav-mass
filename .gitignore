@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+output/*.png
+output/full_tree_assembly.step
+output/3mf/Ring_Size_*.3mf
+output/3mf/fidget_ring_*.3mf
+output/3mf/GravMass_Tree_CyberBrick_U1_MultiPlate.3mf
+output/3mf/GravMass_Tree_U1_MultiPlate.3mf
+esphome/secrets.yaml
+esphome/.esphome/
