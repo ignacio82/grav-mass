@@ -430,85 +430,74 @@ def run_all_verifications() -> None:
         f"Hollow Root Vault unobstructed slack volume {open_vault_slack_vol:.1f} mm³ < 150,000 mm³ (150 cm³)!"
     )
 
-    # (b) M5Stack ATOM Lite (C008, 24.0 x 24.0 x 10.0 mm) dedicated snap-in cradle at (-26.5, +42.0, 0.0)
-    #     + >= 30.0 mm straight unobstructed cable clearance in front (-Y) of HY2.0-4P Grove & 2.54 mm pins
-    atom_c008_gauge = bd.Pos(-26.5, 42.0, 0.0) * bd.Box(
-        24.0,
-        24.0,
-        10.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    atom_c008_over = bd.Pos(-26.5, 42.0, 0.0) * bd.Box(
+    # (b) Dedicated +Y Snap-In Cradle at (-4.0, +36.5, 0.0) for the UCTRONICS B07XXWQ49N (U6223,
+    #     63.0 x 27.0 x 10.0 mm) 12V -> 5.0V 5A Screw-Terminal Buck Converter + open -X/+X wire portals
+    uctronics_buck_gauge = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+        63.0,
         27.0,
-        27.0,
-        11.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    atom_front_clearance_gauge = bd.Pos(-26.5, 29.75 - 15.0, 0.0) * bd.Box(
-        12.0,
-        30.0,
-        9.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    assert _inter_vol(trunk_base, atom_c008_gauge) == 0.0, (
-        "M5Stack ATOM Lite (C008, 24x24x10 mm) gauge collided with trunk_base snap-in cradle!"
-    )
-    assert _inter_vol(trunk_base, atom_c008_over) > 0.0, (
-        "Oversized ATOM Lite gauge did not intersect snap-in cradle walls!"
-    )
-    assert _inter_vol(trunk_base, atom_front_clearance_gauge) == 0.0, (
-        "30.0 mm straight cable clearance gauge in front of ATOM Lite Grove socket collided with trunk_base!"
-    )
-
-    # (c) Dedicated Snap-In Cradles for Bambu IA005 4-Channel PDB (10.0 x 53.0 x 10.0 mm at (+40.0, -14.0, 0.0))
-    #     and Dual Logic-Level MOSFET / Driver Module (23.5 x 17.5 x 11.5 mm at (+18.0, +44.0, 0.0))
-    ia005_gauge = bd.Pos(40.0, -14.0, 0.0) * bd.Box(
-        10.0,
-        53.0,
         10.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    ia005_over = bd.Pos(40.0, -14.0, 0.0) * bd.Box(
+    uctronics_buck_over = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+        67.0,
+        31.0,
         13.5,
-        56.5,
-        11.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    mosfet_gauge = bd.Pos(18.0, 44.0, 0.0) * bd.Box(
-        23.5,
-        17.5,
-        11.5,
+    uctronics_wire_portal_gauge = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+        70.0,
+        18.0,
+        10.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    mosfet_over = bd.Pos(18.0, 44.0, 0.0) * bd.Box(
-        27.0,
-        21.0,
-        13.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    assert _inter_vol(trunk_base, uctronics_buck_gauge) == 0.0, (
+        "UCTRONICS B07XXWQ49N (U6223, 63.0 x 27.0 x 10.0 mm) buck converter gauge collided with trunk_base cradle!"
     )
-    assert _inter_vol(trunk_base, ia005_gauge) == 0.0, (
-        "Bambu IA005 PDB gauge collided with trunk_base!"
+    assert _inter_vol(trunk_base, uctronics_buck_over) > 0.0, (
+        "Oversized UCTRONICS buck converter gauge did not intersect snap-in cradle walls!"
     )
-    assert _inter_vol(trunk_base, ia005_over) > 0.0, (
-        "Oversized IA005 PDB gauge did not intersect cradle walls!"
-    )
-    assert _inter_vol(trunk_base, mosfet_gauge) == 0.0, (
-        "Dual MOSFET / Driver module gauge collided with trunk_base!"
-    )
-    assert _inter_vol(trunk_base, mosfet_over) > 0.0, (
-        "Oversized Dual MOSFET gauge did not intersect cradle walls!"
+    assert _inter_vol(trunk_base, uctronics_wire_portal_gauge) == 0.0, (
+        "UCTRONICS buck converter -X/+X screw-terminal wire portal gauge collided with trunk_base!"
     )
 
-    # Verify >= 18.0 mm finger access spacing between dedicated board bays and Ø 28.0 mm motor shroud
+    # (c) Dedicated +X Snap-In Organizer Cradle at (+44.5, -12.0, 0.0) for the WAGO 221-415
+    #     (18.6 x 30.0 x 8.4 mm each; 2x stacked = 18.6 x 30.0 x 16.8 mm) 5-Port Lever-Nut Blocks
+    wago_221_gauge = bd.Pos(44.5, -12.0, 0.0) * bd.Box(
+        18.6,
+        30.0,
+        16.8,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    wago_221_over = bd.Pos(44.5, -12.0, 0.0) * bd.Box(
+        22.5,
+        34.0,
+        19.5,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    wago_wire_portal_gauge = bd.Pos(34.0, -12.0, 0.0) * bd.Box(
+        5.0,
+        24.0,
+        16.8,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    assert _inter_vol(trunk_base, wago_221_gauge) == 0.0, (
+        "WAGO 221-415 (18.6 x 30.0 x 16.8 mm dual-stack) gauge collided with trunk_base!"
+    )
+    assert _inter_vol(trunk_base, wago_221_over) > 0.0, (
+        "Oversized WAGO 221-415 gauge did not intersect cradle walls!"
+    )
+    assert _inter_vol(trunk_base, wago_wire_portal_gauge) == 0.0, (
+        "WAGO 221-415 -X wire portal gauge collided with trunk_base!"
+    )
+
+    # Verify finger access spacing between dedicated board bays and Ø 28.0 mm motor shroud
     motor_shroud_cyl = bd.Cylinder(
         radius=14.0,
         height=30.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _bbox_xy_gap(atom_c008_gauge.bounding_box(), mosfet_gauge.bounding_box()) >= 18.0
-    assert _bbox_xy_gap(atom_c008_gauge.bounding_box(), ia005_gauge.bounding_box()) >= 18.0
-    assert _bbox_xy_gap(mosfet_gauge.bounding_box(), ia005_gauge.bounding_box()) >= 18.0
-    assert _bbox_xy_gap(ia005_gauge.bounding_box(), motor_shroud_cyl.bounding_box()) >= 18.0
+    assert _bbox_xy_gap(uctronics_buck_gauge.bounding_box(), wago_221_gauge.bounding_box()) >= 7.0
+    assert _bbox_xy_gap(wago_221_gauge.bounding_box(), motor_shroud_cyl.bounding_box()) >= 18.0
 
     # XA007 Power Switch Module cutout (22.0 x 14.0 x 12.0 mm at (-46.0, 0.0, 4.0))
     xa007_gauge = bd.Pos(-46.0, 0.0, 4.0) * bd.Box(

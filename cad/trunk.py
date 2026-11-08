@@ -68,6 +68,12 @@ from common_params import (
     TRUNK_FLARE_HEIGHT,
     TRUNK_OUTER_R,
     TRUNK_SECTION_HEIGHT,
+    UCTRONICS_BUCK_BAY_X,
+    UCTRONICS_BUCK_BAY_Y,
+    UCTRONICS_BUCK_BAY_Z,
+    WAGO_221_BAY_X,
+    WAGO_221_BAY_Y,
+    WAGO_221_BAY_Z,
     WIRE_CONDUIT_D,
     WIRE_CONDUIT_W,
     XA007_SWITCH_BAY_X,
@@ -514,11 +520,13 @@ def build_trunk_base() -> bd.Solid:
     Ø 135.0 x 50.0 mm internal clear electronics vault with > 200,000 mm³ unobstructed Cable Slack
     Dump Zone):
       - Isolated Ø 28.0 mm Motor & Magnetic Safety Clutch Shroud Tower (Z = 0..42.0 mm) with bottom wire notch
-      - M5Stack ATOM Lite (C008) 24.5 x 24.5 x 10.6 mm Snap-In Cradle at (-26.5, +42.0) with rear USB-C bezel,
-        top/rear button & RGB LED sight window, and >= 30.0 mm straight front cable clearance
-      - Dedicated Snap-In Cradles for Bambu IA005 4-Ch PDB (+40.0, -14.0) & Dual MOSFET Driver (+18.0, +44.0)
-        spaced >= 18.0 mm apart from each other and from the Ø 28.0 mm motor shroud
-      - Stepped -Y ESPHome / Battery Cradle (0.0, -33.0) for M5Stack Atomic H-Driver (A092 + C008) or 14500 pack
+      - Dedicated +Y Snap-In Cradle at (-4.0, +36.5) for the UCTRONICS B07XXWQ49N (U6223,
+        63.0 x 27.0 x 10.0 mm) 12V->5V 5A Screw-Terminal Buck Converter (64.2 x 28.2 x 12.0 mm pocket
+        with open -X/+X screw-terminal wire portals)
+      - Dedicated +X Snap-In Organizer Cradle at (+44.5, -12.0) for the WAGO 221-415 (30.0 x 18.6 x 8.4 mm)
+        5-Port Lever-Nut Bus Blocks (19.8 x 31.2 x 18.0 mm dual-stack pocket with open -X wire portal)
+      - Stepped -Y ESPHome / Battery Cradle (0.0, -33.0) for M5Stack Atomic H-Driver (A092 + C008,
+        48.0 x 24.0 x 18.0 mm) or 14500 pack, with inner +Y Grove/terminal wire portal into the vault
       - Oversized 10.0 x 8.0 mm Rear (-X) Connector-Pass-Through Trunk Wiring Conduit
     """
     # 1. 4-diagonal-root spreading flare (Ø 185.0 mm span) + widened bark-textured vault drum (R=72.5 mm)
@@ -595,24 +603,17 @@ def build_trunk_base() -> bd.Solid:
         height=44.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # (v) Rear Perimeter M5Stack ATOM Lite (C008) Snap-In Cradle Column at (-26.5, +42.0)
-    atom_cradle_frame = bd.Pos(-26.5, 43.0, -0.2) * bd.Box(
-        ATOM_LITE_CRADLE_X + 3.6,   # 28.1 mm
-        ATOM_LITE_CRADLE_Y + 2.6,   # 27.1 mm
+    # (v) North (+Y) Dedicated UCTRONICS B07XXWQ49N (U6223, 63.0 x 27.0 x 10.0 mm) 5V 5A Buck Cradle at (-4.0, +36.5)
+    buck_cradle_frame = bd.Pos(-4.0, 36.5, -0.2) * bd.Box(
+        UCTRONICS_BUCK_BAY_X + 3.6,  # 67.8 mm
+        UCTRONICS_BUCK_BAY_Y + 3.6,  # 31.8 mm
         44.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # (vi) Dedicated Bambu IA005 4-Ch PDB Snap-In Cradle Column at (+40.0, -14.0)
-    ia005_cradle_frame = bd.Pos(40.0, -14.0, -0.2) * bd.Box(
-        IA005_PDB_BAY_X + 3.6,      # 14.2 mm
-        IA005_PDB_BAY_Y + 3.6,      # 57.2 mm
-        44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # (vii) Dedicated Dual-Channel MOSFET / Driver Module Snap-In Cradle Column at (+18.0, +44.0)
-    mosfet_cradle_frame = bd.Pos(18.0, 44.0, -0.2) * bd.Box(
-        DUAL_MOSFET_BAY_X + 3.6,    # 27.6 mm
-        DUAL_MOSFET_BAY_Y + 3.6,    # 21.6 mm
+    # (vi) East (+X) Dedicated WAGO 221-415 (30.0 x 18.6 x 8.4 mm) Dual-Stack Lever-Nut Cradle at (+44.5, -12.0)
+    wago_cradle_frame = bd.Pos(44.5, -12.0, -0.2) * bd.Box(
+        WAGO_221_BAY_X + 3.6,        # 23.4 mm
+        WAGO_221_BAY_Y + 3.6,        # 34.8 mm
         44.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
@@ -622,61 +623,48 @@ def build_trunk_base() -> bd.Solid:
         + front_cradle_frame
         + xa007_boss
         + wand_pillar
-        + atom_cradle_frame
-        + ia005_cradle_frame
-        + mosfet_cradle_frame
+        + buck_cradle_frame
+        + wago_cradle_frame
     )
     body = body - (raw_vault - internal_structures)
 
-    # Cut the internal pockets of the 3 new Snap-In Cradles + Rear USB-C Bezel & Sight Window:
-    atom_pocket = bd.Pos(-26.5, 42.0, -0.1) * bd.Box(
-        ATOM_LITE_CRADLE_X,         # 24.5 mm
-        ATOM_LITE_CRADLE_Y,         # 24.5 mm (open on -Y face for Grove socket & 32 mm front clearance!)
-        ATOM_LITE_CRADLE_Z + 0.1,   # 10.6 mm clear height
+    # Cut the internal pockets of the UCTRONICS 5V 5A Buck Cradle & WAGO 221-415 Lever-Nut Cradle:
+    buck_pocket = bd.Pos(-4.0, 36.5, -0.1) * bd.Box(
+        UCTRONICS_BUCK_BAY_X,        # 64.2 mm (fits 63.0 mm UCTRONICS B07XXWQ49N PCB)
+        UCTRONICS_BUCK_BAY_Y,        # 28.2 mm (fits 27.0 mm UCTRONICS B07XXWQ49N PCB)
+        UCTRONICS_BUCK_BAY_Z + 0.1,  # 12.1 mm clear height (fits 10.0 mm tall module)
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    atom_front_grove_open = bd.Pos(-26.5, 29.5, -0.1) * bd.Box(
-        22.5,
-        6.0,
-        ATOM_LITE_CRADLE_Z + 0.1,
+    buck_terminal_wire_slots = bd.Pos(-4.0, 36.5, -0.1) * bd.Box(
+        UCTRONICS_BUCK_BAY_X + 8.0,  # 72.2 mm — opens both -X (VIN) and +X (5V OUT) end walls for 18 AWG wires
+        20.0,                        # 20.0 mm wide wire pass-through centered on the screw terminals
+        UCTRONICS_BUCK_BAY_Z + 0.1,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    atom_usbc_bezel = bd.Pos(-26.5, 62.0, 1.8) * bd.Box(
-        11.2,
-        20.0,
-        6.8,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    atom_sight_window = bd.Pos(-26.5, 42.0, -0.1) * bd.Cylinder(
-        radius=3.0,
+    buck_sight_vent = bd.Pos(-4.0, 36.5, -0.1) * bd.Cylinder(
+        radius=3.5,
         height=18.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    ) + bd.Pos(-26.5, 62.0, 9.2) * bd.Box(
-        6.0,
-        20.0,
-        5.0,
+    )
+    wago_pocket = bd.Pos(44.5, -12.0, -0.1) * bd.Box(
+        WAGO_221_BAY_X,              # 19.8 mm (fits 18.6 mm deep WAGO 221-415 / 221-413 blocks)
+        WAGO_221_BAY_Y,              # 31.2 mm (fits 30.0 mm wide 5-port WAGO 221-415 blocks)
+        WAGO_221_BAY_Z + 0.1,        # 18.1 mm clear height (fits 2x 8.4 mm = 16.8 mm stacked blocks)
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    ia005_pocket = bd.Pos(40.0, -14.0, -0.1) * bd.Box(
-        IA005_PDB_BAY_X,            # 10.6 mm
-        IA005_PDB_BAY_Y,            # 53.6 mm
-        IA005_PDB_BAY_Z + 0.1,      # 10.6 mm
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    mosfet_pocket = bd.Pos(18.0, 44.0, -0.1) * bd.Box(
-        DUAL_MOSFET_BAY_X,          # 24.0 mm
-        DUAL_MOSFET_BAY_Y,          # 18.0 mm
-        DUAL_MOSFET_BAY_Z + 0.1,    # 12.0 mm
+    wago_wire_open = bd.Pos(34.0, -12.0, -0.1) * bd.Box(
+        6.0,                         # Opens -X inner vault wall of wago_cradle_frame for all 5 lever-nut wire ports
+        26.0,                        # Leaves 2.6 mm retention corner lips at ±Y to hold WAGO blocks captive
+        WAGO_221_BAY_Z + 0.1,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     body = (
         body
-        - atom_pocket
-        - atom_front_grove_open
-        - atom_usbc_bezel
-        - atom_sight_window
-        - ia005_pocket
-        - mosfet_pocket
+        - buck_pocket
+        - buck_terminal_wire_slots
+        - buck_sight_vent
+        - wago_pocket
+        - wago_wire_open
     )
 
     # 3. Cut lower Ø 24.0 mm clutch/collar bore (Z = -0.5..42.0 mm), 45° support-free expansion cone

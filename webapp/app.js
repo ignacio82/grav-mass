@@ -795,12 +795,12 @@ async function init() {
 
   statusEl.textContent = "Fetching CAD scene manifest...";
   progBar.style.width = "25%";
-  const manifestResp = await fetch("assets/manifest.json?v=43", { cache: "no-store" });
+  const manifestResp = await fetch("assets/manifest.json?v=44", { cache: "no-store" });
   manifest = await manifestResp.json();
 
   statusEl.textContent = "Downloading B-Rep binary mesh buffer...";
   progBar.style.width = "55%";
-  const binResp = await fetch(`${manifest.binary_file}?v=43`, { cache: "no-store" });
+  const binResp = await fetch(`${manifest.binary_file}?v=44`, { cache: "no-store" });
   const arrayBuffer = await binResp.arrayBuffer();
 
   statusEl.textContent = "Constructing Three.js WebGL geometries & physics actors...";
@@ -1155,20 +1155,37 @@ function buildHardwareOverlay() {
     }
   );
 
-  // 2d. Dedicated 12V -> 5.0V 5A Synchronous Buck Converter + WAGO 221 Distribution in +X Vault Cradle
+  // 2d. Dedicated 12V -> 5.0V 5A UCTRONICS Screw-Terminal Buck Converter (63.0x27.0x10.0mm) in +Y Vault Cradle
   addElectronicActor(
-    new THREE.BoxGeometry(18.0, 44.0, 11.0),
+    new THREE.BoxGeometry(63.0, 27.0, 10.0),
     { color: 0x2563eb, metalness: 0.4, roughness: 0.35 },
-    [40.0, -14.0, 8.5],
+    [-4.0, 36.5, 5.0],
     {
-      name: "hw_5V_Buck_Converter_WAGO",
-      label: "Dedicated 12V→5.0V 5A Screw-Terminal Buck Converter & WAGO 221 Lever Nuts (Powers 50 Track LEDs + 16 Topper LEDs via 3A Fuse F2)",
+      name: "hw_5V_Buck_Converter_UCTRONICS",
+      label: "UCTRONICS 12V→5.0V 5A (25W) Screw-Terminal Buck Converter (B07XXWQ49N / U6223, 63×27×10mm — Powers 50 Track LEDs + 16 Topper LEDs via 3A Fuse F2)",
       subsystem: "trunk_base",
       step: 2,
       sub_delay: 0.35,
       anim_dur: 0.65,
-      insert_offset: [35, -14, -48],
-      explode: [75, -25, -95],
+      insert_offset: [-4, 36, -48],
+      explode: [-10, 75, -95],
+    }
+  );
+
+  // 2e. 2x Stacked WAGO 221-415 5-Port Lever-Nut Blocks (18.6x30.0x16.8mm) in +X Vault Organizer Cradle
+  addElectronicActor(
+    new THREE.BoxGeometry(18.6, 30.0, 16.8),
+    { color: 0xf97316, metalness: 0.25, roughness: 0.35 },
+    [44.5, -12.0, 8.4],
+    {
+      name: "hw_5V_Buck_Converter_WAGO",
+      label: "WAGO 221-415 Lever-Nut Distribution Stack (B07NKT2P2F, 30.0×18.6×8.4mm each — Zero-solder +12V, +5V LED & Star GND buses)",
+      subsystem: "trunk_base",
+      step: 2,
+      sub_delay: 0.42,
+      anim_dur: 0.65,
+      insert_offset: [44, -12, -48],
+      explode: [78, -22, -95],
     }
   );
 

@@ -197,11 +197,19 @@ ATOM_LITE_CRADLE_Z = 10.6
 ATOM_LITE_FRONT_CLEARANCE_MM = 30.0         # >= 30.0 mm straight unobstructed cable clearance in front of Grove/pins
 BOARD_BAY_MIN_SPACING_MM = 18.0             # >= 18.0 mm spacing between IA005 PDB, MOSFET driver & motor shroud
 
-IA005_PDB_BAY_X = 10.6                      # Bambu IA005 4-Ch PDB bay (10.6 x 53.6 x 10.6 mm)
+UCTRONICS_BUCK_BAY_X = 64.2                 # UCTRONICS B07XXWQ49N (U6223, 63.0 x 27.0 x 10.0 mm) 5V 5A buck bay
+UCTRONICS_BUCK_BAY_Y = 28.2
+UCTRONICS_BUCK_BAY_Z = 12.0
+
+WAGO_221_BAY_X = 19.8                       # WAGO 221-415 (30.0 x 18.6 x 8.4 mm) dual-stack lever-nut bay
+WAGO_221_BAY_Y = 31.2
+WAGO_221_BAY_Z = 18.0
+
+IA005_PDB_BAY_X = 10.6                      # Legacy Bambu IA005 4-Ch PDB bay (10.6 x 53.6 x 10.6 mm)
 IA005_PDB_BAY_Y = 53.6
 IA005_PDB_BAY_Z = 10.6
 
-DUAL_MOSFET_BAY_X = 24.0                    # Dual-Channel Logic-Level MOSFET / Buck / Driver Module bay (24.0 x 18.0 x 12.0 mm)
+DUAL_MOSFET_BAY_X = 24.0                    # Legacy Dual-Channel MOSFET bay (24.0 x 18.0 x 12.0 mm)
 DUAL_MOSFET_BAY_Y = 18.0
 DUAL_MOSFET_BAY_Z = 12.0
 
