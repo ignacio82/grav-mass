@@ -795,12 +795,12 @@ async function init() {
 
   statusEl.textContent = "Fetching CAD scene manifest...";
   progBar.style.width = "25%";
-  const manifestResp = await fetch("assets/manifest.json?v=42", { cache: "no-store" });
+  const manifestResp = await fetch("assets/manifest.json?v=43", { cache: "no-store" });
   manifest = await manifestResp.json();
 
   statusEl.textContent = "Downloading B-Rep binary mesh buffer...";
   progBar.style.width = "55%";
-  const binResp = await fetch(`${manifest.binary_file}?v=42`, { cache: "no-store" });
+  const binResp = await fetch(`${manifest.binary_file}?v=43`, { cache: "no-store" });
   const arrayBuffer = await binResp.arrayBuffer();
 
   statusEl.textContent = "Constructing Three.js WebGL geometries & physics actors...";
@@ -2342,8 +2342,7 @@ function updateSimulation(dt) {
     const activeCob =
       state.mode !== "plates" &&
       subsystemVisibility.track !== false &&
-      cobLit &&
-      state.powerOn;
+      cobLit;
 
     // Animate per-vertex WS2812B addressable colors along the 4.5-turn BTF-LIGHTING Pebble Wire
     if (cobColorAttr) {
@@ -2411,8 +2410,7 @@ function updateSimulation(dt) {
     const activeWarmTopper =
       state.mode !== "plates" &&
       subsystemVisibility.topper !== false &&
-      topperLit &&
-      state.powerOn;
+      topperLit;
 
     // Animate per-vertex colors on the 16-LED Sparkleiot WS2812B Apple Topper Ring (B09YTMNGTD)
     if (puckColorAttr) {
@@ -2889,26 +2887,34 @@ function updateSimulation(dt) {
           const vLead = leader.speedMmS || 0.0;
           if (v > vLead) {
             const dv = v - vLead;
-            const eBall = 0.52;
-            v = 0.5 * (1.0 - eBall) * v + 0.5 * (1.0 + eBall) * vLead;
-            leader.speedMmS = Math.min(
-              980.0,
-              0.5 * (1.0 + eBall) * ( dv + vLead ) + 0.5 * (1.0 - eBall) * vLead
-            );
-            // If leader is pinned in queue, high-speed impact causes a physical uphill recoil + lateral wall jostle!
-            if (leader.isQueued && dv > 85.0) {
-              v = -0.28 * dv;
-            }
-            if (dv > 45.0) {
-              const jostleSign = m.index % 2 === 0 ? 1.0 : -1.0;
-              vuLat += jostleSign * Math.min(75.0, dv * 0.24);
-              leader.vuLat = (leader.vuLat || 0.0) - jostleSign * Math.min(60.0, dv * 0.18);
-              const flashVal = Math.min(1.0, dv / 220.0);
-              m.impactFlash = Math.max(m.impactFlash || 0.0, flashVal);
-              leader.impactFlash = Math.max(leader.impactFlash || 0.0, flashVal);
+            if (leader.isQueued && dv <= 45.0) {
+              v = 0.0;
+              vuLat *= 0.25;
+              if (Math.abs(vuLat) < 1.0) vuLat = 0.0;
+            } else {
+              const eBall = 0.52;
+              v = 0.5 * (1.0 - eBall) * v + 0.5 * (1.0 + eBall) * vLead;
+              if (!leader.isQueued) {
+                leader.speedMmS = Math.min(
+                  980.0,
+                  0.5 * (1.0 + eBall) * (dv + vLead) + 0.5 * (1.0 - eBall) * vLead
+                );
+              }
+              // If leader is pinned in queue, high-speed impact causes a physical uphill recoil + lateral wall jostle!
+              if (leader.isQueued && dv > 85.0) {
+                v = -0.28 * dv;
+              }
+              if (dv > 45.0) {
+                const jostleSign = m.index % 2 === 0 ? 1.0 : -1.0;
+                vuLat += jostleSign * Math.min(75.0, dv * 0.24);
+                leader.vuLat = (leader.vuLat || 0.0) - jostleSign * Math.min(60.0, dv * 0.18);
+                const flashVal = Math.min(1.0, dv / 220.0);
+                m.impactFlash = Math.max(m.impactFlash || 0.0, flashVal);
+                leader.impactFlash = Math.max(leader.impactFlash || 0.0, flashVal);
+              }
             }
           } else {
-            v = Math.min(v, vLead);
+            v = leader.isQueued ? 0.0 : Math.min(v, vLead);
           }
         } else {
           // Endcap bumper / intake gate rebound when bottom pocket is occupied
@@ -2918,6 +2924,8 @@ function updateSimulation(dt) {
             v = -0.32 * v;
           } else {
             v = 0.0;
+            vuLat *= 0.25;
+            if (Math.abs(vuLat) < 1.0) vuLat = 0.0;
           }
         }
       }
