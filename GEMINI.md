@@ -20,7 +20,11 @@ The **Grav-Mass Day "Falling Apple Cascade" Marble Run Tree** is a 3D-printable,
 ```text
 /home/ignacio/grav-mass/
 ├── GEMINI.md                     # AI engineering knowledge base & design invariants (KEEP UPDATED!)
-├── README.md                     # User-facing BOM with purchase links, 3D printing & step-by-step assembly guide
+├── README.md                     # Concise project overview, quick start, and documentation index
+├── docs/                         # Split user/developer documentation (BOM.md, PRINTING.md, ASSEMBLY.md, PHYSICS.md, SMART_HOME.md, DEVELOPMENT.md, REFACTOR_NOTES.md)
+├── bom/                          # Machine-readable BOM source of truth (bom.yaml) & generated spreadsheet (bom.csv)
+├── scripts/
+│   └── gen_bom.py                # Validates bom/bom.yaml and generates docs/BOM.md tables & bom/bom.csv (--check supported)
 ├── cad/
 │   ├── common_params.py          # Single source of truth for all parametric constants & helix/spiral equations
 │   ├── trunk.py                  # Trunk_Base (N20 motor + AAA battery bay + switch), Trunk_Mid, Trunk_Top, Battery_Cover
