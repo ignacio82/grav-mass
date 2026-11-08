@@ -33,8 +33,8 @@ electronics:
     url: https://www.amazon.com/UCTRONICS-Converter-Transformer-Voltage-Regulator/dp/B07XXWQ49N
     alt_skus:
       - U6223
-    spec: "`9–36V DC` in → Fixed **`5.0V DC, 5.0A (25W)`** out (`63 × 20 × 10 mm`) with onboard `VIN+/GND` and `OUT+/GND` screw terminals"
-    where_used: "Seats inside the `Ø 135 × 50 mm` Hollow Root Vault on Branch 2 (`F2 = 3A` fuse) to power all 66 WS2812B LEDs without loading `C008`'s USB diode"
+    spec: "`9–36V DC` in → Fixed **`5.0V DC, 5.0A (25W)`** out (`63.0 × 27.0 × 10.0 mm`) with onboard `VIN+/GND` and `OUT+/GND` screw terminals"
+    where_used: "Seats into the dedicated `+Y` snap-in cradle (`64.2 × 28.2 × 12.0 mm`) inside the `Ø 135 × 50 mm` Hollow Root Vault on Branch 2 (`F2 = 3A` fuse) to power all 66 WS2812B LEDs without loading `C008`'s USB diode"
     category: power
     optional: false
     notes: "status: **Required *(New — 5V LED Rail)*** | link_text: Amazon — UCTRONICS `DC 9V–36V to 5V 5A` Screw-Terminal Buck Converter (`B07XXWQ49N`)"
@@ -49,8 +49,8 @@ electronics:
       - "221-412"
       - "221-413"
       - "221-415"
-    spec: "Includes `5× 221-415` (5-port), `5× 221-413` (3-port), and `5× 221-412` (2-port) lever connectors (`24–12 AWG`)"
-    where_used: "Uses `2× 221-415` (`WAGO-1 +12V` & `WAGO-2 Star GND`) + `2× 221-413` (`WAGO-3 +5V LED` & `WAGO-4 LED GND`) for 100% tool-free distribution"
+    spec: "Includes `5× 221-415` (5-port, `30.0 × 18.6 × 8.4 mm`), `5× 221-413` (3-port, `18.7 × 18.6 × 8.4 mm`), and `5× 221-412` (2-port, `13.1 × 18.6 × 8.4 mm`) lever connectors (`24–12 AWG`)"
+    where_used: "Uses `2× 221-415` (`WAGO-1 +12V` & `WAGO-2 Star GND`, seated in the `+X` `19.8 × 31.2 × 18.0 mm` organizer cradle) + `2× 221-413` (`WAGO-3 +5V LED` & `WAGO-4 LED GND`) for 100% tool-free distribution"
     category: power-distribution
     optional: false
     notes: "qty_display: **1× Pack** | status: **Required *(New — Solder-Free Bus)*** | link_text: Amazon — WAGO `221` Lever-Nut 15-Piece Assortment Pocket Pack (`B07NKT2P2F`)"
@@ -207,7 +207,7 @@ electronics:
     vendor: M5Stack Store
     url: https://shop.m5stack.com/products/ina226-voltage-and-current-measurement-unit-10a
     alt_skus: []
-    spec: "`0–30V DC`, `±10A`, `HT3.96-4P` screw terminals + Grove `HY2.0-4P` I2C (`0x41`)"
+    spec: "`32.0 × 24.0 × 10.2 mm`, `0–30V DC`, `±10A`, `HT3.96-4P` screw terminals + Grove `HY2.0-4P` I2C (`0x41`)"
     where_used: "Clamps inline with the `5V` LED buck output (`GPIO21`/`GPIO25` I2C header) for real hardware current/power measurement in ESPHome"
     category: telemetry
     optional: true

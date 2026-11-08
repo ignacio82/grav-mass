@@ -63,7 +63,7 @@ where $\Delta s_{AB} = s_B - s_A$ and $\Delta h_{AB} = \Delta h_B - \Delta h_A$.
 
 | Marble Core Configuration (Inside `Apple_Hemisphere_A` + `B`) | Mass Distribution | Rotational Inertia Multiplier ($\kappa$) | Expected `G0 → G5` Transit Time ($g = 9.81\text{ m/s}^2$) |
 | :--- | :--- | :---: | :---: |
-| **Bambu Y-Shape 3-LED Light (`KC012`/`KC013`, `Ø 18 × 6.5 mm` + `CR1632`)** | 3-LED Y-board + `CR1632` steel coin cell in `Ø 18.7 mm` chamber | **`κ = 1.48`** | **`~4.21 s`** |
+| **Bambu Y-Shape 3-LED Light (`KC013` Warm White / `KC012` Cool White, `Ø 18.0 × 6.5 mm` + `CR1632`)** | 3-LED Y-board + `CR1632` (`Ø 16.0 × 3.2 mm`) steel coin cell in `Ø 18.70 × 7.30 mm` chamber | **`κ = 1.48`** | **`~4.21 s`** |
 | **Glowing LED + `M8` Steel Hex Nut Ring *(Recommended)*** | Heavy steel nut + LED concentrated near center + thin PLA shell | **`κ = 1.46`** | **`~4.18 s`** |
 | **Heavy `Ø 12.7 mm` (`1/2"`) Chrome Steel Ball Core** | Dense solid steel sphere (`~8.4 g`) concentrated at the center | **`κ = 1.42`** | **`~4.12 s`** |
 | **Hollow `PLA` Thin-Shell Lantern + LED Only** | Mass concentrated in the outer `~1.9 mm` spherical shell wall | **`κ = 1.54`** | **`~4.29 s`** |

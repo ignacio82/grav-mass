@@ -37,7 +37,7 @@ To satisfy all electrical, thermal, mechanical, and zero-solder constraints, the
    - `A092`'s internal `MP1584EN` buck converter powers the `C008` ATOM Lite ESP32 cleanly at `5.0V`.
    - `GPIO33` monitors the true `12.0V` input bus via `A092`'s onboard `1:10` resistor divider (`1.20V` at ADC pin).
 2. **Branch 2 — Addressable RGB LEDs (`12V` → Fuse `F2 (3A)` → Dedicated `12V → 5V 5A` Screw-Terminal Buck Converter → Track & Topper LEDs):**
-   - A dedicated synchronous `12V → 5V 5A (25W)` step-down converter (`DFRobot DFR0205` or sealed screw-terminal buck module) with a `1000 µF / 16V` electrolytic bulk capacitor across its output screw terminals powers both WS2812B LED zones:
+   - A dedicated synchronous `12V → 5V 5A (25W)` step-down converter (`UCTRONICS B07XXWQ49N` / `U6223` screw-terminal buck module, `63.0 × 27.0 × 10.0 mm`) with a `1000 µF / 16V` electrolytic bulk capacitor (`B07WPWFSNQ`) across its output screw terminals powers both WS2812B LED zones:
      - **Sub-Branch 2A:** `50× WS2812B` Helical Track Pebble Wire (`BTF-LIGHTING B0CCS11V7H`), fed at both the bottom starter plug and the built-in mid/end power-injection leads (`GPIO26` data via `330 Ω` series resistor).
      - **Sub-Branch 2B:** `16× WS2812B` Apple Topper Ring (`Sparkleiot B09YTMNGTD`), fed via a dedicated `1 m` `JST-SM` extension cable (`B0CT827QQC`) up the `10 × 8 mm` rear trunk conduit (`GPIO32` data).
    - **Strict `5V` Isolation Rule:** The `Red (+5V)` wire of the `A096` Grove cable from `C008` is **capped/disconnected** (or used solely to power an optional `3.3V → 5V` logic-level shifter IC's low-current $V_{CC}$ pin if needed). The external `5V` LED buck output **never** touches `C008`/`A092`'s `5V` rail. Only `GND`, `GPIO26` (White), and `GPIO32` (Yellow) connect between `C008` and the LED harnesses.
@@ -72,16 +72,16 @@ We evaluated two complete engineering solutions for driving the Archimedes screw
 | Subsystem | Component & Model / SKU | Verified Electrical & Physical Specifications | Source / Verification Status |
 | :--- | :--- | :--- | :--- |
 | **External PSU** | **BTF-LIGHTING `12V 5A (60W)` Power Supply Adapter (`B01D8FLSV8`)** | **Input:** `100–240V AC` (`50–60 Hz`). **Output:** Regulated **`12.0V DC`**, **`5.0A` (`60W`)**. **Plug:** `5.5 × 2.1 mm` center-positive (`AC` wall power cord included). **Protections:** Short-circuit, overload, overvoltage, over-temperature. ETL/CE/FCC/RoHS listed. | [Amazon (`B01D8FLSV8`)](https://www.amazon.com/dp/B01D8FLSV8) |
-| **DC Entry Jack** | **Pre-Wired `5.5 × 2.1 mm` Threaded Panel-Mount DC Barrel Jack (`B07C7VSRBG`, `18 AWG`)** | **Rating:** `12–24V DC`, **`5A–10A` continuous** (`<= 30 mΩ` contact resistance). **Mounting:** `Ø 11.2 mm` (`M11 × 0.75`) panel hole with hex nut, lock washer, and `18 AWG` pre-crimped red/black leads. | [Amazon (`B07C7VSRBG`)](https://www.amazon.com/dp/B07C7VSRBG) |
+| **DC Entry Jack** | **Pre-Wired `5.5 × 2.1 mm` Threaded Panel-Mount DC Barrel Jack (`B07C7VSRBG`, `18 AWG`)** | **Rating:** `12–24V DC`, **`5A–10A` continuous** (`<= 30 mΩ` contact resistance). **Mounting:** `Ø 11.4 mm` (`M11 × 0.75` `Ø 11.0 mm` thread at `Z = 10.0 mm`) panel hole with hex nut, lock washer, and `18 AWG` pre-crimped red/black leads. | [Amazon (`B07C7VSRBG`)](https://www.amazon.com/dp/B07C7VSRBG) |
 | **Controller Base** | **M5Stack Atomic H-Driver Base (`A092` / `K050`)** | **Input (`VIN`):** **`9–24V DC`** via `HT3.96-4P` (`3.96 mm` pitch) pluggable screw terminal. **H-Bridge IC:** TI `DRV8876PWPR` (`1.5A` continuous, `2.0A` peak, internal OCP/TSD/UVLO). **Internal Buck:** `MP1584EN` (`VIN → 5.0V @ 1.0A` for ATOM). **Pinout:** `G19 = IN1`, `G23 = IN2`, `G22 = nFAULT` (open-drain active LOW), `G33 = VIN × (10 kΩ / 100 kΩ) = VIN / 10`. **Size:** `48.0 × 24.0 × 18.0 mm` (with `C008`). | [M5Stack Store (`A092`)](https://shop.m5stack.com/products/atomic-h-bridge-driver-base-drv8876) |
-| **ESP32 Controller** | **M5Stack ATOM Lite (`C008`)** | **MCU:** `ESP32-PICO-D4` (`240 MHz` dual-core, Wi-Fi/BLE). **Supply:** `5.0V` (`120 mA` typ Wi-Fi active, `250 mA` peak TX burst). **GPIO:** `G26` (Grove White), `G32` (Grove Yellow), `G39` (Front Button), `G27` (1× SK6812 RGB status LED). **Size:** `24.0 × 24.0 × 10.0 mm`. | [M5Stack Store (`C008`)](https://shop.m5stack.com/products/atom-lite-esp32-development-kit) |
-| **5V LED Buck Converter** | **UCTRONICS `DC 9V–36V to 5V 5A (25W)` Screw-Terminal Buck Converter (`B07XXWQ49N`, Model `U6223`)** | **Input:** `9–36V DC` (`12.0V` nominal). **Output:** Fixed **`5.0V DC`**, **`5.0A` continuous (`25W`)**, synchronous rectification ($\eta \approx 88–92\%$). **Terminals:** Onboard `VIN+/GND` and `OUT+/GND` screw terminals. **Size:** `63.0 × 20.0 × 10.0 mm`. | [Amazon (`B07XXWQ49N`)](https://www.amazon.com/UCTRONICS-Converter-Transformer-Voltage-Regulator/dp/B07XXWQ49N) |
+| **ESP32 Controller** | **M5Stack ATOM Lite (`C008`)** | **MCU:** `ESP32-PICO-D4` (`240 MHz` dual-core, Wi-Fi/BLE). **Supply:** `5.0V` (`120 mA` typ Wi-Fi active, `250 mA` peak TX burst). **GPIO:** `G26` (Grove White), `G32` (Grove Yellow), `G39` (Front Button), `G27` (1× SK6812 RGB status LED). **Size:** `24.0 × 24.0 × 9.5 mm`. | [M5Stack Store (`C008`)](https://shop.m5stack.com/products/atom-lite-esp32-development-kit) |
+| **5V LED Buck Converter** | **UCTRONICS `DC 9V–36V to 5V 5A (25W)` Screw-Terminal Buck Converter (`B07XXWQ49N`, Model `U6223`)** | **Input:** `9–36V DC` (`12.0V` nominal). **Output:** Fixed **`5.0V DC`**, **`5.0A` continuous (`25W`)**, synchronous rectification ($\eta \approx 88–92\%$). **Terminals:** Onboard `VIN+/GND` and `OUT+/GND` screw terminals. **Size:** `63.0 × 27.0 × 10.0 mm`. | [Amazon (`B07XXWQ49N`)](https://www.amazon.com/UCTRONICS-Converter-Transformer-Voltage-Regulator/dp/B07XXWQ49N) |
 | **Track LEDs (Zone 2)** | **BTF-LIGHTING `DC5V` WS2812B Pebble/Seed Pixel String (`B0CCS11V7H`, `50 LEDs`, `5 m`)** | **Voltage:** **`5.0V DC`**. **Pixels:** `50×` addressable RGB ICs encapsulated in `6.2 × 3.2 mm` oval clear resin drops (`100 mm` spacing). **Manufacturer Rated Power:** `0.1W/LED` = **`5.0W` (`1.00A @ 5V`)** nominal; **Unthrottled 100% Solid White Ceiling:** `36 mA/pebble` = **`1.80A` (`9.0W @ 5V`)** (or `3.00A / 15.0W` using conservative `60 mA/pixel` SMD5050 bound). **Connectors:** Pre-terminated 3-pin `JST-SM` + red/black power-injection pigtails at both ends. | [Amazon (`B0CCS11V7H`)](https://www.amazon.com/dp/B0CCS11V7H) |
 | **Topper LEDs (Zone 1)** | **Sparkleiot 16-Bit WS2812B 5050 RGB LED Ring (`B09YTMNGTD`, `Ø 45 mm`)** | **Voltage:** **`5.0V DC`**. **Pixels:** `16×` `WS2812B` `5050` SMD RGB LEDs (`12 mA/channel × 3 = 36–60 mA/LED`). **Unthrottled 100% Solid White Ceiling:** `16 × 60 mA` = **`0.96A` (`4.80W @ 5V`)**; typical animated rainbow = `0.30–0.45A` (`1.5–2.25W`). **Connectors:** Pre-soldered 3-pin `JST-SM` male & female pigtails (`5V`, `DI/DO`, `GND`). | [Amazon (`B09YTMNGTD`)](https://www.amazon.com/dp/B09YTMNGTD) |
 | **Auger Motor (Option B — Primary)** | **`12V DC 150 RPM N20` Micro Metal Gear Motor (`B0BFRPMSW6`, `Ø 3 mm` D-Shaft)** | **Rated Voltage:** **`12.0V DC`** (`6–15V` operating range). **Speed:** **`150 RPM` ±10%** at `12V`. **Current:** `35 mA` no-load, **`150–220 mA` rated lifting load** (`2.64W`), **`0.65A` stall current** (`7.80W @ 12V`). **Rated Torque:** `0.90 kg·cm` (`900 g·cm`). **Dimensions:** `10.0 × 12.0 × 25.0 mm` gearbox+body, `Ø 3.0 × 9.0 mm` D-shaft (`2.5 mm` flat). | [Amazon (`B0BFRPMSW6`)](https://www.amazon.com/dp/B0BFRPMSW6) |
 | **Auger Motor (Option A — Retrofit)** | **Bambu Lab `LA002` `6V DC 150 RPM N20` Gear Motor** + **`12V→6V 3A` Buck** + **Screw-Terminal `DRV8871` / `TB67H420FTG`** | **Rated Voltage:** **`6.0V DC`** (`3–7V` operating range). **Speed:** `150 RPM` at `6V`. **Rated Torque:** `852.6 g·cm`. **Current:** `50 mA` no-load, `250–300 mA` lifting load (`1.80W @ 6V`), `0.85A` stall (`5.10W @ 6V`). | Verified via [Bambu Lab `LA002` PDF Datasheet](https://store.bblcdn.com/s1/default/3c08b682f05248a18eb163890acc7211/N20_Reduction_Gear_Motor.pdf). |
-| **Optional Hardware Telemetry** | **M5Stack Unit `INA226-10A` (`SKU: U190`)** | **Interface:** Plug-and-play Grove `HY2.0-4P` I2C (`0x41` default) + `HT3.96-4P` pluggable screw terminals. **Range:** `0–30V DC`, **`±10A` continuous** (`0.005 Ω` shunt, `1.25 mA` resolution, `±0.1%` accuracy). **Size:** `58.0 × 24.0 × 10.2 mm`. | Verified via M5Stack `U190` (`INA226-10A`) documentation. |
-| **Wireless Ornaments** | **8× Single Magnetic LEDs (`KA006`) + 6× Y-Shape Magnetic LEDs (`KC012`/`KC013`)** | **Supply:** Self-contained `CR927` (`KA006`) and `CR1632` (`KC012`/`KC013`) coin-cell batteries (**`0.00A` load on the `12V` external supply**). | Verified via Bambu Lab Maker's Supply specifications. |
+| **Optional Hardware Telemetry** | **M5Stack Unit `INA226-10A` (`SKU: U190`)** | **Interface:** Plug-and-play Grove `HY2.0-4P` I2C (`0x41` default) + `HT3.96-4P` pluggable screw terminals. **Range:** `0–30V DC`, **`±10A` continuous** (`0.005 Ω` shunt, `1.25 mA` resolution, `±0.1%` accuracy). **Size:** `32.0 × 24.0 × 10.2 mm`. | Verified via M5Stack `U190` (`INA226-10A`) documentation. |
+| **Wireless Ornaments** | **8× Single Magnetic LEDs (`KA006`) + 6× Y-Shape Magnetic LEDs (`KC013` / `KC012`)** | **Supply:** Self-contained `CR927` (`KA006`) and `CR1632` (`KC013` Warm White / `KC012` Cool White) coin-cell batteries (**`0.00A` load on the `12V` external supply**). | Verified via Bambu Lab Maker's Supply specifications. |
 
 ---
 
@@ -98,7 +98,7 @@ The table below calculates both **Typical Continuous Operation** (animated RGB c
 | **Branch 3 (Option B — Primary): `12V 150 RPM N20` Motor on `A092`** | `12.0V` | `0.18 A` *(lifting 6 marbles)* | `0.65 A` *(locked-rotor stall)* | `2.16 W` / `7.80 W` | `97%` *(DRV8876 $R_{DS(on)}$)* | `2.23 W` / `8.04 W` | `0.19 A` / `0.67 A` | **Verified Spec:** `12V N20` draws `150–220 mA` under load, `0.65A` stall (well below `DRV8876` `1.5A` continuous / `2.0A` peak limit). |
 | *Branch 3 (Option A — Alt): `6V LA002` + `12V→6V` Buck + Ext H-Bridge* | *`6.0V`* | *`0.28 A`* | *`0.85 A` (stall)* | *`1.68 W` / `5.10 W`* | *`85%` (12V→6V Buck)* | *`1.98 W` / `6.00 W`* | *`0.17 A` / `0.50 A`* | *Verified via Bambu `LA002` PDF (`6V` rated, `852.6 g·cm` torque).* |
 | **Wiring, Contact & Fuse Distribution Loss Allowance (`5%`)** | `12.0V` | — | — | — | — | `0.46 W` / `1.26 W` `[1.60 W]` | `0.04 A` / `0.11 A` `[0.13 A]` | Conservative `5%` allowance across WAGO terminals, inline blade fuses, and `18–20 AWG` internal leads. |
-| **TOTAL SYSTEM INPUT AT `12.0V DC` BARREL JACK** | **`12.0V DC`** | — | — | **`8.26 W` / `22.85 W`** `[28.85 W]` | — | **`9.67 W` / `26.50 W`** **`[33.66 W]`** | **`0.81 A` / `2.21 A`** **`[2.81 A]`** | **Selected `12V 5.0A (60W)` PSU (`GST60A12-P1J`) provides `2.26×` (`+126%`) headroom** (and even a `12V 3.0A (36W)` `GST36A12-P1J` provides `> 35%` margin over actual hardware peak!). |
+| **TOTAL SYSTEM INPUT AT `12.0V DC` BARREL JACK** | **`12.0V DC`** | — | — | **`8.26 W` / `22.85 W`** `[28.85 W]` | — | **`9.67 W` / `26.50 W`** **`[33.66 W]`** | **`0.81 A` / `2.21 A`** **`[2.81 A]`** | **Selected `12V 5.0A (60W)` PSU (`BTF-LIGHTING B01D8FLSV8`) provides `2.26×` (`+126%`) headroom** over actual simultaneous hardware peak! |
 
 > [!NOTE]
 > **Values Verified from Datasheets vs. Values to Measure on Physical Hardware Before Full Commissioning:**
@@ -117,11 +117,11 @@ The table below calculates both **Typical Continuous Operation** (animated RGB c
 ```mermaid
 flowchart LR
   subgraph EXT["External Wall Power (1 Cable)"]
-    PSU["🔌 MEAN WELL GST60A12-P1J<br/>Regulated 12V DC 5.0A (60W)<br/>(or GST36A12-P1J 12V 3.0A 36W)<br/>5.5 × 2.1 mm Center-Positive"]
+    PSU["🔌 BTF-LIGHTING B01D8FLSV8<br/>Regulated 12V DC 5.0A (60W)<br/>5.5 × 2.1 mm Center-Positive"]
   end
 
   subgraph ENTRY["Trunk_Base Rear (-X) Panel Entry & WAGO Bus"]
-    JACK["🔘 Panel-Mount 5.5×2.1mm DC Jack<br/>(Rear -X Root Flange Bore Ø11.2mm)<br/>18 AWG Pigtails"]
+    JACK["🔘 Panel-Mount 5.5×2.1mm DC Jack<br/>(Rear -X Root Flange Bore Ø11.4mm)<br/>18 AWG Pigtails (B07C7VSRBG)"]
     F0["🛡️ Main Inline Fuse F0<br/>5A Mini Blade Fuse"]
     WAGO_POS["🟧 WAGO 221-415 (+12V Bus)<br/>5-Port Lever Connector"]
     WAGO_GND["⬛ WAGO 221-415 (Star GND Bus)<br/>5-Port Lever Connector"]
@@ -137,7 +137,7 @@ flowchart LR
 
   subgraph BR2["Branch 2: Dedicated 5V Addressable LED Power Rail"]
     F2["🛡️ Fuse F2: 3A Blade"]
-    BUCK5["🟦 12V → 5.0V 5A (25W) Sync Buck<br/>(DFRobot DFR0205 / Screw-Terminal)<br/>+ 1000µF 16V Bulk Cap across OUT+/OUT-"]
+    BUCK5["🟦 12V → 5.0V 5A (25W) Sync Buck<br/>(UCTRONICS B07XXWQ49N / U6223)<br/>+ 1000µF 16V Bulk Cap across OUT+/OUT-"]
     INA["📊 Optional M5Stack U190 (INA226-10A)<br/>Screw-Terminal High-Side 5V/12V Sensor<br/>(I2C 0x41 -> ESPHome Telemetry)"]
     WAGO_5V["🟧 WAGO 221-413 (+5V LED Bus)"]
     WAGO_LGND["⬛ WAGO 221-413 (LED GND Bus)"]
@@ -180,11 +180,11 @@ GRAV-MASS TREE — SINGLE-CABLE 12V DC SOLDER-FREE WIRING SCHEMATIC (PRIMARY OPT
 ====================================================================================================
 
 [ EXTERNAL WALL ADAPTER ]
-  MEAN WELL GST60A12-P1J (12.0V DC, 5.0A, 60W) or GST36A12-P1J (12.0V DC, 3.0A, 36W)
+  BTF-LIGHTING B01D8FLSV8 (Regulated 12.0V DC, 5.0A, 60W)
          │
          ▼  (Single 5.5 × 2.1 mm Barrel Plug entering Rear -X Root Flange of Trunk_Base)
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ [J1] PANEL-MOUNT 5.5 × 2.1 mm DC BARREL JACK (12V / 5A-10A Rated, Ø11.2 mm Rear Mounting Bore)   │
+│ [J1] PANEL-MOUNT 5.5 × 2.1 mm DC BARREL JACK (12V / 5A-10A Rated, Ø11.4 mm Rear Mounting Bore)   │
 │   ├── Center Pin (+12V, Red 18 AWG) ──► [F0: 5A Inline Blade Fuse] ──► [WAGO-1: +12V 5-Port Bus] │
 │   └── Sleeve     (GND,  Blk 18 AWG) ─────────────────────────────────► [WAGO-2: Star GND Bus]    │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -199,7 +199,7 @@ GRAV-MASS TREE — SINGLE-CABLE 12V DC SOLDER-FREE WIRING SCHEMATIC (PRIMARY OPT
          ▼                   ▼                                            │ at [WAGO-2]            │
 ┌────────────────────┐  ┌──────────────────────────────────────────────┐  └───────────┬────────────┘
 │ M5Stack A092 Base  │  │ 12V -> 5.0V 5A (25W) SCREW-TERMINAL BUCK     │              │
-│ (HT3.96-4P Plug)   │  │ (DFRobot DFR0205 / Synchronous 5V 5A Module) │              │
+│ (HT3.96-4P Plug)   │  │ (UCTRONICS B07XXWQ49N / U6223, 63×27×10 mm)  │              │
 │  • VIN ◄───────────┘  │  • IN+  ◄── (+12V from F2)                   │              │
 │  • GND ◄─────────────────• IN-  ◄── (GND from WAGO-2) ───────────────┼──────────────┤
 │  • M1  ──► 12V N20    │  • OUT+ ──┬── [C_bulk: 1000µF 16V (+)]       │              │
@@ -240,7 +240,7 @@ GRAV-MASS TREE — SINGLE-CABLE 12V DC SOLDER-FREE WIRING SCHEMATIC (PRIMARY OPT
 
 | Connection ID | Source Component & Pin/Terminal | Destination Component & Pin/Terminal | Wire Color & Gauge | Connector / Termination Type (100% Solder-Free) | Signal / Voltage & Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`PWR-01`** | External `12V` Adapter (`GST60A12-P1J` / `GST36A12-P1J`) Plug | `J1` Rear Panel-Mount `5.5 × 2.1 mm` Barrel Jack | Black jacket (`18 AWG` coaxial) | `5.5 × 2.1 mm` DC barrel plug (center `+12V`, barrel `GND`) | Single external `12.0V DC` power entry into the sculpture. |
+| **`PWR-01`** | External `12V` Adapter (`BTF-LIGHTING B01D8FLSV8`) Plug | `J1` Rear Panel-Mount `5.5 × 2.1 mm` Barrel Jack (`B07C7VSRBG`) | Black jacket (`18 AWG` coaxial) | `5.5 × 2.1 mm` DC barrel plug (center `+12V`, barrel `GND`) | Single external `12.0V DC` power entry into the sculpture. |
 | **`PWR-02`** | `J1` Panel Barrel Jack **`+12V` (Center Pin)** | Inline Blade Fuse Holder **`F0 (5A)` Input** → **`WAGO-1` Port 1** | Red `18 AWG` | Pre-wired inline mini/ATC fuse lead clamped into `WAGO 221-415` Port 1 | Main fused `+12.0V DC` distribution bus. |
 | **`PWR-03`** | `J1` Panel Barrel Jack **`GND` (Outer Sleeve)** | **`WAGO-2` Port 1** (`Star GND Bus`) | Black `18 AWG` | Stripped `11 mm` tinned/stranded lead clamped into `WAGO 221-415` Port 1 | Primary `0V` Star Ground reference for the entire sculpture. |
 | **`BR1-01`** | **`WAGO-1` (`+12V` Bus) Port 2** | Inline Fuse **`F1 (2A)`** → **`A092` `HT3.96-4P` Terminal `VIN`** | Red `20 AWG` (or `18 AWG`) | Lever clamp at `WAGO-1` → `3.96 mm` screw clamp at `A092` `VIN` | Supplies `12.0V DC` to `A092` `DRV8876` H-bridge and internal `12V→5V` regulator for `C008`. |
@@ -300,7 +300,7 @@ All fuses use **standard automotive Mini (`APM`/`ATM`) or ATC blade fuses** hous
 | **`F3` *(Option A Only)*** | `WAGO-1` → `12V→6V 3A` Motor Buck Converter `IN+` | `0.17 A` (`@ 12V`) | `0.50 A` (`@ 12V`) | **`1.0 A` Fast-Acting Automotive Blade Fuse** (Black) | `20 AWG` (`11A` rated) | Protects the `6V` `LA002` motor buck converter and external H-bridge against prolonged stall or short. |
 
 ### Additional Built-In Hardware Protections
-- **Reverse-Polarity Protection:** The external `MEAN WELL GST60A12-P1J` barrel plug (`5.5 × 2.1 mm` center-positive) mates only one way with the panel-mounted `J1` barrel jack. Inside `A092`, the `VIN` input and `DRV8876` include undervoltage lockout (`UVLO` @ `4.15V`), overcurrent protection (`OCP` @ `2.0A`), and thermal shutdown (`TSD` @ `165 °C`).
+- **Reverse-Polarity Protection:** The external `BTF-LIGHTING B01D8FLSV8` barrel plug (`5.5 × 2.1 mm` center-positive) mates only one way with the panel-mounted `J1` barrel jack (`B07C7VSRBG`). Inside `A092`, the `VIN` input and `DRV8876` include undervoltage lockout (`UVLO` @ `4.15V`), overcurrent protection (`OCP` @ `2.0A`), and thermal shutdown (`TSD` @ `165 °C`).
 - **`5V` LED Bulk Decoupling Capacitor (`C_bulk`):** A **`1000 µF, 16V` radial electrolytic capacitor** (`105 °C` low-ESR) has its `+` and `-` leads clamped directly into the `OUT+` and `OUT-` screw terminals of the `12V→5V` buck converter alongside the `18 AWG` output wires, suppressing voltage spikes during rapid WS2812B PWM transitions and startup inrush.
 - **Motor EMI Suppression:** Both the `12V 150 RPM N20` motor and `LA002` include a factory `100 nF` (`104`) ceramic capacitor across the motor brush terminals, supplemented by `A092`'s onboard bulk/ceramic decoupling capacitors.
 
@@ -328,10 +328,10 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 
 | Connector / Terminal | Location in Sculpture | Pitch / Size | Manufacturer Current Rating | Max Operating Current in Grav-Mass | Utilization % | Termination Method (Zero Solder) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **`5.5 × 2.1 mm` Panel Barrel Jack (`DC-099`)** | Rear `-X` flange of `trunk_base` (`Ø 11.2 mm` bore at `X=-72, Y=0, Z=9.5 mm`) | `5.5 mm` OD / `2.1 mm` ID | **`5.0 A – 10.0 A`** (`@ 12–24V DC`) | `2.21 A` (`2.81 A` max) | `28–44%` | Pre-wired `18 AWG` leads + threaded panel hex nut. |
-| **WAGO `221-415` / `221-413` Compact Lever Nuts** | Inside `trunk_base` Hollow Root Vault (`WAGO-1..4`) | Accepts `24–12 AWG` (`0.2–4.0 mm²`) | **`20.0 A – 32.0 A`** (`UL 486C` / `EN 60998`) | `2.81 A` max | `< 14%` | Tool-free cam lever (lift orange lever, insert `11 mm` stripped wire, snap lever down). |
+| **`5.5 × 2.1 mm` Panel Barrel Jack (`DC-099`, `B07C7VSRBG`)** | Rear `-X` flange of `trunk_base` (`Ø 11.4 mm` bore at `X=-72.5, Y=0, Z=10.0 mm`) | `5.5 mm` OD / `2.1 mm` ID | **`5.0 A – 10.0 A`** (`@ 12–24V DC`) | `2.21 A` (`2.81 A` max) | `28–44%` | Pre-wired `18 AWG` leads + threaded panel hex nut. |
+| **WAGO `221-415` / `221-413` Compact Lever Nuts (`B07NKT2P2F`)** | Inside `trunk_base` Hollow Root Vault (`WAGO-1..4`, `+X` cradle at `(+44.5, -12.0)`) | Accepts `24–12 AWG` (`0.2–4.0 mm²`) | **`20.0 A – 32.0 A`** (`UL 486C` / `EN 60998`) | `2.81 A` max | `< 14%` | Tool-free cam lever (lift orange lever, insert `11 mm` stripped wire, snap lever down). |
 | **Pluggable Screw Terminal (`HT3.96-4P`)** | `M5Stack A092` (`VIN`, `GND`, `M1`, `M2`) & `U190` (`INA226`) | `3.96 mm` pitch | **`8.0 A – 10.0 A`** (`300V`) | `0.80 A` (`A092`), `2.76 A` (`U190`) | `10–35%` | Flathead screwdriver clamp (`24–16 AWG`). |
-| **Barrier / Cage Screw Terminals** | `12V → 5V 5A` Buck Converter (`DFR0205`) `IN+/IN-/OUT+/OUT-` | `5.08 mm` / `3.81 mm` pitch | **`10.0 A – 15.0 A`** | `2.76 A` (`3.96 A` max) | `26%` | Phillips/flathead screw clamp. |
+| **Barrier / Cage Screw Terminals** | `12V → 5V 5A` Buck Converter (`UCTRONICS B07XXWQ49N` / `U6223`, `63.0 × 27.0 × 10.0 mm`) `VIN+/GND/OUT+/GND` | `5.08 mm` / `3.81 mm` pitch | **`10.0 A – 15.0 A`** | `2.76 A` (`3.96 A` max) | `26%` | Phillips/flathead screw clamp. |
 | **3-Pin `JST-SM` Plug & Receptacle** | Track Wire (`B0CCS11V7H`) & Topper Extension (`B0CT827QQC`) | `2.50 mm` pitch | **`3.0 A`** (`250V`) | `0.96 A` (`Topper`), `0.90 A` per end (`Track`) | `32%` | Factory-crimped latching plug-and-play housing. |
 | **Grove `HY2.0-4P` (`A096` Breakout Cable)** | `M5Stack C008` ATOM Lite Port | `2.00 mm` pitch | **`2.0 A`** max | **`< 0.005 A` (`5 mA` logic data only!)** | **`< 0.3%`** | Factory-molded latching 4-pin plug (carries **only** `GPIO26`, `GPIO32`, and signal `GND` reference!). |
 
@@ -345,9 +345,9 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 3. Route the two motor leads (`Red` and `Black`) out through the bottom `-Y` shroud exit notch (`6.5 × 7.6 mm`) into the Hollow Root Vault.
 
 ### Step 2 — Mount the Rear Panel `5.5 × 2.1 mm` DC Barrel Jack (`J1`)
-1. Remove the hex mounting nut from the pre-wired **`5.5 × 2.1 mm` panel-mount DC barrel jack**.
-2. Thread the jack's `18 AWG` red (`+12V`) and black (`GND`) pigtails from the outside of `trunk_base` through the **`Ø 11.2 mm` rear `-X` DC jack port** (`X = -72.0, Y = 0.0, Z = 9.5 mm`, with integrated anti-rotation D-flat and internal nut pocket) into the Hollow Root Vault.
-3. Slide the lock washer and M11 hex nut over the pigtails inside the vault and tighten finger-snug plus a quarter turn with needle-nose pliers.
+1. Remove the hex mounting nut from the pre-wired **`5.5 × 2.1 mm` panel-mount DC barrel jack (`B07C7VSRBG`)**.
+2. Thread the jack's `18 AWG` red (`+12V`) and black (`GND`) pigtails from the outside of `trunk_base` through the **`Ø 11.4 mm` rear `-X` DC jack port** (`X = -72.5, Y = 0.0, Z = 10.0 mm`, `M11 × 0.75` thread) into the Hollow Root Vault.
+3. Slide the lock washer and `M11` hex nut over the pigtails inside the vault and tighten finger-snug plus a quarter turn with needle-nose pliers.
 
 ### Step 3 — Wire the `12V` and `GND` WAGO Lever-Nut Buses (`WAGO-1` & `WAGO-2`)
 1. Clamp the DC jack's **`+12V` (Red `18 AWG`)** lead into the input side of the **`F0 (5A)` inline blade fuse holder**, and clamp the fuse holder's output lead into **`WAGO-1` (`221-415`, `+12V` Bus) Port 1**.
@@ -363,11 +363,11 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 5. Snap the `A092 + C008` stack into the `-Y` bottom electronics bay (`(0.0, -33.0 mm)`) and secure `Battery_Cover` (aligning its `Ø 5.0 mm` access port over the `C008` status LED and `GPIO39` button).
 
 ### Step 5 — Wire Branch 2 (`12V → 5.0V 5A` LED Buck Converter & Bulk Capacitor)
-1. Clamp the input lead of the **`F2 (3A)` inline blade fuse holder** into **`WAGO-1` (`+12V`) Port 3**, and screw its output lead into the **`IN+`** screw terminal of the **`12V → 5V 5A` Buck Converter (`DFR0205`)**.
-2. Clamp a black `18 AWG` wire from **`WAGO-2` (`Star GND`) Port 3** into the **`IN-`** screw terminal of the `5V` buck converter.
-3. Insert the **`+` (longer) leg** of the **`1000 µF, 16V` electrolytic capacitor** and a red `18 AWG` output wire together into the **`OUT+`** screw terminal of the `5V` buck converter and tighten. Clamp the other end of the red `18 AWG` wire into **`WAGO-3` (`221-413`, `+5V LED` Bus) Port 1** (or route through the optional `M5Stack U190` `INA226` current sensor screw terminals).
-4. Insert the **`-` (shorter, stripe-marked) leg** of the **`1000 µF, 16V` capacitor**, a black `18 AWG` star-ground jumper (to `WAGO-2` Port 4), and a black `18 AWG` wire (to **`WAGO-4` (`221-413`, `LED GND` Bus) Port 1**) into the **`OUT-`** screw terminal of the `5V` buck converter and tighten.
-5. Seat the `5V` buck converter and WAGO lever blocks into the perimeter snap-in cradles inside the `Ø 135 × 50 mm` Hollow Root Vault.
+1. Clamp the input lead of the **`F2 (3A)` inline blade fuse holder** into **`WAGO-1` (`+12V`) Port 3**, and screw its output lead into the **`VIN+` (`IN+`)** screw terminal of the **`12V → 5V 5A` Buck Converter (`UCTRONICS B07XXWQ49N` / `U6223`, `63.0 × 27.0 × 10.0 mm`)**.
+2. Clamp a black `18 AWG` wire from **`WAGO-2` (`Star GND`) Port 3** into the **`GND` (`IN-`)** screw terminal of the `5V` buck converter.
+3. Insert the **`+` (longer) leg** of the **`1000 µF, 16V` electrolytic capacitor (`B07WPWFSNQ`)** and a red `18 AWG` output wire together into the **`OUT+`** screw terminal of the `5V` buck converter and tighten. Clamp the other end of the red `18 AWG` wire into **`WAGO-3` (`221-413`, `+5V LED` Bus) Port 1** (or route through the optional `M5Stack U190` `INA226` current sensor screw terminals).
+4. Insert the **`-` (shorter, stripe-marked) leg** of the **`1000 µF, 16V` capacitor**, a black `18 AWG` star-ground jumper (to `WAGO-2` Port 4), and a black `18 AWG` wire (to **`WAGO-4` (`221-413`, `LED GND` Bus) Port 1**) into the **`GND` (`OUT-`)** screw terminal of the `5V` buck converter and tighten.
+5. Seat the `5V` buck converter into its dedicated `+Y` snap-in cradle (`64.2 × 28.2 × 12.0 mm` at `(-4.0, +36.5 mm)`) and the WAGO lever blocks into the `+X` organizer cradle (`19.8 × 31.2 × 18.0 mm` at `(+44.5, -12.0 mm)`) inside the `Ø 135 × 50 mm` Hollow Root Vault.
 
 ### Step 6 — Connect the Helical Track Wire (`GPIO26`) & Apple Topper Ring (`GPIO32`)
 1. Route the bottom input leads of the **50-LED Helical Track Pebble Wire (`B0CCS11V7H`)** down through `trunk_base`'s `cob_wire_conduit` (`X = +16.5, Y = -27.5 mm`) and route its top termination injection pigtail + the **16-LED Topper Ring's `1 m` extension cable (`B0CT827QQC`)** down the **`10.0 × 8.0 mm` rear `-X` trunk conduit**.
@@ -387,7 +387,7 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 > **Mandatory Safety Rules Before Energizing:**
 > 1. **Never Connect Mains AC Inside the Sculpture:** Only regulated `12.0V DC` Safety Extra-Low Voltage (`SELV` / Class 2) from a UL/CE-listed external desktop/wall adapter may enter the 3D-printed enclosure.
 > 2. **Strict `5V` Rail Isolation (No Backfeeding):** Never connect the `+5.0V` output of the external LED buck converter to the `5V` pin of `A092` or `C008` (including the `Red` wire of the `A096` Grove cable). `A092` generates its own `5.0V` rail from `12V` via its internal `MP1584EN` regulator. Only **`GND`** is shared between the two `5V` domains.
-> 3. **Verify Buck Converter Voltage Before Connecting LEDs (If Using an Adjustable Module):** Fixed `5.0V` modules (`DFRobot DFR0205`) output `5.0V` out of the box. If you substitute an adjustable buck module (`LM2596` / `XL4015` with a brass trim pot), you **must** power the buck converter alone and adjust its output to **`5.00V ± 0.05V DC`** with a multimeter *before* connecting the WS2812B LEDs (voltages `> 5.5V` will permanently destroy WS2812B ICs!).
+> 3. **Verify Buck Converter Voltage Before Connecting LEDs (If Using an Adjustable Module):** Fixed `5.0V` modules (`UCTRONICS B07XXWQ49N` / `U6223`) output `5.0V` out of the box. If you substitute an adjustable buck module (`LM2596` / `XL4015` with a brass trim pot), you **must** power the buck converter alone and adjust its output to **`5.00V ± 0.05V DC`** with a multimeter *before* connecting the WS2812B LEDs (voltages `> 5.5V` will permanently destroy WS2812B ICs!).
 > 4. **Verify Polarity & Electrolytic Capacitor Orientation:** Double-check that the negative stripe (`-`) of the `1000 µF, 16V` capacitor connects to `OUT-` (`GND`) and `+` connects to `OUT+` (`+5V`). Reverse polarity on an electrolytic capacitor can cause venting or rupture.
 > 5. **Thermal Ventilation in PLA:** At worst-case continuous load (`13.8W` LED output at $\eta = 88\%$), the `12V → 5V` synchronous buck converter dissipates only **$P_{\text{diss}} = 15.68 - 13.80 = 1.88\text{ W}$** (and `< 0.75W` during normal animated operation). Always use the louvered **`Base_Bottom_Cover`** so natural convection keeps internal vault temperatures `< 38 °C` (well below PLA's `55–60 °C` glass-transition temperature).
 
@@ -405,24 +405,24 @@ Perform these checks in exact sequential order using a digital multimeter before
 - [ ] **1.5 Fuse Rating Check:** Visually verify `F0 = 5A`, `F1 = 2A` (`1A` for Option A), and `F2 = 3A` blade fuses are seated in their holders.
 
 ### 11.2 Stage 2 — Power Supply & Buck Regulator Voltage Verification (Loads Disconnected)
-- [ ] **2.1 External Adapter Check:** Plug the `MEAN WELL` `12V` adapter into AC mains (unplugged from the tree) and measure the barrel plug (`center = +`, `barrel = -`). Confirm **`11.80V – 12.30V DC`**.
+- [ ] **2.1 External Adapter Check:** Plug the `BTF-LIGHTING B01D8FLSV8` `12V` adapter into AC mains (unplugged from the tree) and measure the barrel plug (`center = +`, `barrel = -`). Confirm **`11.80V – 12.30V DC`**.
 - [ ] **2.2 `12V` Bus Energization (With `A092` Green Plug & `WAGO-3` LED Loads Disconnected):** Plug the barrel connector into `J1` on `trunk_base`. Measure voltage between `WAGO-1` and `WAGO-2`. Confirm **`11.80V – 12.30V DC`**.
 - [ ] **2.3 `5V` LED Buck Output Verification:** Measure voltage across `WAGO-3 (+5V)` and `WAGO-4 (GND)`. Confirm **`4.95V – 5.10V DC`**. *(If using an adjustable buck converter, tune the trim pot to `5.00V` now).* Unplug the `12V` barrel connector before reconnecting loads.
 
 ### 11.3 Stage 3 — Controller, ESPHome & Home Assistant Verification
-- [ ] **3.1 Flash ESPHome Firmware (One-Time Setup):** Connect `C008` via USB-C to your computer (or use OTA if already flashed) and flash [`esphome/grav-mass-tree.yaml`](file:///home/ignacio/grav-mass/esphome/grav-mass-tree.yaml). Unplug the USB-C cable completely.
+- [ ] **3.1 Flash ESPHome Firmware (One-Time Setup):** Connect `C008` via USB-C to your computer (or use OTA if already flashed) and flash [`esphome/grav-mass-tree.yaml`](esphome/grav-mass-tree.yaml). Unplug the USB-C cable completely.
 - [ ] **3.2 Single-Cable Boot Test:** Plug the `A092` green `HT3.96-4P` terminal block back into `A092`, and plug in the external `12V` barrel cable (**no USB cable connected**). Confirm `C008`'s onboard status LED (`GPIO27`) illuminates and the node comes online in Home Assistant within `15 seconds`.
-- [ ] **3.3 `GPIO33` Bus Voltage Telemetry Check:** In Home Assistant, inspect the **`Motor Bus Voltage (VIN)`** sensor (`GPIO33`). Confirm it reports **`11.8V – 12.3V`** and that **`12V Supply Rail Healthy`** binary sensor is `OK`.
+- [ ] **3.3 `GPIO33` Bus Voltage Telemetry Check:** In Home Assistant, inspect the **`Motor Bus Voltage (12V VIN)`** sensor (`sensor.motor_bus_voltage_12v_vin`, `GPIO33`). Confirm it reports **`11.8V – 12.3V`** and that **`12V Supply Voltage Out of Range Alert`** (`binary_sensor.12v_supply_voltage_out_of_range_alert`) is `OK`.
 
 ### 11.4 Stage 4 — Motor Direction, Speed & Stall Protection Verification
-- [ ] **4.1 Unloaded Motor Direction Test:** Before lowering `auger_lower` into the trunk, toggle **`Auger Lift Motor`** ON at `45%` speed (`~68 RPM`) in Home Assistant (or single-click the `GPIO39` button). Looking down into the trunk bore from above, confirm the gold `Motor_Clutch_Driver` hex peg rotates **counter-clockwise (CCW)** so the right-hand Archimedes screw lifts marbles upward. *(If it rotates clockwise, either swap `M1` and `M2` wires at the `A092` screw terminal OR flip `direction` in software).*
-- [ ] **4.2 Reverse Unjam Pulse Test:** Trigger the **`Reverse Auger (1.5s Unjam)`** button in Home Assistant. Confirm the motor cleanly stops, reverses for `1.5 s`, and returns to idle without voltage droop.
-- [ ] **4.3 `GPIO22` `nFAULT` Check:** Confirm **`Motor Driver Fault / Stall`** binary sensor reads `Normal (Clear)` (`GPIO22 = HIGH`).
+- [ ] **4.1 Unloaded Motor Direction Test:** Before lowering `auger_lower` into the trunk, toggle **`Auger Lift Motor`** (`fan.auger_lift_motor`) ON at `45%` speed (`~68 RPM`) in Home Assistant (or single-click the `GPIO39` button). Looking down into the trunk bore from above, confirm the gold `Motor_Clutch_Driver` hex peg rotates **counter-clockwise (CCW)** so the right-hand Archimedes screw lifts marbles upward. *(If it rotates clockwise, either swap `M1` and `M2` wires at the `A092` screw terminal OR flip `direction` in software).*
+- [ ] **4.2 Reverse Unjam Pulse Test:** Trigger the **`Unjam Auger (Reverse 1.5s & Resume)`** (`button.unjam_auger_reverse_1_5s_resume`) button in Home Assistant. Confirm the motor cleanly stops, reverses for `1.5 s`, and resumes forward rotation without voltage droop.
+- [ ] **4.3 `GPIO22` `nFAULT` Check:** Confirm **`Auger Motor Fault / Stall Alert`** (`binary_sensor.auger_motor_fault_stall_alert`) reads `Normal (Clear)` (`GPIO22 = HIGH`).
 
 ### 11.5 Stage 5 — Addressable LEDs & Current Governor Verification
-- [ ] **5.1 Zone 2 Track LED Test (`GPIO26`):** Reconnect the Track Wire (`B0CCS11V7H`) and Topper Ring (`B09YTMNGTD`) power leads to `WAGO-3/4`. Turn on **`Zone 2 — Helical Track Pebble Strip`** in Home Assistant. Confirm all `50` pebble LEDs illuminate smoothly from `Seg 01` to `Seg 14` with zero flickering.
-- [ ] **5.2 Zone 1 Topper Ring Test (`GPIO32`):** Turn on **`Zone 1 — Apple Topper Ring`** with a different color/effect from Zone 2. Confirm all `16` topper LEDs operate independently of the track strip.
-- [ ] **5.3 Full White Stress & Voltage Drop Test:** Set both Zone 1 and Zone 2 to `100%` solid white for `60 seconds` while running the auger motor. Measure voltage at `WAGO-3` (`>= 4.90V`) and confirm `Motor Bus Voltage (VIN)` remains `>= 11.5V` with zero ESP32 resets.
+- [ ] **5.1 Zone 2 Track LED Test (`GPIO26`):** Reconnect the Track Wire (`B0CCS11V7H`) and Topper Ring (`B09YTMNGTD`) power leads to `WAGO-3/4`. Turn on **`Helical Track RGBIC COB Strip`** (`light.helical_track_rgbic_cob_strip`) in Home Assistant. Confirm all `50` pebble LEDs illuminate smoothly from `Seg 01` to `Seg 14` with zero flickering.
+- [ ] **5.2 Zone 1 Topper Ring Test (`GPIO32`):** Turn on **`Golden Apple Topper Ring`** (`light.golden_apple_topper_ring`) with a different color/effect from Zone 2. Confirm all `16` topper LEDs operate independently of the track strip.
+- [ ] **5.3 Full White Stress & Voltage Drop Test:** Set both Zone 1 and Zone 2 to `100%` solid white for `60 seconds` while running the auger motor. Measure voltage at `WAGO-3` (`>= 4.90V`) and confirm `Motor Bus Voltage (12V VIN)` remains `>= 11.5V` with zero ESP32 resets.
 
 ### 11.6 Stage 6 — Mechanical Closed-Loop Marble Cascade Verification
 - [ ] **6.1 Single-Marble Full-Loop Test:** Drop 1 assembled `Ø 25.0 mm` Apple Marble onto `Seg 14`. Confirm it rolls smoothly down all `4.5` turns (`Seg 14 → Seg 01`), enters the `-90°` intake chute into the vertical auger flute, gets scooped up by the rotating auger to `Z = 435.5 mm`, and discharges cleanly back onto `Seg 14`.
@@ -437,6 +437,6 @@ Perform these checks in exact sequential order using a digital multimeter before
 | **Tree does not power on (`C008` status LED off, offline in Home Assistant)** | 1. External `12V` PSU unplugged or switched off.<br/>2. Blown `F0 (5A)` or `F1 (2A)` blade fuse.<br/>3. Loose `VIN` or `GND` wire at `A092` `HT3.96-4P` terminal. | Measure DC voltage across `A092` `VIN` and `GND` screw terminals. If `0V`, check voltage at `WAGO-1` (`+12V`) and inspect fuses `F0` and `F1`. Ensure `11 mm` of bare conductor is clamped inside each WAGO lever port. |
 | **ESP32 boots and Wi-Fi works, but neither LED zone lights up** | 1. Blown `F2 (3A)` fuse.<br/>2. `12V → 5V` buck converter `IN+`/`IN-` loose.<br/>3. Data plug connected to `DO` (output end) instead of `DI` (input end) of LED strip. | Measure voltage between `WAGO-3 (+5V)` and `WAGO-4 (GND)`. Confirm `5.0V DC`. Verify that the `A096` `White (GPIO26)` and `Yellow (GPIO32)` pins connect to the **`DI` (Data In)** arrow side of the Track Wire and Topper Ring. |
 | **LEDs flicker randomly or display wrong colors when motor runs** | Missing common ground reference between `C008` logic ground (`A092 GND`) and `5V` LED buck output ground (`WAGO-4`). | Verify that a solid `18 AWG` black jumper connects `WAGO-2 (Star GND)` to `WAGO-4 (LED GND)` AND that the `A096` Grove `Black (GND)` wire is clamped into `WAGO-4`. |
-| **Auger motor spins, but marbles are pushed downward instead of lifted up** | Motor polarity (`M1`/`M2`) is reversed. | Unplug `12V`, swap the Red and Black motor leads in the **`M1`** and **`M2`** screw terminals on `A092` (or swap `GPIO19`/`GPIO23` in [`esphome/grav-mass-tree.yaml`](file:///home/ignacio/grav-mass/esphome/grav-mass-tree.yaml)). |
-| **Motor stops automatically and `Motor Driver Fault / Stall` turns ON in Home Assistant** | A foreign object or misaligned auger half triggered `DRV8876` overcurrent (`GPIO22` `nFAULT`). | Click **`Reverse Auger (1.5s Unjam)`** in Home Assistant. Lift off `golden_apple_topper` and verify `auger_upper` is fully seated on `auger_lower`'s hex peg. |
-| **Home Assistant shows `12V Supply Rail Healthy = Problem` (`VIN < 10.8V`)** | An incorrect external adapter (e.g., `5V` or `9V` wall wart instead of `12V`) was plugged into `J1`. | Check the label on the external power brick and verify it is a regulated **`12.0V DC`** (`>= 3.0A`) supply. |
+| **Auger motor spins, but marbles are pushed downward instead of lifted up** | Motor polarity (`M1`/`M2`) is reversed. | Unplug `12V`, swap the Red and Black motor leads in the **`M1`** and **`M2`** screw terminals on `A092` (or swap `GPIO19`/`GPIO23` in [`esphome/grav-mass-tree.yaml`](esphome/grav-mass-tree.yaml)). |
+| **Motor stops automatically and `Auger Motor Fault / Stall Alert` turns ON in Home Assistant** | A foreign object or misaligned auger half triggered `DRV8876` overcurrent (`GPIO22` `nFAULT`). | Click **`Unjam Auger (Reverse 1.5s & Resume)`** in Home Assistant. Lift off `golden_apple_topper` and verify `auger_upper` is fully seated on `auger_lower`'s hex peg. |
+| **Home Assistant shows `12V Supply Voltage Out of Range Alert = Problem` (`VIN < 10.8V`)** | An incorrect external adapter (e.g., `5V` or `9V` wall wart instead of `12V`) was plugged into `J1`. | Check the label on the external power brick and verify it is a regulated **`12.0V DC`** (`>= 3.0A`) supply. |

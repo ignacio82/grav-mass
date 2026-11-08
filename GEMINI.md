@@ -27,14 +27,14 @@ The **Grav-Mass Day "Falling Apple Cascade" Marble Run Tree** is a 3D-printable,
 │   └── gen_bom.py                # Validates bom/bom.yaml and generates docs/BOM.md tables & bom/bom.csv (--check supported)
 ├── cad/
 │   ├── common_params.py          # Single source of truth for all parametric constants & helix/spiral equations
-│   ├── trunk.py                  # Trunk_Base (N20 motor + AAA battery bay + switch), Trunk_Mid, Trunk_Top, Battery_Cover
-│   ├── auger.py                  # 2-stage Archimedes screw (auger_lower, auger_upper) + Motor_Clutch_Driver
-│   ├── brackets.py               # 4 tiered cantilever branch brackets (6 pieces per tier, 24 total)
+│   ├── trunk.py                  # Trunk_Base (12V DC jack + UCTRONICS buck + WAGO + A092/C008 + N20), Trunk_Mid, Trunk_Top, covers
+│   ├── auger.py                  # 2-stage Archimedes screw (auger_lower, auger_upper) + Motor_Clutch_Driver + Servo_Or_030_Adapter
+│   ├── brackets.py               # 24 exact-radius station cantilever brackets (bracket_01..24) + 4 tiered archetypes
 │   ├── track.py                  # 14 helical track segments (track_seg_01..14) with planet balconies & endcap basins
-│   ├── topper_planets.py         # 3-color Red Apple Topper, 8 multi-color Solar System planets, Magic_LED_Wand, Marbles
-│   ├── export_3mf_plates.py      # Multi-body 3MF plate packer & validator (Plates 1–5 + unified 5-plate .3mf)
+│   ├── topper_planets.py         # 4-color Red Apple Topper, 8 4-color Solar System planets, Magic_LED_Wand, Marbles
+│   ├── export_3mf_plates.py      # Multi-body 3MF plate packer & validator (Plates 1–18 + unified 18-plate .3mf)
 │   ├── export_webapp_assets.py   # Tessellates B-Rep solids + colored_subparts into webapp/assets/{manifest.json,meshes.bin}
-│   ├── generate_all.py           # Master build script exporting 39 parts (.step + .stl) and all .3mf build plates
+│   ├── generate_all.py           # Master build script exporting 49 parts (.step + .stl) and all 19 .3mf build plates
 │   └── verify_model.py           # Automated B-Rep manifold, interference, clearance, and physics verification suite
 ├── output/
 │   ├── *.step / *.stl            # Individual CAD parts (AP214 STEP + binary STL @ 0.01 mm deflection)
@@ -65,16 +65,25 @@ All parts map to 4 toolheads defined in [`TOOLHEAD_PALETTE`](file:///home/ignaci
 1. **Safe Print Zone:** Every plate must fit strictly inside **`240.0 × 240.0 mm`** (`X, Y in [-120.0, +120.0] mm` relative to plate center) and height `<= 270.0 mm`.
 2. **Minimum Part Clearance:** Every distinct object on a build plate must maintain **`>= 8.0 mm` XY bounding-box clearance** (`MIN_PART_CLEARANCE = 8.0 mm`) from every other object on the same plate (`verify_model.py` and `export_3mf_plates.py` enforce this and raise a `RuntimeError` if violated).
 3. **Flat Bed Adhesion (`Z = 0.00 mm`):** Every printable part must have its bottom face resting flat at `Z = 0.00 mm` with a substantial planar footprint (`>= 25 mm²`).
-4. **6-Plate Layout (5 Pure Single-Color Plates + 1 Dedicated Multi-Color Plate):**
-   - **Plate 1 (`Plate_1_SingleColor_Brown_Trunk_And_Brackets.3mf`):** `100% Toolhead 1 (Dark Wood Brown #4A2F1D)` — `trunk_base`, `trunk_mid`, `trunk_top`, `Battery_Cover`, `Servo_Or_030_Adapter`, `topper_trunk_collar`, and `bracket_tier1..4` (10 objects, zero filament swaps).
-   - **Plate 2 (`Plate_2_SingleColor_Green_Track_Lower.3mf`):** `100% Toolhead 2 (Emerald Green #00A86B)` — `track_seg_01` .. `track_seg_07` (7 objects, zero filament swaps).
-   - **Plate 3 (`Plate_3_SingleColor_Green_Track_Upper.3mf`):** `100% Toolhead 2 (Emerald Green #00A86B)` — `track_seg_08` .. `track_seg_14_top_entry` + `topper_emerald_bezel` (8 objects, zero filament swaps).
-   - **Plate 4 (`Plate_4_SingleColor_Gold_Auger_And_Drive.3mf`):** `100% Toolhead 3 (Silk Gold #D4AF37)` — `auger_lower`, `auger_upper`, `Motor_Clutch_Driver` (3 objects, zero filament swaps).
-   - **Plate 5 (`Plate_5_SingleColor_Red_Apple_Marbles.3mf`):** `100% Toolhead 4 (Crimson Red #C41E3A)` — `6× Apple_Hemisphere_A`, `6× Apple_Hemisphere_B`, `Apple_Captive_Pause_Marble` (13 objects, zero filament swaps).
-   - **Plate 6 (`Plate_6_MultiColor_Topper_Planets_And_Wand.3mf`):** `Dedicated Multi-Color Plate (Toolheads 1–4)` — `golden_apple_topper`, `8× Solar System Planets` (`planet_mercury..neptune`), `apple_topper_stem_leaf`, and `Magic_LED_Wand` (11 unified multi-part objects).
+4. **18-Plate Layout (15 Pure Single-Color Plates + 3 Dedicated 4-Color Plates):**
+   - **Plates 1–4 (`100% Toolhead 1 — Dark Wood Brown #4A2F1D`, zero filament swaps):**
+     - `Plate_1_SingleColor_Brown_Trunk_Base_And_Mid.3mf` (`trunk_base`, `trunk_mid`)
+     - `Plate_2_SingleColor_Brown_Trunk_Top_And_Covers.3mf` (`trunk_top`, `Battery_Cover`, `Base_Bottom_Cover`, `Servo_Or_030_Adapter`, `3× Conduit_Cover_Strip`)
+     - `Plate_3_SingleColor_Brown_Brackets_01_To_12.3mf` (`bracket_01`..`bracket_12`)
+     - `Plate_4_SingleColor_Brown_Brackets_13_To_24.3mf` (`bracket_13`..`bracket_24`)
+   - **Plates 5–13 (`100% Toolhead 2 — Translucent Emerald Green #00A86B`, zero filament swaps):**
+     - `Plate_5` (`track_seg_01`), `Plate_6` (`track_seg_02`), `Plate_7` (`track_seg_03`), `Plate_8` (`track_seg_04`, `track_seg_05`), `Plate_9` (`track_seg_06`, `track_seg_07`), `Plate_10` (`track_seg_08`, `track_seg_09`), `Plate_11` (`track_seg_10`, `track_seg_11`), `Plate_12` (`track_seg_12`, `track_seg_13`), `Plate_13` (`track_seg_14_top_entry`).
+   - **Plate 14 (`100% Toolhead 3 — Silk Gold #D4AF37`, zero filament swaps):**
+     - `Plate_14_SingleColor_Gold_Auger_And_Drive.3mf` (`auger_lower`, `auger_upper`, `Motor_Clutch_Driver`)
+   - **Plate 15 (`100% Toolhead 4 — Crimson Red #C41E3A`, zero filament swaps):**
+     - `Plate_15_SingleColor_Red_Apple_Marbles.3mf` (`6× Apple_Hemisphere_A`, `6× Apple_Hemisphere_B`, `Apple_Captive_Pause_Marble`)
+   - **Plates 16–18 (`Dedicated 4-Color Plates`):**
+     - `Plate_16_MultiColor_Apple_Topper_And_Wand.3mf` (`golden_apple_topper`, `apple_topper_stem_leaf`, `Magic_LED_Wand` — Core Tree Palette `T1–T4`)
+     - `Plate_17_MultiColor_Warm_Rocky_And_Gas_Planets.3mf` (`planet_mercury`, `planet_venus`, `planet_mars`, `planet_jupiter`, `planet_saturn` — `T2` swapped to Matte Ivory White `#F5EFE6`)
+     - `Plate_18_MultiColor_Blue_Ocean_And_Ice_Planets.3mf` (`planet_earth`, `planet_uranus`, `planet_neptune` — `T1` Marine Blue `#1E5AA8`, `T4` Silk Gold `#D4AF37`, `T3` Ivory White `#F5EFE6`)
 5. **OrcaSlicer Multi-Plate 2D Grid Alignment (`ORCA_PLATE_STRIDE_X = 324.0 mm`, `ORCA_PLATE_STRIDE_Y = 324.0 mm`):**
-   - In Snapmaker OrcaSlicer / BambuStudio (`PartPlateList` in `PartPlate.cpp`), `N = 6` plates are arranged in a **`3 × 2` grid** (`cols = 3`, `rows = 2`) with `stride_x = 270.0 * 1.20 = 324.0 mm` and `stride_y = 270.0 * 1.20 = 324.0 mm`.
-   - Plate `p_idx` (`0..5`) has `row = p_idx // 3`, `col = p_idx % 3`, origin `(col * 324.0, -row * 324.0)`, bed bounds `[col * 324.0 .. col * 324.0 + 270.0, -row * 324.0 .. -row * 324.0 + 270.0]`, and center `(col * 324.0 + 135.0, -row * 324.0 + 135.0)`.
+   - In Snapmaker OrcaSlicer / BambuStudio (`PartPlateList` in `PartPlate.cpp`), `N = 18` plates are arranged in a **`5 × 4` grid** (`cols = 5`, `rows = 4`) with `stride_x = 270.0 * 1.20 = 324.0 mm` and `stride_y = 270.0 * 1.20 = 324.0 mm`.
+   - Plate `p_idx` (`0..17`) has `row = p_idx // 5`, `col = p_idx % 5`, origin `(col * 324.0, -row * 324.0)`, bed bounds `[col * 324.0 .. col * 324.0 + 270.0, -row * 324.0 .. -row * 324.0 + 270.0]`, and center `(col * 324.0 + 135.0, -row * 324.0 + 135.0)`.
    - All mesh vertices in `3D/3dmodel.model` are centered at `(0, 0)` in local parent XY (`z_min = 0.0`), and the `<build><item transform="...">` places each object at `(col * 324.0 + 135.0 + cx, -row * 324.0 + 135.0 + cy, 0.0)` for multi-plate (`GravMass_Tree_Ultimate_U1.3mf`) or `(135.0 + cx, 135.0 + cy, 0.0)` for single-plate `.3mf` files.
 6. **Unified Multi-Color Parent Objects (`<components>` + `<part subtype="normal_part">`):**
    - Multi-color parts (`golden_apple_topper`, `planet_mercury..neptune`, `Magic_LED_Wand`, `apple_topper_stem_leaf`) attach a `.colored_subparts` list of `(label, toolhead_id, hex_color, child_solid)` tuples to the parent `bd.Solid`.
@@ -147,17 +156,18 @@ Every transition in the closed-loop marble path must obey gravity (strictly down
 4. **Debossed Tier Identification Bars & Snap-Lock Bracket Pegs (`cad/brackets.py` & `cad/track.py`):**
    - Each cantilever bracket (`bracket_tier1_top`..`bracket_tier4_bottom`) has **`1` to `4` horizontal `45°` V-notch tally bars** debossed into the hidden `-X` back face of its dovetail tenon (`X = -4.35 mm`) for instant visual/tactile tier sorting off the print bed.
    - The twin `Ø 4.0 mm` alignment pegs on each bracket carry a `45°` annular snap-lock ridge (`R = 2.12 mm`) that clicks into a matching annular detent groove (`R = 2.34 mm`) inside each track underside socket.
-5. **Single-USB, Zero-Solder `IA005` 4-Channel Power Distribution Board OR `K050` M5Stack Atomic H-Driver ESP32 & Full-Length Under-Track COB LED Strip (`cad/trunk.py`, `cad/track.py`, `esphome/grav-mass-tree.yaml`):**
-   - **Dual-Purpose Stepped Bottom Electronics Bay (`trunk_base` & `Battery_Cover`):**
-     - Outer bay (`54.6 × 31.6 × 16.9 mm`, `Z = 0..16.8 mm`): Fits the **Bambu Lab 4-Channel Power Distribution Board (`IA005`, `53.0 × 10.0 × 10.0 mm`)** or 14500 Battery Pack.
-     - Inner stepped ESPHome bay (`m5_atom_hdriver_bay = 49.2 × 25.2 × 20.4 mm`, `Z = 0..20.3 mm`, giving `18.9 mm` clear height above `Battery_Cover`'s `Z = 1.4 mm` lip): Fits the **M5Stack Atomic H-Driver Base + Atom Lite ESP32 (`K050`, `48.0 × 24.0 × 18.0 mm`)** for zero-solder ESPHome + Home Assistant control (`DRV8876` PWM motor driver on `GPIO19`/`GPIO23`, `nFAULT` on `GPIO22`, `VIN` ADC on `GPIO33`, and addressable `B0CH149KMC` RGBIC COB strip on Grove `GPIO26`). `Battery_Cover` includes a central `Ø 5.0 mm` status-LED and `GPIO39` button access port.
-   - **4-Channel `SH1.0-2P` Conduits (`trunk_base`):**
-     - `motor_to_pdb_tunnel` (`X = 0.0, Y = -11.5, Z = -0.1..7.5 mm`): Direct `11 mm` pass-through for the `LA002` N20 motor wire to **`CH1`**.
-     - `cob_wire_entry_port` (`X = +16.5, Y = -31.5, Z = 35.5..41.0 mm`) + `cob_wire_conduit` (`X = +16.5, Y = -27.5, Z = 6.0..41.0 mm`): Feeds the continuous under-track **COB LED Strip Light**'s `SH1.0-2P` wire from the underside of `track_seg_01` straight down into **`CH2`**.
-     - `usb_power_tap_tunnel` (`X = -34.0, Y = 0.0, Z = 6.0..46.0 mm`): Connects the rear `-X` vertical trunk wire channel into the base wiring tunnel for an `SH1.0` Topper LED light on **`CH3`**.
-   - **Wide `13.0 × 2.5 mm` Underside COB Channel & `14.6 × 16.0 mm` Starter Pocket (`cad/track.py` & `cad/brackets.py`):**
-     - `make_track_profile_wire()` features a **`13.0 mm` wide × `2.5 mm` deep** underside channel (`LED_CHANNEL_W = 13.0 mm`, `u = -6.5..+6.5 mm`), and `build_cantilever_bracket()` spaces the twin snap-lock pegs at `BRACKET_PEG_SPACING_U = 10.6 mm` (`u = ±10.6 mm`) with a **`13.8 mm` wide** `led_notch` bridge so both the **`12.0 mm` wide PAUTIX 5V USB RGB Smart IC COB LED Strip (`B0CH149KMC`)** and `5–10 mm` COB strips (`KA009` / `KA003` / `B08X1QMRKK`) pass continuously from `track_seg_01` (`-90°`) up to `track_seg_14_top_entry` (`1710°`) with zero interference against the 24 brackets.
-     - `track_seg_01` includes a recessed `14.6 × 16.0 × 2.8 mm` `cob_pcb_pocket` at `theta = -70.0°` on its underside for the `12 mm` RGBIC strip's heat-shrink power head or `KA009`'s `13.7 × 9.9 mm` PCB terminal block.
+5. **Single-Cable `12V` Zero-Solder Electronics Vault, Dedicated `UCTRONICS` Buck & `WAGO 221` Cradles, and Under-Track `WS2812B` Pebble-Wire Dovetail Channel (`cad/trunk.py`, `cad/track.py`, `esphome/grav-mass-tree.yaml`):**
+   - **Hollow Root Vault (`Ø 135.0 × 50.0 mm`, `> 420 cm³` open slack volume in `trunk_base`):**
+     - **Stepped `-Y` Controller Bay (`(0.0, -33.0)`):** Outer bay `54.6 × 31.6 × 16.9 mm` (`Z = 0..16.8 mm`); inner stepped ESPHome bay `m5_atom_hdriver_bay = 49.2 × 25.2 × 20.4 mm` (`Z = 0..20.3 mm`, `18.9 mm` clear height above `Battery_Cover`'s `1.4 mm` lip) fits the **M5Stack Atomic H-Driver Base + ATOM Lite ESP32 (`A092` + `C008`, `48.0 × 24.0 × 18.0 mm` stacked; `C008` alone is `24.0 × 24.0 × 9.5 mm`)**. `Battery_Cover` includes a central `Ø 5.0 mm` status-LED and `GPIO39` button access port.
+     - **Dedicated `+Y` Snap-In Buck Converter Cradle (`(-4.0, +36.5, Z = 0..12.0 mm)`):** `64.2 × 28.2 × 12.0 mm` pocket with `20.0 × 12.0 mm` open `-X`/`+X` wire portals fits the **UCTRONICS `DC 9V–36V to 5.0V 5A (25W)` Screw-Terminal Buck Converter (`B07XXWQ49N` / `U6223`, `63.0 × 27.0 × 10.0 mm`)**.
+     - **Dedicated `+X` Snap-In Lever-Nut Organizer Cradle (`(+44.5, -12.0, Z = 0..18.0 mm)`):** `19.8 × 31.2 × 18.0 mm` pocket with a `26.0 × 18.0 mm` open `-X` wire-access face fits **2× stacked WAGO `221-415` 5-port lever-nut blocks (`30.0 × 18.6 × 8.4 mm` each, `B07NKT2P2F`)**.
+   - **Wire Conduits & Top Crown Ring Seat (`trunk_base` & `trunk_top`):**
+     - `motor_to_pdb_tunnel` (`X = 0.0, Y = -11.5, Z = -0.1..7.5 mm`): `6.5 × 7.6 mm` pass-through for the **`12V DC 150 RPM N20` motor (`B0BFRPMSW6`, `10.0 × 12.0 × 25.0 mm`)** leads into the vault.
+     - `cob_wire_entry_port` (`X = +16.5, Y = -31.5, Z = 35.0..41.5 mm`) + `cob_wire_conduit` (`X = +16.5, Y = -27.5, Z = 6.0..41.5 mm`): Feeds the under-track **`WS2812B` Pebble Wire (`B0CCS11V7H`)** leads from `track_seg_01` straight down into the vault.
+     - Oversized `10.0 × 8.0 mm` rear `-X` Connector-Pass-Through trunk conduit (`Z = 0..450 mm`, concealed by `3× Conduit_Cover_Strip` `11.2 × 68.0 × 2.6 mm`) routes the `1 m` 3-pin `JST-SM` extension cable (`B0CT827QQC`) up to the **`Ø 46.2 × 2.5 mm` top crown recess** in `trunk_top` (`Z = 447.5 mm`) for the **`Ø 45.0 mm` OD × `Ø 32.0 mm` ID Sparkleiot 16-Bit WS2812 RGB Ring (`B09YTMNGTD`)**.
+   - **Snap-In `8.0 × 3.6 mm` (`4.6 mm` Throat) Underside Dovetail Channel & `10.0 × 16.0 × 3.7 mm` Starter Pocket (`cad/track.py` & `cad/brackets.py`):**
+     - `make_track_profile_wire()` features an **`8.0 mm` wide × `3.6 mm` deep** internal dovetail chamber (`LED_CHANNEL_W = 8.0 mm`, `LED_CHANNEL_D = 3.6 mm`) with a **`4.6 mm` snap-in throat** (`LED_CHANNEL_THROAT_W = 4.6 mm`) so the `50×` `6.2 × 3.2 mm` oval resin drops of the **BTF-LIGHTING `DC5V` WS2812B Pebble/Seed Pixel Flexible Wire (`B0CCS11V7H`)** snap in with zero glue or tape. `build_cantilever_bracket()` spaces the twin snap-lock pegs at `BRACKET_PEG_SPACING_U = 10.6 mm` (`u = ±10.6 mm`) with a **`13.8 mm` wide** `led_notch` bridge.
+     - `track_seg_01` includes a recessed `10.0 × 16.0 × 3.7 mm` starter feed pocket at `theta = -70.0°` on its underside.
 6. **Realistic Heart-Shaped 5-Lobed Apple Topper Silhouette & Bark-Textured Trunk-Crown Pedestal (`golden_apple_topper` in `cad/topper_planets.py`):**
    - *Why the Apple Previously Looked Like a Cylinder or Tomato:*
      1. `trunk_top` has `Ø 68.0 mm` (`R = 34.0 mm`), and the Bambu Lab LED Lamp Kit 001 puck (`Ø 60.0 × 18.5 mm`) sits in the bottom `Z = 0..18.5 mm` of `golden_apple_topper`.
@@ -177,7 +187,7 @@ Every transition in the closed-loop marble path must obey gravity (strictly down
    - **Hidden Inner Engraved Numbers (`make_engraved_label_solid` in `cad/common_params.py`):** Rectilinear 7-segment `bd.Box` cutters (`Z in [-depth, +depth]`) deboss hidden assembly numbers into mating/internal surfaces that become 100% invisible once assembled:
      - `trunk_base`, `trunk_mid`, `trunk_top`, `golden_apple_topper`: **`1`**, **`2`**, **`3`** on top mating rims (`Z = 165, 165, 150 mm`), **`4`** inside topper diffuser cone (`Z = 47.9 mm`).
      - `auger_lower`, `auger_upper`: **`1`** on top of male hex peg (`Z = 208 mm`), **`2`** on top of shaft (`Z = 198 mm`).
-     - `bracket_tier1..4`: Arabic digit **`1`–`4`** in the recessed top saddle (`X = reach_x, Z = 16.25 mm` between the two pegs) + `1–4` V-notch bars on the `-X` dovetail tenon face.
+     - `bracket_01..24`: Arabic station number **`1`–`24`** in the recessed top saddle (`X = reach_x, Z = 16.25 mm` between the two pegs) + `1–4` V-notch tier bars on the `-X` dovetail tenon face.
      - `track_seg_01..14`: **`1`–`14`** on the `15°` scarf-joint mating end faces (`u = +5.8, v = -6.0 mm` on `pl_end`).
      - `planet_mercury..neptune` & Track Balcony Pegs: **`1`–`8`** (`1` = Mercury .. `8` = Neptune) inside each planet's bottom LED bore ceiling (`Z = 11.8 mm`) and on the flat top of each matching `Ø 7.60 mm` track balcony peg (`u = 30.0, v = 21.5 mm`).
      - `Apple_Hemisphere_A/B`: **`A`** and **`B`** inside the internal core cavity ceiling.
@@ -191,7 +201,7 @@ Every transition in the closed-loop marble path must obey gravity (strictly down
    - **3-Branch Fused WAGO `221` Distribution & Strict `5V` Rail Isolation:**
      - **Main Input (`J1` `B07C7VSRBG` → `F0 = 5A` `B087BT1PH3` → `WAGO-1 +12V_BUS` & `WAGO-2 STAR_GND` `B07NKT2P2F`):** Fed by a single external `12V 5A (60W)` adapter (`BTF-LIGHTING B01D8FLSV8`).
      - **Branch 1 & 3 (`F1 = 2A` → `A092 VIN/GND`):** Powers `A092` + `C008` (internal `12V→5V` regulator) and drives a **`12V DC 150 RPM N20` motor (`B0BFRPMSW6`)** directly on `A092` `M1/M2` (preserving `GPIO22` `nFAULT` stall protection).
-     - **Branch 2 (`F2 = 3A` → `UCTRONICS 12V → 5.0V 5A` Screw-Terminal Buck Converter `B07XXWQ49N` + `1000 µF 16V` Cap `B07WPWFSNQ` → `WAGO-3 +5V_LED` & `WAGO-4 GND_LED`):** Powers the 50 Track LEDs (`B0CCS11V7H`, with dual-end power injection) and 16 Topper LEDs (`B09YTMNGTD`). **NEVER connect `WAGO-3 (+5V_LED)` to `C008`/`A092`'s `5V` rail—always leave the `A096` Grove `Red (+5V)` wire capped/unconnected!**
+     - **Branch 2 (`F2 = 3A` → `UCTRONICS 12V → 5.0V 5A` Screw-Terminal Buck Converter `B07XXWQ49N` (`U6223`, `63.0 × 27.0 × 10.0 mm` in the `+Y` `64.2 × 28.2 × 12.0 mm` cradle at `(-4.0, +36.5)`) + `1000 µF 16V` Cap `B07WPWFSNQ` → `WAGO-3 +5V_LED` & `WAGO-4 GND_LED`):** Powers the 50 Track LEDs (`B0CCS11V7H`, with dual-end power injection) and 16 Topper LEDs (`B09YTMNGTD`). **NEVER connect `WAGO-3 (+5V_LED)` to `C008`/`A092`'s `5V` rail—always leave the `A096` Grove `Red (+5V)` wire capped/unconnected!**
    - **ESPHome Telemetry & Current Governor (`esphome/grav-mass-tree.yaml`):** `GPIO33` monitors the `12V` supply rail (`10.8V–13.5V` window), I2C (`GPIO21/25`) supports the plug-and-play `M5Stack Unit INA226-10A (U190)` hardware shunt sensor (`0x41`), and the `250 ms` software current governor (`default_max_current_ma = 2000 mA`) enforces the selected current ceiling with no artificial minimum brightness floor.
 
 ---
