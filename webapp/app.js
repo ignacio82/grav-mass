@@ -795,12 +795,12 @@ async function init() {
 
   statusEl.textContent = "Fetching CAD scene manifest...";
   progBar.style.width = "25%";
-  const manifestResp = await fetch("assets/manifest.json?v=44", { cache: "no-store" });
+  const manifestResp = await fetch("assets/manifest.json?v=45", { cache: "no-store" });
   manifest = await manifestResp.json();
 
   statusEl.textContent = "Downloading B-Rep binary mesh buffer...";
   progBar.style.width = "55%";
-  const binResp = await fetch(`${manifest.binary_file}?v=44`, { cache: "no-store" });
+  const binResp = await fetch(`${manifest.binary_file}?v=45`, { cache: "no-store" });
   const arrayBuffer = await binResp.arrayBuffer();
 
   statusEl.textContent = "Constructing Three.js WebGL geometries & physics actors...";
@@ -3135,7 +3135,24 @@ function applyExplodeAndVisibility() {
           );
           const easeU = 1.0 - Math.pow(1.0 - rawU, 3);
           if (rawU < 0.996 && ud.insertVec) {
-            if (itemStep === 7 && ud.name && ud.name.startsWith("asm_track_seg_")) {
+            if (itemStep === 6 && ud.name && ud.name.startsWith("asm_bracket_")) {
+              // Keyhole Drop-In L-Path for 24x Cantilever Brackets:
+              //   Stage 1 (rawU 0..0.55): Push tenon radially inward into the upper keyhole entry window (Z +16.0 mm)
+              //   Stage 2 (rawU 0.55..1.00): Drop -Z down into the 45° dovetail wedge over the ±Y neck detent bumps
+              if (rawU < 0.55) {
+                const p1 = Math.pow(rawU / 0.55, 2) * (3.0 - 2.0 * (rawU / 0.55));
+                const rem = 1.0 - p1;
+                insertOffset.set(
+                  ud.insertVec[0] * rem,
+                  ud.insertVec[1] * rem,
+                  16.0
+                );
+              } else {
+                const t2 = (rawU - 0.55) / 0.45;
+                const p2 = t2 * t2 * (3.0 - 2.0 * t2);
+                insertOffset.set(0.0, 0.0, 16.0 * (1.0 - p2));
+              }
+            } else if (itemStep === 7 && ud.name && ud.name.startsWith("asm_track_seg_")) {
               // Two-stage Helical Scarf-Joint Slide-In for Track Segments (Seg 01 -> Seg 14):
               // Stage 1 (rawU 0..0.55): Approach radially toward cantilever brackets while displaced uphill along helix tangent
               // Stage 2 (rawU 0.55..1.0): Slide tangentially downhill along 15° scarf angle onto previous segment's Twin Ø3.8mm Male Tenons & drop onto bracket pegs!
@@ -3323,8 +3340,8 @@ const STEP_WIRING_GUIDE = {
       },
       {
         pillClass: "wire-motor",
-        pillText: "🛡️ Snap-In Lid",
-        html: "Push <strong>Base_Bottom_Cover</strong> up into the bottom of <code>trunk_base</code>—its upward <strong><code>Ø23.6×2.8 mm</code> Snap-In Hollow Retaining Ring</strong> clicks concentrically inside the central <code>Ø24.0 mm</code> shroud bore with zero screws required!",
+        pillText: "🛡️ Primary Lid",
+        html: "Use <strong>Battery_Cover</strong> with <code>2× M2.5×6 mm</code> screws; omit <code>Base_Bottom_Cover</code> (audit shows it overlaps <code>Battery_Cover</code> by <code>438.8 mm³</code> and <code>CA001</code> magnets are unused).",
       },
     ],
   },
@@ -3351,13 +3368,18 @@ const STEP_WIRING_GUIDE = {
     ],
   },
   6: {
-    title: "🌿 Step 6 Mechanical Joint — 24× Wedge-Lock Cantilever Brackets (Tiers #4 → #1)",
-    badge: "45° DOVETAIL WEDGES",
+    title: "🌿 Step 6 Mechanical Joint — 24× Keyhole Drop-In Brackets (Tiers #4 → #1)",
+    badge: "KEYHOLE DROP-IN",
     rows: [
       {
+        pillClass: "wire-red",
+        pillText: "⚠️ Wire FIRST",
+        html: "Thread the <strong>1m 3-pin JST-SM topper cable</strong> through the rear <code>-X</code> conduit BEFORE seating any <code>180°</code> bracket (<code>#3, #9, #15, #21</code>) whose tenon crosses the groove.",
+      },
+      {
         pillClass: "wire-motor",
-        pillText: "🔢 Tiers 4 → 1",
-        html: "Slide 6× brackets per tier (<code>#4</code> longest at bottom → <code>#1</code> shortest at top) down into the 24 helical trunk dovetail slots (every <code>60°</code> from <code>60°</code> to <code>1440°</code>—supporting both segment midpoints and segment seams!).",
+        pillText: "🔢 Keyhole L-Drop",
+        html: "Push each tenon radially inward into the upper <code>16.2×4.85×18.6 mm</code> keyhole entry window, then slide down <code>16 mm</code> into the <code>45°</code> dovetail over the <code>±Y</code> neck bumps. Pre-fix trunks: saw roofs using <code>Trunk_Keyhole_Cutting_Jig.stl</code>.",
       },
     ],
   },

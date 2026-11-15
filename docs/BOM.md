@@ -35,7 +35,7 @@ Everything required to build, light, and control the tree in **Home Assistant (v
 
 | Qty | Part Number / ASIN | Component | Spec / Dimensions | Direct Product Link | Purpose |
 | :---: | :---: | :--- | :--- | :--- | :--- |
-| **2×** | **`B0BYF4X65F`** | **MonsterBolts `M2.5 × 6 mm` Button Head Cap Machine Screws (BHCS)** | `M2.5 × 6 mm` stainless steel button head machine screws | [Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)](https://www.amazon.com/dp/B0BYF4X65F) | Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base` |
+| **2×** | **`B0BYF4X65F`** | **MonsterBolts `M2.5 × 6 mm` Button Head Cap Machine Screws (BHCS)** | `M2.5 × 6 mm` stainless steel button head machine screws | [Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)](https://www.amazon.com/dp/B0BYF4X65F) | Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base` (omit conflicting `Base_Bottom_Cover`; see [`ASSEMBLY_AUDIT.md`](../ASSEMBLY_AUDIT.md)) |
 
 ---
 

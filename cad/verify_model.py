@@ -1166,6 +1166,52 @@ def run_all_verifications() -> None:
     )
     print("=" * len(hdr) + "\n")
 
+    # =========================================================================
+    # SECTION 5: Rigid Bracket Insertion-Path & Assembly-Order Regression Gate
+    # =========================================================================
+    from test_bracket_insertion import run_insertion_audit
+
+    print("Running 24-station keyhole bracket rigid insertion-path regression check...")
+    all_brk_ok, brk_results = run_insertion_audit()
+    if not all_brk_ok:
+        bad = [r["station"] for r in brk_results if not r["pass"]]
+        raise RuntimeError(f"Bracket rigid keyhole insertion failed at stations: {bad}")
+    print("  [PASS] All 24 stations clear rigid L-path keyhole insertion (0.0000 mm³).")
+
+    def _assert_sweep_clear_z(moving: bd.Shape, obstacle: bd.Shape, dist: float, label: str) -> None:
+        steps = int(math.ceil(dist / 0.5))
+        for i in range(steps + 1):
+            dz = min(dist, i * 0.5)
+            inter = moving.moved(bd.Location((0.0, 0.0, dz))) & obstacle
+            vol = float(inter.volume) if inter is not None else 0.0
+            if vol > 0.05:
+                raise RuntimeError(f"Assembly sweep regression [{label}] at dz={dz:.2f} mm: {vol:.4f} mm³")
+
+    tb_asm = trunk_parts["trunk_base"]
+    tm_asm = trunk_parts["trunk_mid"].moved(bd.Location((0.0, 0.0, TRUNK_SECTION_HEIGHT)))
+    tt_asm = trunk_parts["trunk_top"].moved(bd.Location((0.0, 0.0, 2.0 * TRUNK_SECTION_HEIGHT)))
+    topper_asm = all_generated["golden_apple_topper"].moved(
+        bd.Location((0.0, 0.0, 3.0 * TRUNK_SECTION_HEIGHT))
+    )
+    mcd_asm = auger_parts["Motor_Clutch_Driver"].moved(bd.Location((0.0, 0.0, 26.2)))
+    al_asm = auger_parts["auger_lower"].moved(bd.Location((0.0, 0.0, 37.22)))
+    au_asm = auger_parts["auger_upper"].moved(bd.Location((0.0, 0.0, 37.22 + AUGER_HALF_HEIGHT + 0.1)))
+    b01_asm = station_brackets["bracket_01"].moved(
+        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(60.0)), TRUNK_OUTER_R * math.sin(math.radians(60.0)), helix_z(60.0) - 30.0), (0.0, 0.0, 60.0))
+    )
+    b02_asm = station_brackets["bracket_02"].moved(
+        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(120.0)), TRUNK_OUTER_R * math.sin(math.radians(120.0)), helix_z(120.0) - 30.0), (0.0, 0.0, 120.0))
+    )
+    s01_asm = build_track_segment(0.0, 120.0, orient_for_print=False, bottom_return_ramp=True)
+
+    _assert_sweep_clear_z(tm_asm, tb_asm, 20.0, "trunk_mid -> trunk_base")
+    _assert_sweep_clear_z(tt_asm, tm_asm, 20.0, "trunk_top -> trunk_mid")
+    _assert_sweep_clear_z(topper_asm, tt_asm, 10.0, "golden_apple_topper -> trunk_top")
+    _assert_sweep_clear_z(al_asm, mcd_asm + tb_asm, 18.0, "auger_lower -> clutch+base")
+    _assert_sweep_clear_z(au_asm, al_asm, 15.0, "auger_upper -> auger_lower")
+    _assert_sweep_clear_z(s01_asm, tb_asm + b01_asm + b02_asm, 15.0, "track_seg_01 -> base+b01+b02")
+    print("  [PASS] Sequential assembly-order vertical insertion sweeps (0.5 mm step, max 0.00 mm³).")
+
     from verify_physics import run_all_physics_verifications
 
     run_all_physics_verifications()

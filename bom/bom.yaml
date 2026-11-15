@@ -250,10 +250,10 @@ fasteners:
     url: https://www.amazon.com/dp/B0BYF4X65F
     alt_skus: []
     spec: "`M2.5 × 6 mm` stainless steel button head machine screws"
-    where_used: "Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base`"
+    where_used: "Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base` (omit conflicting `Base_Bottom_Cover`; see [`ASSEMBLY_AUDIT.md`](../ASSEMBLY_AUDIT.md))"
     category: fastener
     optional: false
-    notes: "link_text: Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)"
+    notes: "status: **Primary Cover Screw** *(Use `Battery_Cover`; omit `Base_Bottom_Cover`)* | link_text: Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)"
 
 filament:
   - toolhead: "**Core Tree `T1`** *(Plates 1–4, 16, 17)*"

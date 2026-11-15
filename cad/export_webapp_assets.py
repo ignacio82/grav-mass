@@ -604,7 +604,7 @@ def export_webapp_bundle() -> None:
         assembled_entries.append(
             {
                 "name": f"asm_bracket_{b_num:02d}_tier{t_num}",
-                "label": f"Cantilever Bracket #{b_num:02d} (Engraved '{b_num}') @ {int(b_deg)}° — {t_lbl} (Exact Station Radius, Slides into Trunk Dovetail & Supports Track)",
+                "label": f"Cantilever Bracket #{b_num:02d} (Engraved '{b_num}') @ {int(b_deg)}° — {t_lbl} (Push Radially into Keyhole Window, Then Drop into Dovetail)",
                 "subsystem": "brackets",
                 "step": 6,
                 "sub_delay": round(k_idx * 0.11, 3),
@@ -689,7 +689,7 @@ def export_webapp_bundle() -> None:
             "hardware": [
                 "2a. Seat M5Stack ATOM Lite (C008) + Atomic H-Driver Base (A092) into the -Y cradle (powered from WAGO-1 +12V_BUS via 2A fuse F1 into VIN/GND; A092's internal buck powers C008 with zero USB cable needed) and seat the 12V→5.0V 5A screw-terminal Buck Converter into the +X cradle (fed via 3A fuse F2)",
                 "2b. Clamp the 12V 150RPM N20 Motor leads into A092 M1/M2 (or wire Option A 12V→6V buck + H-bridge for 6V LA002), plug the A096 Grove2Dupont cable into C008 (leave A096 Red +5V wire CAPPED in an empty WAGO port to prevent 5V backfeeding!), and connect the 5V Buck output (+ 1000µF cap) to WAGO-3 (+5V_LED) & WAGO-4 (GND_LED)",
-                "2c. Secure Battery_Cover and snap on Base_Bottom_Cover (3.0 mm thick with ventilation louvers, 4× captive-magnet tabs, and an upward Ø23.60×2.8 mm Snap-In Hollow Retaining Ring that clicks concentrically into Trunk_Base's central Ø24.00 mm shroud bore with zero screws needed!)",
+                "2c. Secure the primary Battery_Cover with 2× M2.5 × 6 mm screws (omit Base_Bottom_Cover — audit shows it overlaps Battery_Cover by 438.8 mm³ and its 4× CA001 magnet tabs are unused)",
             ],
             "clearance_note": "With >150 cm³ of unobstructed perimeter volume inside the Ø135×50 mm Hollow Root Vault and >= 18 mm finger gap around every cradle, WAGO 221 lever nuts and inline fuse holders fit cleanly with zero soldering.",
         },
@@ -731,16 +731,16 @@ def export_webapp_bundle() -> None:
         },
         {
             "step": 6,
-            "title": "Step 6 — Slide In All 24 Exact-Radius Cantilever Brackets (#1 at 60° → #24 at 1440°)",
-            "subtitle": "Sort Plates 3 & 4's 24 brackets by their engraved top-saddle number (1 to 24) and slide each dovetail tenon down into its 60° trunk socket",
+            "title": "Step 6 — Drop In All 24 Keyhole Cantilever Brackets (#1 at 60° → #24 at 1440°)",
+            "subtitle": "CRITICAL: Pre-thread the 1m JST-SM topper cable through the rear -X conduit BEFORE inserting 180° brackets (#3, #9, #15, #21)! Push each bracket radially into its keyhole entry window, then slide down 16.0 mm into the dovetail wedge",
             "camera_target": [0, 0, 215],
             "camera_pos": [310, -295, 250],
             "hardware": [
-                "6a. Lower 6 Stations (#1–#6 on Plate 3, engraved '1'..'6' on the top saddle floor): slide into the lowest 6 trunk dovetail sockets (60°–360°, radii 141.9 mm down to 126.1 mm)",
-                "6b. Middle 12 Stations (#7–#12 on Plate 3 & #13–#18 on Plate 4, engraved '7'..'18'): slide in ascending spiral order into the middle trunk sockets (420°–1080°, radii 123.0 mm down to 88.3 mm, including the precision cross-seam dovetails at Z = 150 mm and Z = 300 mm)",
-                "6c. Upper 6 Stations (#19–#24 on Plate 4, engraved '19'..'24'): slide into the highest 6 trunk sockets (1140°–1440°, radii 85.2 mm down to 69.4 mm)",
+                "6a. FIRST thread the 1m 3-pin JST-SM topper extension cable up through the 10×8 mm rear (-X) trunk conduit so it exits at Z=450 mm BEFORE fitting the 180° brackets (#3, #9, #15, #21) whose tenons overlap the conduit groove",
+                "6b. Lower (#1–#6, engraved '1'..'6'), Middle (#7–#18, '7'..'18', incl. seams at Z=150 & Z=300 mm), & Upper (#19–#24, '19'..'24'): push tenon radially inward into the upper keyhole entry window (0.000 mm³ collision), then drop vertically -16.0 mm into the 45° dovetail over the ±Y neck detent bumps",
+                "6c. Retrofit for already-printed Pre-Fix trunk_base: use Trunk_Keyhole_Cutting_Jig.stl with a flush-cut saw to open slots #1–#7 entry roofs downward into drop-in keyhole windows",
             ],
-            "clearance_note": "Every single bracket (#1–#12 on Plate 3, #13–#24 on Plate 4) is custom-sized to the exact conical helix radius at its 60° station and prints upright on Z=0 with a flat bottom rib (zero supports!).",
+            "clearance_note": "Every socket now has an upper drop-in keyhole window (16.2×4.85×18.6 mm, 45° support-free gable roof) giving a verified 0.0000 mm³ rigid L-path for all 24 brackets while stacked.",
         },
         {
             "step": 7,
@@ -775,7 +775,7 @@ def export_webapp_bundle() -> None:
             "camera_target": [0, 0, 465],
             "camera_pos": [225, -225, 525],
             "hardware": [
-                "9a. Thread the pre-terminated 1m 3-Pin JST-SM Extension Cable (B0CT827QQC) straight down the oversized 10.0×8.0 mm rear (-X) Connector-Pass-Through conduit into the Hollow Root Vault (connect Center Data to Grove Yellow GPIO32 and +5V/GND to WAGO-3 & WAGO-4), then press-fit the brown Conduit_Cover_Strip flush into the groove",
+                "9a. Connect the already-threaded 1m 3-Pin JST-SM Extension Cable (B0CT827QQC, threaded before Step 6 180° brackets) to Grove Yellow GPIO32 and WAGO-3/4, then trim Conduit_Cover_Strip strips to <=35 mm spans between the 180° brackets before pressing flush",
                 "9b. Seat the Ø45.0 mm Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD) flat into the Ø46.2×2.5 mm recessed ring seat on the top rim of Trunk_Top (#3 at Z = 447.5 mm)",
                 "9c. Lower the Sculpted Heart-Shaped Crimson Apple Topper (#4, with Woody Stem & Emerald Leaf) onto Trunk_Top's upward Ø59.40×4.0 mm Crown Centering Tenon Collar (which telescopes inside the topper's Ø60.00 mm base socket with 0.30 mm radial clearance so the topper locks concentrically onto the trunk!)",
             ],

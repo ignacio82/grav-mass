@@ -24,9 +24,10 @@ A motorized, closed-loop kinetic marble run sculpture (~527 mm tall × ~336 mm b
 ## 🚀 Quick Start
 
 1. **🛒 Buy Components & Filament:** Order the off-the-shelf solder-free electronics, `2× M2.5 × 6 mm` screws, and filament spools from **[`docs/BOM.md`](docs/BOM.md)** (or import **[`bom/bom.csv`](bom/bom.csv)** directly into a spreadsheet).
-2. **🖨️ Slice & Print the 18 Plates:** Open **[`output/3mf/GravMass_Tree_Ultimate_U1.3mf`](output/3mf/GravMass_Tree_Ultimate_U1.3mf)** (or individual plate `.3mf` files) and follow the plate support settings in **[`docs/PRINTING.md`](docs/PRINTING.md)**.
-3. **🔧 Assemble the Tree:** Follow Steps 1–9 and the hidden inner numbering guide in **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)** Alongside the **[Live 3D Assembly Studio (`newton.martinez.fyi`)](https://newton.martinez.fyi/)**.
-4. **⚡ Flash ESPHome & Run:** Flash **[`esphome/grav-mass-tree.yaml`](esphome/grav-mass-tree.yaml)** onto the `C008` ATOM Lite and plug in the single `12V DC` barrel cord per **[`docs/SMART_HOME.md`](docs/SMART_HOME.md)**.
+2. **🧪 Print Fit Coupons First:** Print **[`output/3mf/Test_Coupons.3mf`](output/3mf/Test_Coupons.3mf)** first (`0.10–0.25 mm` clearances across all 5 joint classes) and check **[`ASSEMBLY_AUDIT.md`](ASSEMBLY_AUDIT.md)** before slicing the main plates!
+3. **🖨️ Slice & Print the 18 Plates:** Open **[`output/3mf/GravMass_Tree_Ultimate_U1.3mf`](output/3mf/GravMass_Tree_Ultimate_U1.3mf)** (or individual plate `.3mf` files) and follow the audit status & support settings in **[`docs/PRINTING.md`](docs/PRINTING.md)**.
+4. **🔧 Assemble the Tree:** Follow Steps 1–9 (including the keyhole drop-in brackets and optional `Trunk_Keyhole_Cutting_Jig.stl` retrofit for pre-fix trunk bases) in **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)** alongside the **[Live 3D Assembly Studio (`newton.martinez.fyi`)](https://newton.martinez.fyi/)**.
+5. **⚡ Flash ESPHome & Run:** Flash **[`esphome/grav-mass-tree.yaml`](esphome/grav-mass-tree.yaml)** onto the `C008` ATOM Lite and plug in the single `12V DC` barrel cord per **[`docs/SMART_HOME.md`](docs/SMART_HOME.md)**.
 
 ---
 
@@ -34,6 +35,7 @@ A motorized, closed-loop kinetic marble run sculpture (~527 mm tall × ~336 mm b
 
 | Document | Contents |
 | :--- | :--- |
+| **[`ASSEMBLY_AUDIT.md`](ASSEMBLY_AUDIT.md)** | Full joint & assembly-order audit, printability report across all 18 plates, and "safe to print / hold" gate |
 | **[`docs/BOM.md`](docs/BOM.md)** | Complete shopping list (electronics, fasteners, filament) generated from [`bom/bom.yaml`](bom/bom.yaml) + system connection flowchart (`bom/bom.csv` also available) |
 | **[`docs/PRINTING.md`](docs/PRINTING.md)** | 18-plate `.3mf` breakdown, toolhead palettes, support settings, and why `"On build plate only"` is used |
 | **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)** | Hidden inner assembly numbering system table and step-by-step physical assembly instructions (Steps 1–9) |
