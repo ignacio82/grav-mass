@@ -137,3 +137,50 @@ Before printing the test coupons or committing more filament, please measure the
    - `m5_atom_hdriver_bay` (`49.2 × 25.2 mm`), `buck_pocket` (`64.2 × 28.2 mm`), `wago_pocket` (`19.8 × 31.2 mm`), and actual `-X` root thickness at `(Y = 0, Z = 10 mm)` (`15.2 mm` CAD) against your specific `DC-099` jack's threaded barrel length.
 5. **Rear `-X` wire conduit opening at `Z = 70..130 mm` (`trunk_base`):**
    - Actual conduit width (`10.0 mm` CAD) and depth (`8.0 mm` CAD), and verify how much depth (`~3.65 mm`) remains if you dry-fit a pre-fix bracket into slot `k = 3` (`180°`).
+
+---
+
+## 7. Phase 4 Per-Plate Printability Audit (Plates 1–18)
+
+All metrics below were parsed directly from the 18 production `.3mf` archives in `output/3mf/Plate_*.3mf` (`Metadata/project_settings.config`, `3D/3dmodel.model`) **and** verified against the post-fix tessellated keyhole trunk/bracket solids (`cad/audit_plates.py`, `verified by computation`).
+
+### 7.1 Printer & Slicer Baseline Read from `.3mf` Settings (`verified by computation`)
+- **Nozzle / Extrusion:** `nozzle_diameter = ["0.4", "0.4", "0.4", "0.4"]`, `outer_wall_line_width = 0.42 mm`, `inner_wall_line_width = 0.45 mm`, `layer_height = 0.20 mm`, `wall_loops = 3`.
+- **Two-wall structural minimum:** `2 × 0.42 mm = 0.84 mm` (single-wall minimum = `0.42 mm`). Any protruding radial bead or wall `< 0.42 mm` cannot resolve cleanly with a standard single perimeter pass without Arachne line-width thinning or omission.
+- **Plate Packing Rules:** Every single one of Plates 1–18 passes watertightness (`wt=True`), winding consistency (`wind=True`), `270 × 270 × 270 mm` bed limits, `240 × 240 mm` safe print zone (`marginXY = 18.5..62.0 mm`), and `>= 8.0 mm` inter-part XY clearance (`12.5..38.9 mm`, `verified by computation`).
+
+### 7.2 Plate-by-Plate Printability Matrix
+
+*(Note: Plates 1–4 `.3mf` meshes on disk were pre-fix before Phase 6 regeneration; post-fix keyhole trunk/brackets were independently verified in `cad/audit_plates.py` (`task-307`) and are noted in parentheses.)*
+
+| Plate | Contents (`n`) | Supports (`3MF`) | BBox (`X×Y×Z mm`, marginXY, gap) | Min Bed Contact | Overhang `>45°` / `>60°` (`mm²`) | Max Flat Bridge (`mm @ Z`) | Ray Min Wall (`mm`) | Verdict |
+| :--- | :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Plate 1** | `trunk_base` (post-fix) + `Base_Bottom_Cover` (`n=2`) | `0 (OFF)` | `204.9×144.5×165.0` (`32.5`, `15.1`) | `1,509.0 mm²` (`tb` post-fix `7,375.6`) | `13,124.5 / 13,027.4` (`tb` post-fix `13,129.4`) | **`135.0 mm @ 16.5 mm`** (`Ø135` vault roof `Z=50`, `batt_bay` `Z=16.8..20.3`) | `0.23` (`p5=1.18` post-fix) | **FAIL** *(already printed; `supports OFF` bridges `25–135 mm`)* |
+| **Plate 2** | `trunk_mid`, `trunk_top`, `Battery_Cover`, `3× Conduit_Cover_Strip`, `Servo_Or_030_Adapter` (`n=7`) | `0 (OFF)` | `171.4×157.4×165.0` (`49.3`, `13.4`) | `148.5 mm²` (`tm/tt` `~1,050`) | `456.4 / 396.3` (post-fix: `tm 85.3`, `tt 462.4`) | `5.0 mm` (post-fix keyhole roof = `1.6 mm @ 137.1`) | `0.20` (`tm p5=0.51` flute lip, `1.65` behind tenon) | **RISK** *(covers conflict per **J13**/**J16**; trunk itself prints well)* |
+| **Plate 3** | `bracket_01..12` (`n=12`) | `0 (OFF)` | `231.3×165.4×22.2` (`19.4`, `12.5`) | `597.0 mm²` (`b01` `874.0`) | `186.7 / 125.7` (`15.6 / 10.5` per bracket) | `0.3 mm` (`0.3`) | `0.41` (`b01 p5=1.64`) | **PASS** *(upright XY grain; pending Phase 6 keyhole `.3mf` re-export)* |
+| **Plate 4** | `bracket_13..24` (`n=12`) | `0 (OFF)` | `158.2×165.4×22.2` (`52.3`, `14.6`) | `294.8 mm²` | `186.7 / 125.7` | `0.3 mm` | `0.40` (`b24 p5=0.88`) | **PASS** *(pending Phase 6 keyhole `.3mf` re-export)* |
+| **Plate 5** | `track_seg_01` (`n=1`) | `1 (tree)` | `232.9×228.1×49.3` (`18.5`, `single`) | **`0.0 mm²`** *(knife-edge contact)* | `21,064.4 / 18,143.6` | **`68.0 mm @ 9.0 mm`** | `0.15` (lip/seam cusp) | **RISK / HOLD** *(0.0 mm² bed contact; do not print until J6/J7/J15 fixed)* |
+| **Plate 6** | `track_seg_02` (`n=1`) | `1 (tree)` | `202.2×203.4×32.7` (`33.3`, `single`) | `52.6 mm²` | `13,196.4 / 12,412.3` | **`83.9 mm @ 2.2 mm`** | `0.46` | **HOLD** *(unretentive pegs & LED pocket per J6/J7/J15)* |
+| **Plate 7** | `track_seg_03` (`n=1`) | `1 (tree)` | `194.4×195.6×34.9` (`37.2`, `single`) | `50.2 mm²` | `12,656.3 / 11,850.1` | **`80.7 mm @ 2.3 mm`** | `0.21` | **HOLD** *(same as Plate 6)* |
+| **Plate 8** | `track_seg_04` (`n=1`) | `1 (tree)` | `186.6×187.8×32.9` (`41.1`, `single`) | `40.7 mm²` | `12,000.7 / 11,166.1` | **`77.6 mm @ 2.2 mm`** | `0.18` | **HOLD** *(same as Plate 6)* |
+| **Plate 9** | `track_seg_05` + `track_seg_13` (`n=2`) | `1 (tree)` | `218.3×222.4×35.0` (`23.8`, `12.5`) | `22.7 mm²` | `18,047.7 / 16,516.2` | **`66.1 mm @ 2.2 mm`** | `0.19` | **HOLD** *(same as Plate 6)* |
+| **Plate 10** | `track_seg_06` + `track_seg_12` (`n=2`) | `1 (tree)` | `225.5×227.0×35.4` (`21.5`, `12.5`) | `22.6 mm²` | `18,136.4 / 16,569.2` | **`56.4 mm @ 2.2 mm`** | `0.16` | **HOLD** *(same as Plate 6)* |
+| **Plate 11** | `track_seg_07` + `track_seg_11` (`n=2`) | `1 (tree)` | `209.0×204.3×34.0` (`30.5`, `12.5`) | `27.0 mm²` | `17,986.1 / 16,383.8` | **`47.7 mm @ 2.3 mm`** | `0.16` | **HOLD** *(same as Plate 6)* |
+| **Plate 12** | `track_seg_08` + `track_seg_10` (`n=2`) | `1 (tree)` | `211.5×213.2×35.2` (`28.4`, `12.5`) | `25.9 mm²` | `18,109.0 / 16,484.1` | **`42.3 mm @ 2.3 mm`** | `0.21` | **HOLD** *(same as Plate 6)* |
+| **Plate 13** | `track_seg_09` + `track_seg_14_top_entry` (`n=2`) | `1 (tree)` | `194.5×196.3×41.4` (`36.8`, `12.5`) | **`0.0 mm²`** (`s14` knife-edge) | `16,336.3 / 14,980.4` | **`37.7 mm @ 2.4 mm`** | `0.25` | **FAIL** *(seg14 pinches marble by 42.93 mm³ & 0.0 mm² bed contact)* |
+| **Plate 14** | `auger_lower`, `auger_upper`, `Motor_Clutch_Driver` (`n=3`) | **`0 (OFF)`** | `137.0×38.0×208.0` (`62.0`, `22.0`) | `68.5 mm²` (`auger` ring/hex base) | **`9,314.0 / 4,067.5`** *(68.9° helical flight)* | `0.0 mm` | `0.78` | **RISK** *(tall 208 mm slender Z print + 68.9° unsupported helical blade edge; enable brim + cooling/`tree(auto)` [`PT`])* |
+| **Plate 15** | `6× Apple_Hemisphere_A` + `6× Apple_Hemisphere_B` (`n=12`) | **`0 (OFF)`** | `215.0×69.0×15.2` (`27.5`, `13.0`) | `40.0 mm²` | `2,766.2 / 2,567.6` | **`24.9 mm @ 2.6 mm`** *(inner chamber + spherical cap)* | `0.50` | **RISK** *(24.9 mm internal roof & shallow lower sphere overhang printed unsupported with 0 supports; test 1 coupon pair first)* |
+| **Plate 16** | `golden_apple_topper` (4-col) + `Magic_LED_Wand` (`n=2`) | `1 (tree)` | `139.2×109.1×109.6` (`52.5`, `34.8`) | `685.7 mm²` | `6,444.3 / 5,646.1` | `59.8 mm @ 19.0 mm` *(supported by trees)* | `0.18` (`topper` shell fillet edge) | **PASS** *(tree supports handle canopy; test wand magnet fit [`PT`])* |
+| **Plate 17** | `mercury`, `venus`, `mars`, `jupiter`, `saturn` (`n=5`, 4-col) | `1 (tree)` | `154.4×114.1×36.3` (`57.2`, `38.9`) | `77.7 mm²` | `14,032.0 / 13,620.1` | `39.4 mm @ 16.1 mm` *(Saturn ring, tree supported)* | `0.16` | **HOLD** *(prints cleanly, but missing KA006 LED crush ribs per J10)* |
+| **Plate 18** | `earth`, `uranus`, `neptune` (`n=3`, 4-col) | `1 (tree)` | `152.3×36.0×31.5` (`58.7`, `29.5`) | `77.7 mm²` | `5,091.7 / 4,507.8` | `28.0 mm @ 14.8 mm` *(tree supported)* | `0.19` | **HOLD** *(prints cleanly, but missing KA006 LED crush ribs per J10)* |
+
+### 7.3 Sub-0.4 mm Features, Thin Pegs & Layer-Direction Findings (`verified by computation` / `[PT]`)
+1. **Acoustic Click Micro-Ribs (`cad/track.py` line 748):** `click_rib` protrudes **`0.35 mm` radially** (`u = 16.65..17.00 mm`, `1.20 mm` tangential width) against **`0.42 mm` outer wall line width (`0.40 mm` nozzle)**. Being narrower than 1 extrusion line (`0.35 < 0.42 mm`), classic slicing drops or under-resolves it and Arachne snaps it up toward `~0.42 mm` (`assumed, needs physical test`).
+2. **Engraved Assembly Text (`common_params.py` line 437):** `stroke_w = max(0.55, 0.22 * char_h)`:
+   - **Small digits (`char_h = 2.5–2.6 mm`, `depth = 0.45–0.65 mm`)** on Track scarf ends `"1".."14"`, Planet bores `"1".."8"`, and Marbles `"A"/"B"`: stroke = **`0.55–0.57 mm`**, internal gap inside closed numerals (`"8"`, `"6"`) = `~0.52 mm` (`1.2×` nozzle line width -> legible readability borderline [`PT`]).
+   - **Larger digits (`char_h = 3.6–4.6 mm`, `depth = 0.70–0.75 mm`)** on Brackets `"1".."24"` (`stroke = 0.79–0.88 mm`) and Timing Gates `"G0".."G5"` (`stroke = 1.01 mm`): exceed `2×` line width and print cleanly [`PT`].
+3. **Ray-Cast Sub-`0.42 mm` Edge Hits (`minWall = 0.15–0.41 mm`):** Caused primarily by shallow grazing rays across `45°` bevel feathers/seam fillets (`track` tapered dovetail lip tip `0.70 mm` thick transitioning to sharp bevel edge, beveled chamfered edges on brackets/trunk), NOT uniform load-bearing walls — verified via `p5_wall` (`0.51–1.71 mm` on trunk/brackets) except the `-Y` flute edge lip (`0.51 mm`) and `track` sharp scarf cusps (`0.15–0.25 mm`) which are brittle under flexing [`PT`].
+4. **Thin Pegs & Layer Orientation:**
+   - **`bracket_01..24` (`Ø 4.0 mm` pegs, `rib = 8.0 × 17.75 mm`):** Printed flat (`Z=0` side) so **both** the main cantilever beam **and** the twin `Ø 4.0 mm` track alignment pegs orient layers parallel to their primary bending/shear axes (optimal XY strength!).
+   - **`auger_lower` hex drive (`5.0 mm` across flats × `10 mm` tall) & `auger_upper`:** Printed vertically along `Z`, putting rotational drive shear directly across `Z` layer boundaries (`208 mm` total height on `68.5 mm²` footprint -> brim strongly recommended [`PT`]).
+   - **`track_seg_01..14` scarf tenon pegs (`Ø 3.80 × 5.0 mm`) & `1.15 mm` inner sidewall tabs:** Tilted `~15–22°` on bed with `6.0–15.0°` oblique overhangs and `37.7–83.9 mm` underside chord spans resting on `tree(auto)` supports; `1.15 mm` (`2.7` perimeters) sidewall tabs are fragile against cross-layer snap force [`PT`].
