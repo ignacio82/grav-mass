@@ -184,3 +184,22 @@ All metrics below were parsed directly from the 18 production `.3mf` archives in
    - **`bracket_01..24` (`Ø 4.0 mm` pegs, `rib = 8.0 × 17.75 mm`):** Printed flat (`Z=0` side) so **both** the main cantilever beam **and** the twin `Ø 4.0 mm` track alignment pegs orient layers parallel to their primary bending/shear axes (optimal XY strength!).
    - **`auger_lower` hex drive (`5.0 mm` across flats × `10 mm` tall) & `auger_upper`:** Printed vertically along `Z`, putting rotational drive shear directly across `Z` layer boundaries (`208 mm` total height on `68.5 mm²` footprint -> brim strongly recommended [`PT`]).
    - **`track_seg_01..14` scarf tenon pegs (`Ø 3.80 × 5.0 mm`) & `1.15 mm` inner sidewall tabs:** Tilted `~15–22°` on bed with `6.0–15.0°` oblique overhangs and `37.7–83.9 mm` underside chord spans resting on `tree(auto)` supports; `1.15 mm` (`2.7` perimeters) sidewall tabs are fragile against cross-layer snap force [`PT`].
+
+---
+
+## 8. Phase 5 Test Coupons (`output/3mf/Test_Coupons.3mf`)
+
+A compact 27-part multi-clearance calibration plate was generated and exported to [`output/3mf/Test_Coupons.3mf`](file:///home/ignacio/grav-mass/output/3mf/Test_Coupons.3mf) (`cad/test_coupons.py`, `verified by computation`):
+- **Footprint & Packing:** `218.7 × 150.0 × 54.0 mm` (centered well inside `240 × 240 mm` safe print zone), minimum inter-part XY clearance `8.8 mm` (`>= 8.0 mm`), `100%` watertight (`wt_all = True`, `wind_all = True`), `min_bed = 38.1 mm²` on every piece.
+- **5 Joint Classes × Clearances (`10` = `0.10 mm`, `15` = `0.15 mm`, `20` = `0.20 mm`, `25` = `0.25 mm` embossed on top faces):**
+  1. **Trunk Keyhole Socket & Tenons (`T1` PLA):** `Coupon_Keyhole_Trunk_Slice` (`54 mm` curved `±34°` arc w/ exact production keyhole socket) + `4× Coupon_Keyhole_Tenon_c10..c25` pull-tabs. Also lets you dry-fit your already-printed `pre-fix` brackets against the new keyhole socket AND verify `Trunk_Keyhole_Cutting_Jig` alignment!
+  2. **Track Scarf & Snap-Pegs (`T2` PETG):** Production `18°` `Coupon_Scarf_Female_Track` + `Coupon_Scarf_Male_Track` pair, PLUS `Coupon_Scarf_Peg_Socket` (`Ø 4.30 mm` bore) + `4× Coupon_Scarf_Pegs_c10..c25` to find the minimum radial clearance that locks PETG scarf pegs without cracking.
+  3. **Planet Peg & `KA006` Bore (`T2` PETG peg + `T1` PLA caps):** `Coupon_Planet_Peg` (production `Ø 7.60 / 8.12 mm` snap peg) + `4× Coupon_Planet_Bore_c10..c25` caps (includes `Ø 7.50 mm + 2c` upper LED bay so you can test `KA006` retention physically).
+  4. **Trunk Keyed Tenon Pair (`T1` PLA):** `Coupon_Trunk_Socket` (`R = 27.5 mm` sector w/ `+X` key flat) + `4× Coupon_Trunk_Tenon_c10..c25` stubs.
+  5. **Bayonet Marble `A`/`B` (`T1` PLA):** Production `Coupon_Bayonet_B` + `4× Coupon_Bayonet_A_c10..c25` twist-lock caps.
+
+### Recommended Coupon Test Print Order (Riskiest Joints First)
+1. **First — Track Scarf & Keyhole Bracket Sub-Set (`Coupon_Scarf_*`, `Coupon_Keyhole_*`, `Coupon_Planet_*`):** Validates the **highest-risk unprinted systems**: PETG scarf loose-slip clearance (confirm which of `c10/c15` actually holds vs `c25` slipping), `KA006` planet LED press-fit (`c10`), and exact keyhole drop-in glide (`c15` vs `c20`) matching your already-printed `trunk_base` + brackets.
+2. **Second — Bayonet Marble Sub-Set (`Coupon_Bayonet_*`):** Tests `supp = 0` internal bridging on the `18.7 mm` cavity and quarter-turn bayonet lock friction before printing 6 pairs (`Plate 15`).
+3. **Third — Trunk Keyed Tenon (`Coupon_Trunk_*`):** Confirms your U1's `Z = 150 / 300 mm` seam slip clearance (`c15` vs `c20`) before printing `trunk_mid` and `trunk_top`.
+*(Note: If slicing `Test_Coupons.3mf` as one single print with `T1` PLA + `T2` PETG, use a `65 °C` textured PEI plate or separate the `T2` PETG coupons onto a `70–75 °C` bed pass.)*
