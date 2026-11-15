@@ -39,6 +39,10 @@ from common_params import (
     DC_BARREL_JACK_Z_CENTER,
     DOVETAIL_ANGULAR_STEP_DEG,
     DOVETAIL_BASE_W_TOP,
+    DOVETAIL_ENTRY_DEPTH,
+    DOVETAIL_ENTRY_H,
+    DOVETAIL_ENTRY_PEAK_W,
+    DOVETAIL_ENTRY_W,
     DOVETAIL_NECK_W_TOP,
     DOVETAIL_RADIAL_DEPTH,
     DOVETAIL_SLOT_H,
@@ -154,12 +158,18 @@ def make_keyed_female_socket_cutter(z_base: float = 0.0, height: float = TENON_H
 
 
 def make_female_dovetail_slot_cutter() -> bd.Solid:
-    """Build a downward-tapered 45-degree female dovetail socket cutter with 45-deg roof ramp.
+    """Build a keyhole drop-in 45-degree female dovetail socket cutter with support-free entry window.
 
-    Local coordinates before placement at (R=TRUNK_OUTER_R, theta, z):
-      X: radially outward (slot cuts from X = -DOVETAIL_RADIAL_DEPTH to X = +1.5 mm)
-      Y: tangential width (45-deg dovetail sidewalls, downward tapered by DOVETAIL_TAPER_W)
-      Z: vertical along trunk axis (0 to DOVETAIL_SLOT_H, plus 45-deg top lead-in ramp)
+    Geometry (local coordinates before placement at R=TRUNK_OUTER_R, theta, z_slot):
+      - Lower active dovetail seat (Z = 0..DOVETAIL_SLOT_H = 18.0 mm):
+          X in [-4.50, +1.50 mm], tapered downward by DOVETAIL_TAPER_W (0.80 mm),
+          mouth width 7.0 -> 6.2 mm, base width 16.0 -> 15.2 mm.
+      - Upper keyhole drop-in entry window (Z = 18.0..36.6 mm):
+          16.20 mm wide (tenon base 15.40 + 0.80 mm) x 4.85 mm deep (tenon depth 4.35 + 0.50 mm)
+          x 18.60 mm straight height (tenon height 17.75 + 0.85 mm) so brackets push radially
+          inward while the trunk is already stacked and then slide down 18.2 mm into the dovetail.
+      - Support-free 45-deg gable roof (Z = 36.6..43.9 mm):
+          Tapers linearly at 45 deg to a 1.60 mm peak bridge (zero horizontal bridges > 8 mm).
     """
     d = DOVETAIL_RADIAL_DEPTH  # 4.5 mm
     out_ext = 1.5              # Extend past outer cylinder surface for clean boolean cut
@@ -167,13 +177,11 @@ def make_female_dovetail_slot_cutter() -> bd.Solid:
     # Top of active dovetail slot (Z = DOVETAIL_SLOT_H)
     half_base_top = DOVETAIL_BASE_W_TOP / 2.0  # 8.0 mm at X = -d
     half_neck_top = DOVETAIL_NECK_W_TOP / 2.0  # 3.5 mm at X = 0.0
-    half_out_top = max(1.0, half_neck_top - out_ext)
 
     # Bottom of active dovetail slot (Z = 0), tapered inward by DOVETAIL_TAPER_W / 2 per side
     taper = DOVETAIL_TAPER_W / 2.0
     half_base_bot = half_base_top - taper
     half_neck_bot = half_neck_top - taper
-    half_out_bot = max(1.0, half_neck_bot - out_ext)
 
     pts_bot = [
         (-d, -half_base_bot),
@@ -193,28 +201,45 @@ def make_female_dovetail_slot_cutter() -> bd.Solid:
         (-d, half_base_top),
         (-d, -half_base_top),
     ]
-    # 45-deg top exit ramp (Z = DOVETAIL_SLOT_H + d + 0.2) so top overhang is <= 45 deg
-    pts_ramp = [
-        (0.2, -half_neck_top),
-        (0.3, -half_neck_top),
-        (out_ext, -half_neck_top),
-        (out_ext, half_neck_top),
-        (0.3, half_neck_top),
-        (0.2, half_neck_top),
-        (0.2, -half_neck_top),
-    ]
 
     w_bot = bd.Wire([bd.Edge.make_line(pts_bot[i], pts_bot[i + 1]) for i in range(6)])
     w_top = bd.Pos(0.0, 0.0, DOVETAIL_SLOT_H) * bd.Wire(
         [bd.Edge.make_line(pts_top[i], pts_top[i + 1]) for i in range(6)]
     )
-    w_ramp = bd.Pos(0.0, 0.0, DOVETAIL_SLOT_H + d + 0.2) * bd.Wire(
-        [bd.Edge.make_line(pts_ramp[i], pts_ramp[i + 1]) for i in range(6)]
+    body = bd.Solid.make_loft([w_bot, w_top], ruled=True)
+
+    # Upper keyhole entry window + 45-deg self-supporting gable roof
+    win_d = DOVETAIL_ENTRY_DEPTH         # 4.85 mm
+    win_hw = DOVETAIL_ENTRY_W / 2.0      # 8.10 mm
+    win_z0 = DOVETAIL_SLOT_H             # 18.00 mm
+    win_z1 = win_z0 + DOVETAIL_ENTRY_H   # 36.60 mm
+    peak_hw = DOVETAIL_ENTRY_PEAK_W / 2.0  # 0.80 mm
+    roof_dz = win_hw - peak_hw           # 7.30 mm (exact 45-deg roof slope)
+
+    entry_win = bd.Pos(0.5 * (out_ext - win_d), 0.0, win_z0) * bd.Box(
+        win_d + out_ext,
+        2.0 * win_hw,
+        DOVETAIL_ENTRY_H,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
 
-    body = bd.Solid.make_loft([w_bot, w_top], ruled=True)
-    ramp = bd.Solid.make_loft([w_top, w_ramp], ruled=True)
-    return body + ramp
+    def _win_wire(z_val: float, hw: float) -> bd.Wire:
+        pts = [
+            (-win_d, -hw),
+            (out_ext, -hw),
+            (out_ext, hw),
+            (-win_d, hw),
+            (-win_d, -hw),
+        ]
+        return bd.Pos(0.0, 0.0, z_val) * bd.Wire(
+            [bd.Edge.make_line(pts[i], pts[i + 1]) for i in range(4)]
+        )
+
+    roof = bd.Solid.make_loft(
+        [_win_wire(win_z1, win_hw), _win_wire(win_z1 + roof_dz, peak_hw)],
+        ruled=True,
+    )
+    return (body + entry_win + roof).solid()
 
 
 def _cut_helical_dovetails_for_section(
@@ -224,17 +249,18 @@ def _cut_helical_dovetails_for_section(
     local_z_min_safe: float,
     local_z_max_safe: float,
 ) -> bd.Solid:
-    """Subtract female dovetail sockets at 60-degree increments along the helical slope.
+    """Subtract female keyhole dovetail sockets at 60-degree increments along the helical slope.
 
     Uses the exact unclamped mathematical height `z_global = helix_z(theta_deg) - 30.0`
-    for every 60° station (60°..1560°). Whenever a slot's vertical span overlaps the
-    section `[z_section_min, z_section_max]`, it cuts cleanly at `z_local = z_global - z_section_min`
-    so slots near section seams (Z = 150 mm and Z = 300 mm) align 100% seamlessly across
-    stacked trunk sections with 0.000 mm vertical error.
+    for every 60° station (60°..1440°). Whenever a keyhole slot's vertical span overlaps
+    the section `[z_section_min, z_section_max]`, it cuts cleanly at `z_local = z_global - z_section_min`
+    so slots near section seams (Z = 150 mm and Z = 300 mm) align seamlessly across
+    stacked trunk sections.
     """
     _ = (local_z_min_safe, local_z_max_safe)
     base_cutter = make_female_dovetail_slot_cutter()
-    slot_total_h = DOVETAIL_SLOT_H + DOVETAIL_RADIAL_DEPTH + 1.0
+    roof_dz = (DOVETAIL_ENTRY_W - DOVETAIL_ENTRY_PEAK_W) / 2.0
+    slot_total_h = DOVETAIL_SLOT_H + DOVETAIL_ENTRY_H + roof_dz + 0.6
     num_steps = int(round(HELIX_TOTAL_DEG / DOVETAIL_ANGULAR_STEP_DEG))
 
     for k in range(1, num_steps):

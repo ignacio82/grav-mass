@@ -45,19 +45,26 @@ def _inter_vol(a: bd.Shape, b: bd.Shape) -> float:
         return 0.0
 
 
-def _crop_trunk_near_z(
+def _crop_trunk_near_station(
     sections: list[tuple[str, bd.Solid]],
+    loc0: bd.Location,
     z_slot: float,
     z_pad_below: float = 35.0,
     z_pad_above: float = 60.0,
 ) -> bd.Shape | None:
-    """Intersect trunk sections with a generous local Z slab enclosing any bracket sweep."""
-    crop_box = bd.Pos(0.0, 0.0, z_slot - z_pad_below) * bd.Box(
-        200.0,
-        200.0,
-        z_pad_below + z_pad_above,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
+    """Intersect trunk sections with a generous sector box in bracket coordinates enclosing
+    every rigid sweep pose (`X_local in [-12, +135]`, `Y_local in [-24, +24]`,
+    `Z_local in [-z_pad_below, z_pad_above]`).
+    """
+    crop_box = (
+        bd.Pos(61.5, 0.0, -z_pad_below)
+        * bd.Box(
+            147.0,
+            48.0,
+            z_pad_below + z_pad_above,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+    ).moved(loc0)
     parts: list[bd.Shape] = []
     for _name, sec in sections:
         bb = sec.bounding_box()
@@ -102,7 +109,7 @@ def find_rigid_insertion_path(
         (TRUNK_OUTER_R * math.cos(rad), TRUNK_OUTER_R * math.sin(rad), z_slot),
         (0.0, 0.0, theta_deg),
     )
-    obstacle = _crop_trunk_near_z(sections, z_slot, z_pad_below=40.0, z_pad_above=65.0)
+    obstacle = _crop_trunk_near_station(sections, loc0, z_slot, z_pad_below=40.0, z_pad_above=65.0)
 
     seated_vol = _check_pose(bracket, loc0, 0.0, 0.0, 0.0, obstacle)
     if seated_vol > COLLISION_TOL_MM3:

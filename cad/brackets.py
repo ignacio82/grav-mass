@@ -22,6 +22,7 @@ from common_params import (
     BRACKET_PEG_SPACING_U,
     DOVETAIL_BASE_W_TOP,
     DOVETAIL_CLEARANCE,
+    DOVETAIL_DETENT_Y_HALF,
     DOVETAIL_NECK_W_TOP,
     DOVETAIL_RADIAL_DEPTH,
     DOVETAIL_SLOT_H,
@@ -95,7 +96,25 @@ def make_male_dovetail_tenon() -> bd.Solid:
 
     lower_chamfer = bd.Solid.make_loft([w_z0, w_mid], ruled=True)
     upper_tenon = bd.Solid.make_loft([w_mid, w_top], ruled=True)
-    return (lower_chamfer + upper_tenon).solid()
+    tenon = (lower_chamfer + upper_tenon).solid()
+
+    # Add a small 45-deg beveled anti-lift friction bump on both +/-Y neck flanks
+    # (Z = 14.5..16.5 mm, Y_outer = DOVETAIL_DETENT_Y_HALF = 3.44 mm < 3.50 mm socket neck)
+    # so the tenon slides cleanly in rigid PLA with zero flexing while providing light friction
+    # against accidental upward slip before the helical track is locked over the pegs.
+    y_bump = DOVETAIL_DETENT_Y_HALF
+    for sign_y in (-1.0, 1.0):
+        pts_bump = [
+            (sign_y * 2.90, 14.5),
+            (sign_y * y_bump, 15.1),
+            (sign_y * y_bump, 15.9),
+            (sign_y * 2.90, 16.5),
+            (sign_y * 2.90, 14.5),
+        ]
+        b_wire = bd.Wire([bd.Edge.make_line(pts_bump[i], pts_bump[i + 1]) for i in range(4)])
+        bump = bd.Pos(-0.20, 0.0, 0.0) * bd.extrude(bd.Plane.YZ * bd.Face(b_wire), amount=0.25, both=True)
+        tenon = tenon + bump
+    return tenon.solid()
 
 
 def build_cantilever_bracket(

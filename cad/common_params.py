@@ -225,12 +225,17 @@ WIRE_CONDUIT_D = 8.0                        # Fits JST-SM / SH1.0 / PH2.0 / Dupo
 CONDUIT_COVER_STRIP_H = 68.0                # Snap-on brown cover strip height (68.0 x 10.2 x 2.6 mm)
 BASE_BOTTOM_COVER_THICK = 3.0               # 3.0 mm thick twist-lock / magnetic ventilated bottom service lid
 
-# Dovetail socket parameters (45-deg overhang, downward tapered)
+# Dovetail keyhole socket parameters (45-deg overhang, downward tapered + drop-in entry window)
 DOVETAIL_RADIAL_DEPTH = 4.5                 # Radial depth into trunk wall (R=34.0 down to R=29.5)
-DOVETAIL_NECK_W_TOP = 7.0                   # Entry neck width at top of slot
+DOVETAIL_NECK_W_TOP = 7.0                   # Entry neck width at top of active dovetail seat
 DOVETAIL_BASE_W_TOP = DOVETAIL_NECK_W_TOP + 2.0 * DOVETAIL_RADIAL_DEPTH  # 16.0 mm (45-deg walls)
 DOVETAIL_TAPER_W = 0.8                      # Downward width taper over slot height for wedge lock
-DOVETAIL_SLOT_H = 18.0                      # Active vertical engagement height of dovetail slot
+DOVETAIL_SLOT_H = 18.0                      # Active vertical engagement height of dovetail seat
+DOVETAIL_ENTRY_W = 16.20                    # Upper keyhole entry window width (tenon base 15.40 + 0.80 mm)
+DOVETAIL_ENTRY_DEPTH = 4.85                 # Entry window radial depth (tenon depth 4.35 + 0.50 mm; leaves 1.65 mm wall at seams)
+DOVETAIL_ENTRY_H = 18.60                    # Straight vertical entry window height above dovetail (17.75 tenon + 0.85 mm)
+DOVETAIL_ENTRY_PEAK_W = 1.60                # 45-deg gable roof apex width above entry window (no bridge > 8 mm)
+DOVETAIL_DETENT_Y_HALF = 3.44               # 45-deg anti-lift neck friction bump half-width (< 3.50 mm socket neck)
 DOVETAIL_ANGULAR_STEP_DEG = 60.0            # 60-deg increments along helical slope (6 per turn)
 
 # ---------------------------------------------------------------------------
