@@ -25,16 +25,19 @@ import zipfile
 import build123d as bd
 
 from auger import build_all_auger_parts
-from brackets import build_all_24_station_brackets, build_all_bracket_parts
+from brackets import build_all_station_brackets
 from common_params import (
+    BRACKET_STATION_COUNT,
     MIN_PART_CLEARANCE,
     ORCA_PLATE_STRIDE_X,
     ORCA_PLATE_STRIDE_Y,
+    PLANET_ANCHOR_DEGS,
     SAFE_PLATE_ZONE,
     TOOLHEAD_PALETTE,
     U1_BED_X,
     U1_BED_Y,
     U1_BED_Z,
+    WIRE_CONDUIT_ANGLE_DEG,
     assign_toolhead,
 )
 from topper_planets import (
@@ -42,13 +45,13 @@ from topper_planets import (
     build_all_marbles,
     build_all_topper_planet_parts,
     build_apple_captive_pause_marble,
-    build_apple_topper_stem_leaf,
+    build_apple_green_leaf,
 )
 from track import (
     TRACK_PLANET_SEGMENT_INDICES,
     build_all_track_parts,
-    build_track_joint_clip,
     build_track_segment,
+    get_track_segment_specs,
 )
 from trunk import build_all_trunk_parts
 from common_params import (
@@ -56,6 +59,7 @@ from common_params import (
     HELIX_PITCH,
     HELIX_TOTAL_DEG,
     TRACK_SEGMENT_ARC_DEG,
+    TRUNK_OUTER_R,
     TRUNK_SECTION_HEIGHT,
     helix_point,
     helix_radius,
@@ -248,11 +252,13 @@ def _orca_plate_cols(plate_count: int) -> int:
 def build_five_plates(
     prebuilt_parts: dict[str, bd.Solid] | None = None,
 ) -> dict[str, list[PlatedPart]]:
-    """Construct and lay out all Grand Grav-Mass parts across 10 Snapmaker U1 build plates:
-      - Plates 1-9: 100% single-color plates (only 1 filament/toolhead per plate, zero swaps)
-        containing every FULL-SCALE track segment (track_seg_01..14) and all 24 exact-radius
-        cantilever support brackets (bracket_01..24).
-      - Plate 10:   Dedicated multi-color plate containing ONLY unified multi-color objects.
+    """Construct and lay out all Grand Grav-Mass parts across 18 Snapmaker U1 build plates:
+      - Plates 1–15: 100% single-color plates (only 1 filament/toolhead per plate, zero swaps)
+        containing trunk sections, Bottom_Electronics_Lid, 150° Conduit_Cover_Strip_{Base,Mid,Top},
+        Motor_Clutch_Driver (Brown PLA), all 26 exact-radius cantilever
+        brackets (bracket_01..26, Brown PLA), all 14 track segments + apple_green_leaf (Teal PETG),
+        auger_lower & auger_upper (Silk Gold PLA), and 12x apple hemispheres (Crimson PLA).
+      - Plates 16–18: Dedicated 4-color PLA-only plates containing unified multi-color objects.
     """
     if prebuilt_parts is not None:
         trunk_parts = {
@@ -261,9 +267,10 @@ def build_five_plates(
                 "trunk_base",
                 "trunk_mid",
                 "trunk_top",
-                "Base_Bottom_Cover",
-                "Conduit_Cover_Strip",
-                "Battery_Cover",
+                "Bottom_Electronics_Lid",
+                "Conduit_Cover_Strip_Base",
+                "Conduit_Cover_Strip_Mid",
+                "Conduit_Cover_Strip_Top",
             )
         }
         auger_parts = {
@@ -272,12 +279,11 @@ def build_five_plates(
                 "auger_lower",
                 "auger_upper",
                 "Motor_Clutch_Driver",
-                "Servo_Or_030_Adapter",
             )
         }
         topper_planet_parts = {
             k: prebuilt_parts[k]
-            for k in ("golden_apple_topper", "Magic_LED_Wand", *PLANET_NAMES)
+            for k in ("golden_apple_topper", "apple_green_leaf", "Magic_LED_Wand", *PLANET_NAMES)
         }
     else:
         trunk_parts = build_all_trunk_parts()
@@ -285,9 +291,12 @@ def build_five_plates(
         topper_planet_parts = build_all_topper_planet_parts()
 
     if prebuilt_parts is not None and "bracket_01" in prebuilt_parts:
-        station_brackets = {f"bracket_{k:02d}": prebuilt_parts[f"bracket_{k:02d}"] for k in range(1, 25)}
+        station_brackets = {
+            f"bracket_{k:02d}": prebuilt_parts[f"bracket_{k:02d}"]
+            for k in range(1, BRACKET_STATION_COUNT + 1)
+        }
     else:
-        station_brackets = build_all_24_station_brackets()
+        station_brackets = build_all_station_brackets()
 
     if prebuilt_parts is not None and "track_seg_01" in prebuilt_parts:
         track_parts = {
@@ -312,40 +321,30 @@ def build_five_plates(
         else build_all_apple_hemispheres(count=6)
     )
 
-    # Create 3 labeled copies of Conduit_Cover_Strip (1 for each trunk section: base, mid, top)
-    conduit_covers: dict[str, bd.Solid] = {}
-    for idx in range(1, 4):
-        c_copy = copy.deepcopy(trunk_parts["Conduit_Cover_Strip"])
-        c_name = f"Conduit_Cover_Strip_{idx:02d}"
-        assign_toolhead(c_copy, c_name, 1)
-        conduit_covers[c_name] = c_copy
-
     plates: dict[str, list[PlatedPart]] = {}
 
     # -----------------------------------------------------------------------
-    # Plate 1: Single-Color T1 Dark Wood Brown (#4A2F1D) — Trunk Base & Bottom Cover
-    # 100% Toolhead 1 (Zero filament swaps, zero prime tower, >= 15.1 mm gap)
+    # Plate 1: Single-Color T1 Dark Wood Brown (#4A2F1D) — Trunk Base (Solo)
+    # 100% Toolhead 1 (Centered at (0, 0), 145.0 x 144.5 mm inside 240x240 mm)
     # -----------------------------------------------------------------------
     p1_name = "Plate_1_SingleColor_Brown_Trunk_Base"
     plates[p1_name] = [
-        _place_on_bed(trunk_parts["trunk_base"], (0.0, 0.0, 0.0), (-30.0, 0.0), 0, p1_name),
-        _place_on_bed(trunk_parts["Base_Bottom_Cover"], (0.0, 0.0, 0.0), (80.0, 0.0), 0, p1_name),
+        _place_on_bed(trunk_parts["trunk_base"], (0.0, 0.0, 0.0), (0.0, 0.0), 0, p1_name),
     ]
 
     # -----------------------------------------------------------------------
-    # Plate 2: Single-Color T1 Dark Wood Brown (#4A2F1D) — Upper Trunk Sections & Covers
-    # 100% Toolhead 1 (Zero filament swaps, zero prime tower, >= 13.4 mm gap)
-    # Includes 3x copies of Conduit_Cover_Strip (1 per trunk section: base, mid, top)
+    # Plate 2: Single-Color T1 Dark Wood Brown (#4A2F1D) — Upper Trunk, Lid, Covers & Drive Coupler
+    # 100% Toolhead 1 (Zero filament swaps, >= 10.2 mm XY clearance inside 240x240 mm)
     # -----------------------------------------------------------------------
     p2_name = "Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers"
     plates[p2_name] = [
-        _place_on_bed(trunk_parts["trunk_mid"], (0.0, 0.0, 0.0), (-52.0, -38.0), 1, p2_name),
-        _place_on_bed(trunk_parts["trunk_top"], (0.0, 0.0, 0.0), (52.0, -38.0), 1, p2_name),
-        _place_on_bed(trunk_parts["Battery_Cover"], (0.0, 0.0, 0.0), (-52.0, 32.0), 1, p2_name),
-        _place_on_bed(auger_parts["Servo_Or_030_Adapter"], (0.0, 0.0, 90.0), (-52.0, 74.0), 1, p2_name),
-        _place_on_bed(conduit_covers["Conduit_Cover_Strip_01"], (0.0, 0.0, 90.0), (48.0, 24.0), 1, p2_name),
-        _place_on_bed(conduit_covers["Conduit_Cover_Strip_02"], (0.0, 0.0, 90.0), (48.0, 50.0), 1, p2_name),
-        _place_on_bed(conduit_covers["Conduit_Cover_Strip_03"], (0.0, 0.0, 90.0), (48.0, 76.0), 1, p2_name),
+        _place_on_bed(trunk_parts["Bottom_Electronics_Lid"], (0.0, 0.0, 0.0), (-50.0, -50.0), 1, p2_name),
+        _place_on_bed(trunk_parts["trunk_mid"], (0.0, 0.0, 0.0), (84.0, -84.0), 1, p2_name),
+        _place_on_bed(trunk_parts["trunk_top"], (0.0, 0.0, 0.0), (84.0, 4.0), 1, p2_name),
+        _place_on_bed(trunk_parts["Conduit_Cover_Strip_Mid"], (0.0, 0.0, 90.0), (-45.0, 110.0), 1, p2_name),
+        _place_on_bed(trunk_parts["Conduit_Cover_Strip_Top"], (0.0, 0.0, 90.0), (-45.0, 88.0), 1, p2_name),
+        _place_on_bed(trunk_parts["Conduit_Cover_Strip_Base"], (0.0, 0.0, 90.0), (-67.0, 66.0), 1, p2_name),
+        _place_on_bed(auger_parts["Motor_Clutch_Driver"], (0.0, 0.0, 0.0), (84.0, 98.0), 1, p2_name),
     ]
 
     # -----------------------------------------------------------------------
@@ -370,15 +369,15 @@ def build_five_plates(
     plates[p3_name] = p3_items
 
     # -----------------------------------------------------------------------
-    # Plate 4: Single-Color T1 Dark Wood Brown (#4A2F1D) — Station Brackets #13 to #24
+    # Plate 4: Single-Color T1 Dark Wood Brown (#4A2F1D) — Station Brackets #13 to #26
     # 100% Toolhead 1 (Upright Z=0 flat rib base, zero supports, >= 14.6 mm gap)
     # -----------------------------------------------------------------------
-    p4_name = "Plate_4_SingleColor_Brown_Brackets_13_To_24"
+    p4_name = "Plate_4_SingleColor_Brown_Brackets_13_To_26"
     p4_items: list[PlatedPart] = []
-    for i in range(6):
-        yc = round(-75.0 + i * 30.0, 2)
+    for i in range(7):
+        yc = round(-90.0 + i * 30.0, 2)
         k1 = 13 + i
-        k2 = 24 - i
+        k2 = 26 - i
         b1 = station_brackets[f"bracket_{k1:02d}"]
         b2 = station_brackets[f"bracket_{k2:02d}"]
         len1 = max(b1.bounding_box().size.X, _mesh_bounds(b1)[1] - _mesh_bounds(b1)[0])
@@ -427,8 +426,8 @@ def build_five_plates(
     ]
 
     # -----------------------------------------------------------------------
-    # Plate 9: Single-Color T2 Translucent Emerald Green (#00A86B) — Track Segments 05 & 13
-    # 100% Toolhead 2 (Side-by-side non-overlapping AABB & Convex Hulls, >= 12.5 mm gap)
+    # Plate 9: Single-Color T2 Translucent Teal PETG (#00A86B) — Track Segments 05 & 13
+    # 100% Toolhead 2 (Side-by-side inside 240x240 mm, >= 9.0 mm gap)
     # -----------------------------------------------------------------------
     p9_name = "Plate_9_SingleColor_Green_Track_05_And_13"
     plates[p9_name] = _pair_side_by_side_on_bed(
@@ -438,78 +437,86 @@ def build_five_plates(
         (0.0, 0.0, 40.0),
         8,
         p9_name,
-        gap_x=12.5,
+        gap_x=9.0,
     )
 
     # -----------------------------------------------------------------------
-    # Plate 10: Single-Color T2 Translucent Emerald Green (#00A86B) — Track Segments 06 & 12
-    # 100% Toolhead 2 (Side-by-side non-overlapping AABB & Convex Hulls, >= 12.5 mm gap)
+    # Plate 10: Single-Color T2 Translucent Teal PETG (#00A86B) — Track Segments 06 & 12
+    # 100% Toolhead 2 (Side-by-side inside 240x240 mm, >= 9.0 mm gap)
     # -----------------------------------------------------------------------
     p10_name = "Plate_10_SingleColor_Green_Track_06_And_12"
     plates[p10_name] = _pair_side_by_side_on_bed(
         track_parts["track_seg_06"],
         (0.0, 0.0, 60.0),
         track_parts["track_seg_12"],
-        (0.0, 0.0, 40.0),
+        (0.0, 0.0, 50.0),
         9,
         p10_name,
-        gap_x=12.5,
+        gap_x=9.0,
     )
 
     # -----------------------------------------------------------------------
-    # Plate 11: Single-Color T2 Translucent Emerald Green (#00A86B) — Track Segments 07 & 11
-    # 100% Toolhead 2 (Side-by-side non-overlapping AABB & Convex Hulls, >= 12.5 mm gap)
+    # Plate 11: Single-Color T2 Translucent Teal PETG (#00A86B) — Track Segments 07 & 11
+    # 100% Toolhead 2 (Side-by-side inside 240x240 mm, >= 9.0 mm gap)
     # -----------------------------------------------------------------------
     p11_name = "Plate_11_SingleColor_Green_Track_07_And_11"
     plates[p11_name] = _pair_side_by_side_on_bed(
         track_parts["track_seg_07"],
-        (0.0, 0.0, 20.0),
+        (0.0, 0.0, 40.0),
         track_parts["track_seg_11"],
-        (0.0, 0.0, 45.0),
+        (0.0, 0.0, 40.0),
         10,
         p11_name,
-        gap_x=12.5,
+        gap_x=9.0,
     )
 
     # -----------------------------------------------------------------------
-    # Plate 12: Single-Color T2 Translucent Emerald Green (#00A86B) — Track Segments 08 & 10
-    # 100% Toolhead 2 (Side-by-side non-overlapping AABB & Convex Hulls, >= 12.5 mm gap)
+    # Plate 12: Single-Color T2 Translucent Teal PETG (#00A86B) — Track Segments 08 & 10
+    # 100% Toolhead 2 (Side-by-side inside 240x240 mm, >= 9.0 mm gap)
     # -----------------------------------------------------------------------
     p12_name = "Plate_12_SingleColor_Green_Track_08_And_10"
     plates[p12_name] = _pair_side_by_side_on_bed(
         track_parts["track_seg_08"],
         (0.0, 0.0, 50.0),
         track_parts["track_seg_10"],
-        (0.0, 0.0, 45.0),
+        (0.0, 0.0, 50.0),
         11,
         p12_name,
-        gap_x=12.5,
+        gap_x=9.0,
     )
 
     # -----------------------------------------------------------------------
-    # Plate 13: Single-Color T2 Translucent Emerald Green (#00A86B) — Track Segments 09 & 14
-    # 100% Toolhead 2 (Side-by-side non-overlapping AABB & Convex Hulls, >= 12.5 mm gap)
+    # Plate 13: Single-Color T2 Translucent Teal PETG (#00A86B) — Track Segments 09 & 14 + Leaf
+    # 100% Toolhead 2 (Inside 240x240 mm, >= 9.0 mm gap)
     # -----------------------------------------------------------------------
     p13_name = "Plate_13_SingleColor_Green_Track_09_And_14"
-    plates[p13_name] = _pair_side_by_side_on_bed(
-        track_parts["track_seg_09"],
-        (0.0, 0.0, 60.0),
-        track_parts["track_seg_14_top_entry"],
-        (0.0, 0.0, 20.0),
-        12,
-        p13_name,
-        gap_x=12.5,
-    )
+    plates[p13_name] = [
+        *_pair_side_by_side_on_bed(
+            track_parts["track_seg_09"],
+            (0.0, 0.0, 40.0),
+            track_parts["track_seg_14_top_entry"],
+            (0.0, 0.0, 30.0),
+            12,
+            p13_name,
+            gap_x=9.0,
+        ),
+        _place_on_bed(
+            topper_planet_parts["apple_green_leaf"],
+            (0.0, 0.0, 0.0),
+            (48.75, 100.0),
+            12,
+            p13_name,
+        ),
+    ]
 
     # -----------------------------------------------------------------------
-    # Plate 14: Single-Color T3 Silk Gold (#D4AF37) — Archimedes Auger & Hex Coupler
-    # 100% Toolhead 3 (Zero filament swaps, zero prime tower, >= 22.0 mm gap)
+    # Plate 14: Single-Color T3 Silk Gold (#D4AF37) — Archimedes Auger Halves (10 mm Outer Brim)
+    # 100% Toolhead 3 (Zero filament swaps, >= 52.0 mm gap; Motor_Clutch_Driver on Plate 2 T1)
     # -----------------------------------------------------------------------
     p14_name = "Plate_14_SingleColor_Gold_Auger_And_Drive"
     plates[p14_name] = [
         _place_on_bed(auger_parts["auger_lower"], (0.0, 0.0, 0.0), (-45.0, 0.0), 13, p14_name),
-        _place_on_bed(auger_parts["auger_upper"], (0.0, 0.0, 0.0), (15.0, 0.0), 13, p14_name),
-        _place_on_bed(auger_parts["Motor_Clutch_Driver"], (0.0, 0.0, 0.0), (65.0, 0.0), 13, p14_name),
+        _place_on_bed(auger_parts["auger_upper"], (0.0, 0.0, 0.0), (45.0, 0.0), 13, p14_name),
     ]
 
     # -----------------------------------------------------------------------
@@ -542,8 +549,9 @@ def build_five_plates(
     ]
 
     # -----------------------------------------------------------------------
-    # Plate 16: Dedicated 4-Color Plate — Apple Topper (with integrated Stem/Leaf) & Magic Wand
-    # Palette (4 Colors max): T1 #4A2F1D Brown, T2 #00A86B Emerald, T3 #D4AF37 Gold, T4 #C41E3A Red
+    # Plate 16: Dedicated 4-Color PLA Plate — Apple Topper (T1/T4) & Magic Wand (T1/T3/T4)
+    # Palette (4 Colors max, 100% PLA): T1 #4A2F1D Brown, T2 #F5EFE6 Ivory, T3 #D4AF37 Gold, T4 #C41E3A Red
+    # (Standalone Teal PETG apple_green_leaf prints separately on Plate 13)
     # -----------------------------------------------------------------------
     p16_name = "Plate_16_MultiColor_Topper_And_Wand"
     plates[p16_name] = [
@@ -552,9 +560,9 @@ def build_five_plates(
     ]
 
     # -----------------------------------------------------------------------
-    # Plate 17: Dedicated 4-Color Plate — Warm Terrestrial & Gas-Giant Planets
-    # Palette (4 Colors max): T1 #4A2F1D Dark Basalt/Umber, T2 #F5EFE6 Creamy Alabaster,
-    #                         T3 #D4AF37 Ochre/Silk Gold, T4 #C41E3A Terracotta/Crimson Red
+    # Plate 17: Dedicated 4-Color PLA Plate — Warm Terrestrial & Gas-Giant Planets
+    # Palette (4 Colors max, 100% PLA): T1 #4A2F1D Dark Basalt/Umber, T2 #F5EFE6 Creamy Alabaster,
+    #                                   T3 #D4AF37 Ochre/Silk Gold, T4 #C41E3A Terracotta/Crimson Red
     # -----------------------------------------------------------------------
     p17_name = "Plate_17_MultiColor_Planets_Warm_And_Gas_Giants"
     plates[p17_name] = [
@@ -566,9 +574,9 @@ def build_five_plates(
     ]
 
     # -----------------------------------------------------------------------
-    # Plate 18: Dedicated 4-Color Plate — Ocean & Ice-Giant Planets
-    # Palette (4 Colors max): T1 #1E5AA8 Deep Cobalt Ocean Blue, T2 #00A86B Continental Emerald/Teal,
-    #                         T3 #F0F4F8 Glacial Polar Ice White, T4 #D4AF37 Golden Mountain/Ring Accent
+    # Plate 18: Dedicated 4-Color PLA Plate — Ocean & Ice-Giant Planets (Single-Polymer PLA)
+    # Palette (4 Colors max, 100% PLA): T1 #1E5AA8 Deep Cobalt Blue, T2 #D4AF37 Silk Gold,
+    #                                   T3 #F5EFE6 Ivory Polar Ice White, T4 #C41E3A Crimson
     # -----------------------------------------------------------------------
     p18_name = "Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants"
     plates[p18_name] = [
@@ -586,13 +594,17 @@ build_twelve_plates = build_five_plates
 build_eighteen_plates = build_five_plates
 
 PLATE_FILAMENT_PALETTES: dict[str, tuple[list[str], list[str]]] = {
+    "Plate_16_MultiColor_Topper_And_Wand": (
+        ["#4A2F1D", "#F5EFE6", "#D4AF37", "#C41E3A"],
+        ["PLA", "PLA", "PLA", "PLA"],
+    ),
     "Plate_17_MultiColor_Planets_Warm_And_Gas_Giants": (
         ["#4A2F1D", "#F5EFE6", "#D4AF37", "#C41E3A"],
         ["PLA", "PLA", "PLA", "PLA"],
     ),
     "Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants": (
-        ["#1E5AA8", "#00A86B", "#F0F4F8", "#D4AF37"],
-        ["PLA", "PETG", "PLA", "PLA"],
+        ["#1E5AA8", "#D4AF37", "#F5EFE6", "#C41E3A"],
+        ["PLA", "PLA", "PLA", "PLA"],
     ),
 }
 
@@ -680,9 +692,14 @@ def _make_slice_info_xml(plate_names_ordered: list[str]) -> str:
     return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(cfg, encoding="unicode")
 
 
-def _color_to_toolhead_id(hex_str: str, default_tid: int) -> int:
-    """Map a sub-part hex color to the closest Snapmaker U1 toolhead (1..4)."""
+def _color_to_toolhead_id(hex_str: str, default_tid: int, plate_name: str | None = None) -> int:
+    """Map a sub-part hex color to the matching Snapmaker U1 toolhead (1..4)."""
     h = hex_str.upper()
+    if plate_name and plate_name in PLATE_FILAMENT_PALETTES:
+        p_colors = PLATE_FILAMENT_PALETTES[plate_name][0]
+        for idx, p_col in enumerate(p_colors, start=1):
+            if p_col.upper() == h:
+                return idx
     if h in ("#4A2F1D", "#6E4726", "#B8860B", "#1E5AA8"):
         return 1
     if h in ("#00A86B", "#2E9B4F", "#1E6B9B", "#F5EFE6"):
@@ -723,7 +740,13 @@ def _add_part_meshes_to_exporter(
                 )
             else:
                 sp_hex = pp.hex_color
-            sp_tid = int(getattr(sp, "toolhead_id", _color_to_toolhead_id(sp_hex, pp.toolhead_id)))
+            sp_tid = int(
+                getattr(
+                    sp,
+                    "toolhead_id",
+                    _color_to_toolhead_id(sp_hex, pp.toolhead_id, plate_name=pp.plate_name),
+                )
+            )
             sub_label = getattr(sp, "label", "") or f"part_{idx + 1}"
             mesh_key = f"{pp.name}__sub_{idx}__{sub_label}"
             sp_local.color = bd.Color(sp_hex)
@@ -858,6 +881,9 @@ def _inject_orca_metadata_into_3mf(
             obj_node = ET.SubElement(config_root, "object", {"id": str(obj_id)})
             ET.SubElement(obj_node, "metadata", {"key": "name", "value": pp.name})
             ET.SubElement(obj_node, "metadata", {"key": "extruder", "value": str(pp.toolhead_id)})
+            if pp.name in ("auger_lower", "auger_upper"):
+                ET.SubElement(obj_node, "metadata", {"key": "brim_type", "value": "outer_only"})
+                ET.SubElement(obj_node, "metadata", {"key": "brim_width", "value": "10"})
             part_node = ET.SubElement(obj_node, "part", {"id": str(obj_id), "subtype": "normal_part"})
             ET.SubElement(part_node, "metadata", {"key": "name", "value": pp.name})
             ET.SubElement(part_node, "metadata", {"key": "matrix", "value": "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"})
@@ -980,7 +1006,7 @@ def export_all_3mf_plates(
         prebuilt_parts = {}
         prebuilt_parts.update(build_all_trunk_parts())
         prebuilt_parts.update(build_all_auger_parts())
-        prebuilt_parts.update(build_all_bracket_parts())
+        prebuilt_parts.update(build_all_station_brackets())
         prebuilt_parts.update(build_all_topper_planet_parts())
 
     plates = build_five_plates(prebuilt_parts=prebuilt_parts)
@@ -1054,7 +1080,7 @@ def build_and_export_full_assembly(
         prebuilt_parts = {}
         prebuilt_parts.update(build_all_trunk_parts())
         prebuilt_parts.update(build_all_auger_parts())
-        prebuilt_parts.update(build_all_bracket_parts())
+        prebuilt_parts.update(build_all_station_brackets())
         prebuilt_parts.update(build_all_topper_planet_parts())
 
     assembly_solids: list[bd.Solid] = []
@@ -1087,19 +1113,34 @@ def build_and_export_full_assembly(
         "asm_trunk_top",
         "#4A2F1D",
     )
-    if "Base_Bottom_Cover" in prebuilt_parts:
+    if "Bottom_Electronics_Lid" in prebuilt_parts:
         _add_placed(
-            prebuilt_parts["Base_Bottom_Cover"],
-            bd.Location((0, 0, -3.2)),
-            "asm_Base_Bottom_Cover",
+            prebuilt_parts["Bottom_Electronics_Lid"],
+            bd.Location((0, 0, 0)),
+            "asm_Bottom_Electronics_Lid",
             "#4A2F1D",
         )
-    if "Conduit_Cover_Strip" in prebuilt_parts:
-        for idx, z_center in enumerate((105.0, 225.0, 375.0), start=1):
+    conduit_rad = math.radians(WIRE_CONDUIT_ANGLE_DEG)
+    conduit_r = TRUNK_OUTER_R + 1.25
+    for s_key, z_c in (
+        ("Conduit_Cover_Strip_Base", 100.0),
+        ("Conduit_Cover_Strip_Mid", 225.0),
+        ("Conduit_Cover_Strip_Top", 375.0),
+    ):
+        if s_key in prebuilt_parts:
+            strip_pl = bd.Plane(
+                origin=(
+                    conduit_r * math.cos(conduit_rad),
+                    conduit_r * math.sin(conduit_rad),
+                    z_c,
+                ),
+                x_dir=(math.sin(conduit_rad), -math.cos(conduit_rad), 0.0),
+                z_dir=(-math.cos(conduit_rad), -math.sin(conduit_rad), 0.0),
+            )
             _add_placed(
-                prebuilt_parts["Conduit_Cover_Strip"],
-                bd.Location((-28.5, 0, z_center), (90.0, 0.0, 90.0)),
-                f"asm_Conduit_Cover_Strip_{idx:02d}",
+                prebuilt_parts[s_key],
+                bd.Location(strip_pl),
+                f"asm_{s_key}",
                 "#4A2F1D",
             )
 
@@ -1114,51 +1155,44 @@ def build_and_export_full_assembly(
     )
 
     # 3. Place the 4.5-turn Conical Helix Track segments in true assembly space
-    num_full = int(HELIX_TOTAL_DEG // TRACK_SEGMENT_ARC_DEG)
-    for i in range(num_full + 1):
-        t0 = i * TRACK_SEGMENT_ARC_DEG
-        t1 = min(HELIX_TOTAL_DEG, (i + 1) * TRACK_SEGMENT_ARC_DEG)
-        if t1 - t0 <= 1.0:
-            continue
+    for idx, (name, t0, t1, is_bot, is_top, seg_num) in enumerate(get_track_segment_specs()):
         seg = build_track_segment(
             t0,
             t1,
             orient_for_print=False,
-            include_planet_pedestal=(i in TRACK_PLANET_SEGMENT_INDICES),
-            bottom_return_ramp=(i == 0),
-            top_feeder_ramp=(i == num_full),
+            include_planet_pedestal=(idx in TRACK_PLANET_SEGMENT_INDICES),
+            bottom_return_ramp=is_bot,
+            top_feeder_ramp=is_top,
+            seg_number=seg_num,
         )
         seg.color = bd.Color("#00A86B")
-        seg.label = f"asm_track_seg_{i + 1:02d}"
+        seg.label = f"asm_{name}"
         assembly_solids.append(seg)
 
-    # 4. Place Golden Apple Topper on top of the trunk (Z = 450 mm)
+    # 4. Place Golden Apple Topper (T1/T4 PLA) & Standalone Teal PETG Leaf on top of the trunk (Z = 450 mm)
     _add_placed(
         prebuilt_parts["golden_apple_topper"],
         bd.Location((0, 0, 3.0 * TRUNK_SECTION_HEIGHT)),
         "asm_golden_apple_topper",
-        "#F4B41A",
+        "#C41E3A",
+    )
+    leaf_asm = build_apple_green_leaf(orient_for_print=False)
+    _add_placed(
+        leaf_asm,
+        bd.Location((0, 0, 3.0 * TRUNK_SECTION_HEIGHT)),
+        "asm_apple_green_leaf",
+        "#00A86B",
     )
 
-    # 5. Place all 8 Multi-Color Planetary Ornaments along the 8 magnetized track segments
-    planet_placements = [
-        ("planet_mercury", 1590.0),
-        ("planet_venus", 1380.0),
-        ("planet_earth", 1140.0),
-        ("planet_mars", 900.0),
-        ("planet_jupiter", 660.0),
-        ("planet_saturn", 540.0),
-        ("planet_uranus", 300.0),
-        ("planet_neptune", 60.0),
-    ]
-    for pname, deg in planet_placements:
-        pt = helix_point(deg)
-        rad = math.radians(deg)
-        out_x = pt.X + 30.0 * math.cos(rad)
-        out_y = pt.Y + 30.0 * math.sin(rad)
+    # 5. Place all 8 Multi-Color Planetary Ornaments along their PLANET_ANCHOR_DEGS pedestals
+    from common_params import closed_loop_section_plane
+    for idx, pname in enumerate(PLANET_NAMES):
+        deg = PLANET_ANCHOR_DEGS[idx]
+        pl_m = closed_loop_section_plane(deg, scarf_tilt_deg=0.0)
+        pt_b = pl_m.from_local_coords(bd.Vector(30.0, 18.0, 0.0))
         _add_placed(
             prebuilt_parts[pname],
-            bd.Location((out_x, out_y, pt.Z + 18.05)),
+            bd.Location((pt_b.X, pt_b.Y, pt_b.Z)),
             f"asm_{pname}",
             "#D4AF37",
         )
@@ -1468,8 +1502,8 @@ def verify_3mf_exports(
             )
         print(sep)
     print(
-        f"Verified {num_plates} Individual Plates (15 Pure Single-Color + 3 Dedicated 4-Color Plates, <= 4 Colors/Plate) + Unified '{master_path.name}' "
-        f"(OrcaSlicer 5x4 Plate Grid, Zero Convex-Hull Overlaps, Full-Scale Tracks, 24x Exact Station Brackets, <= {SAFE_PLATE_ZONE:.0f}x{SAFE_PLATE_ZONE:.0f} mm Safe Zone, >= {MIN_PART_CLEARANCE:.1f} mm Clearance: PASS)"
+        f"Verified {num_plates} Individual Plates (15 Pure Single-Color + 3 Dedicated 4-Color PLA Plates, <= 4 Colors/Plate) + Unified '{master_path.name}' "
+        f"(OrcaSlicer 5x4 Plate Grid, Zero Convex-Hull Overlaps, Full-Scale Tracks, {BRACKET_STATION_COUNT}x Exact Station Brackets, <= {SAFE_PLATE_ZONE:.0f}x{SAFE_PLATE_ZONE:.0f} mm Safe Zone, >= {MIN_PART_CLEARANCE:.1f} mm Clearance: PASS)"
     )
     print("=" * len(hdr) + "\n")
 

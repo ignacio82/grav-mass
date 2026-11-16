@@ -13,18 +13,18 @@ A motorized, closed-loop kinetic marble run sculpture (~527 mm tall × ~336 mm b
 
 ## ✨ Key Features
 
-- **15 Single-Color + 3 Dedicated 4-Color Build Plates (18 Plates Total):** Pre-arranged for Snapmaker OrcaSlicer (`0.4 mm` nozzle) with zero prime towers on Plates 1–15 and zero convex-hull overlaps — see **[`docs/PRINTING.md`](docs/PRINTING.md)**.
+- **15 Single-Color + 3 Dedicated 4-Color PLA Build Plates (18 Plates Total):** Pre-arranged for Snapmaker OrcaSlicer (`0.4 mm` nozzle) with zero prime towers on Plates 1–15, `100%` PLA multi-color Plates 16–18 (Teal PETG on Plates 5–13 track & leaf), and zero convex-hull overlaps — see **[`docs/PRINTING.md`](docs/PRINTING.md)**.
 - **One-Cable, 100% Solder-Free `12V` Power & ESPHome Smart Control (`A092` + `C008`):** Powered by one external `12V 5A` adapter feeding 3 fused WAGO `221` branches for the ESP32 controller, `12V 150 RPM N20` motor, and isolated `5V 5A` LED buck rail — see **[`docs/SMART_HOME.md`](docs/SMART_HOME.md)** and **[`POWER_ARCHITECTURE.md`](POWER_ARCHITECTURE.md)**.
 - **Wireless Glowing Marbles (`KC013`), Planets (`KA006`) & RGB Lantern Apple Topper (`B09YTMNGTD`):** 6 twist-lock hollow apple marbles and 8 sculpted Solar System planets toggled with the magnetic **`Magic_LED_Wand`** — see **[`docs/BOM.md`](docs/BOM.md)**.
-- **Hidden Inner Assembly Numbering System:** Every trunk section (`1–4`), auger half (`1–2`), bracket (`1–24`), track segment (`1–14`), planet/peg (`1–8`), and marble half (`A`/`B`) has debossed alignment marks that hide completely once assembled — see **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)**.
-- **Galileo–Newton Gravity Chronometer (`G0–G5` Timing Gates & Elevation Scales):** Molded `100 mm` spiral arc-length ticks, `25 mm` elevation ticks, and `0.35 mm` acoustic click micro-ribs for measuring $g \approx 9.81\text{ m/s}^2$ — see **[`docs/PHYSICS.md`](docs/PHYSICS.md)**.
+- **Hidden Inner Assembly Numbering System:** Every trunk section (`1–4`), auger half (`1–2`), bracket (`1–26`), track segment (`1–14`), planet/peg (`1–8`), and marble half (`A`/`B`) has debossed alignment marks that hide completely once assembled — see **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)**.
+- **Galileo–Newton Gravity Chronometer (`G0–G5` Timing Gates & Elevation Scales):** Molded `100 mm` spiral arc-length ticks, `25 mm` elevation ticks, and `0.50 mm` acoustic click micro-ribs for measuring $g \approx 9.81\text{ m/s}^2$ — see **[`docs/PHYSICS.md`](docs/PHYSICS.md)**.
 
 ---
 
 ## 🚀 Quick Start
 
-1. **🛒 Buy Components & Filament:** Order the off-the-shelf solder-free electronics, `2× M2.5 × 6 mm` screws, and filament spools from **[`docs/BOM.md`](docs/BOM.md)** (or import **[`bom/bom.csv`](bom/bom.csv)** directly into a spreadsheet).
-2. **🧪 Print Fit Coupons First:** Print **[`output/3mf/Test_Coupons.3mf`](output/3mf/Test_Coupons.3mf)** first (`0.10–0.25 mm` clearances across all 5 joint classes) and check **[`ASSEMBLY_AUDIT.md`](ASSEMBLY_AUDIT.md)** before slicing the main plates!
+1. **🛒 Buy Components & Filament:** Order the off-the-shelf solder-free electronics, `5× M2.5 × 6 mm` screws (`B0BYF4X65F`), and filament spools from **[`docs/BOM.md`](docs/BOM.md)** (or import **[`bom/bom.csv`](bom/bom.csv)** directly into a spreadsheet).
+2. **🧪 Print Fit Coupons First:** Print **[`output/3mf/Test_Coupons_PLA.3mf`](output/3mf/Test_Coupons_PLA.3mf)** and **[`output/3mf/Test_Coupons_PETG.3mf`](output/3mf/Test_Coupons_PETG.3mf)** first (`0.10–0.25 mm` clearances across all joint classes) and verify against **[`ASSEMBLY_AUDIT.md`](ASSEMBLY_AUDIT.md)** before slicing the main plates!
 3. **🖨️ Slice & Print the 18 Plates:** Open **[`output/3mf/GravMass_Tree_Ultimate_U1.3mf`](output/3mf/GravMass_Tree_Ultimate_U1.3mf)** (or individual plate `.3mf` files) and follow the audit status & support settings in **[`docs/PRINTING.md`](docs/PRINTING.md)**.
 4. **🔧 Assemble the Tree:** Follow Steps 1–9 (including the keyhole drop-in brackets and optional `Trunk_Keyhole_Cutting_Jig.stl` retrofit for pre-fix trunk bases) in **[`docs/ASSEMBLY.md`](docs/ASSEMBLY.md)** alongside the **[Live 3D Assembly Studio (`newton.martinez.fyi`)](https://newton.martinez.fyi/)**.
 5. **⚡ Flash ESPHome & Run:** Flash **[`esphome/grav-mass-tree.yaml`](esphome/grav-mass-tree.yaml)** onto the `C008` ATOM Lite and plug in the single `12V DC` barrel cord per **[`docs/SMART_HOME.md`](docs/SMART_HOME.md)**.

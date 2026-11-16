@@ -129,7 +129,7 @@ electronics:
     alt_skus:
       - LA002
     spec: "`10 × 12 × 25 mm` metal gearbox (100% identical size to `LA002`), **`12.0V DC` rated**, `150 RPM`, `0.90 kg·cm` torque, `Ø 3.0 mm` D-shaft"
-    where_used: "Drops directly into [`trunk_base`](../cad/trunk.py) & [`Servo_Or_030_Adapter`](../cad/auger.py) and clamps straight into `A092` **`M1` & `M2`** (`12V` native PWM)!"
+    where_used: "Presses directly into [`trunk_base`](../cad/trunk.py) central `12.6 × 10.6 × 26.2 mm` motor pocket and clamps straight into `A092` **`M1` & `M2`** (`12V` native PWM)!"
     category: motor
     optional: false
     notes: "status: **Required *(New — 12V Auger Motor)*** | link_text: Amazon — `12V DC 150 RPM N20` Micro Metal Gear Motor, `Ø 3mm` D-Shaft (`B0BFRPMSW6`)"
@@ -142,7 +142,7 @@ electronics:
     url: https://www.amazon.com/dp/B0CCS11V7H
     alt_skus: []
     spec: "`360°`-flexible 3-wire cord with `50×` `6.2 × 3.2 mm` oval epoxy RGB LED drops (`5V`, `5W` nominal / `9W` max white), 3-pin `JST-SM` + start/end power-injection leads"
-    where_used: "Snaps into the **`8.0 × 3.6 mm` dovetail channel (`4.6 mm` throat)** under [`track_seg_01`](../cad/track.py)..[`14`](../cad/track.py); powered from `5V` Buck (`WAGO-3/4`), Data from **`GPIO26` (White)**"
+    where_used: "Snaps into the **`8.4 × 6.2 mm` dovetail channel (`4.6 mm` throat)** under [`track_seg_01`](../cad/track.py)..[`14`](../cad/track.py); powered from `5V` Buck (`WAGO-3/4`), Data from **`GPIO26` (White)**"
     category: lighting-wired
     optional: false
     notes: "status: **Existing *(Retained)*** | link_text: Amazon — BTF-LIGHTING `DC5V` `WS2812B` Pebble/Seed Pixel Flexible Wire (`B0CCS11V7H`)"
@@ -168,7 +168,7 @@ electronics:
     url: https://www.amazon.com/dp/B0CT827QQC
     alt_skus: []
     spec: "3-pin `JST-SM` plug-and-play extension wire (`5V`, `GND`, `DATA`)"
-    where_used: "Plugs into the Sparkleiot Topper Ring (`zero soldering`), threads down the **`10 × 8 mm` rear `-X` trunk conduit**, and connects to `WAGO-3/4` (`5V`/`GND`) + **`GPIO32` (Yellow)**"
+    where_used: "Plugs into the Sparkleiot Topper Ring (`zero soldering`), threads down the **`10 × 8 mm` `150°` rear-left trunk conduit**, and connects to `WAGO-3/4` (`5V`/`GND`) + **`GPIO32` (Yellow)**"
     category: wiring
     optional: false
     notes: "status: **Existing *(Retained)*** | link_text: Amazon — BTF-LIGHTING 3-Pin JST-SM Extension Cable (`B0CT827QQC`)"
@@ -243,17 +243,17 @@ electronics:
 
 fasteners:
   - id: screw-m25x6-bhcs
-    qty: 2
+    qty: 5
     sku: B0BYF4X65F
     name: "MonsterBolts `M2.5 × 6 mm` Button Head Cap Machine Screws (BHCS)"
     vendor: Amazon
     url: https://www.amazon.com/dp/B0BYF4X65F
     alt_skus: []
     spec: "`M2.5 × 6 mm` stainless steel button head machine screws"
-    where_used: "Secures [`Battery_Cover`](../output/Battery_Cover.stl) to the bottom of `trunk_base` (omit conflicting `Base_Bottom_Cover`; see [`ASSEMBLY_AUDIT.md`](../ASSEMBLY_AUDIT.md))"
+    where_used: "4× secure [`Bottom_Electronics_Lid`](../output/Bottom_Electronics_Lid.stl) onto `trunk_base`; 1× clamps [`Motor_Clutch_Driver`](../output/Motor_Clutch_Driver.stl) onto the N20 D-shaft"
     category: fastener
     optional: false
-    notes: "status: **Primary Cover Screw** *(Use `Battery_Cover`; omit `Base_Bottom_Cover`)* | link_text: Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)"
+    notes: "status: **Primary Fasteners (5 Screws)** *(Zero CA001 Magnets Required)* | link_text: Amazon — MonsterBolts M2.5 × 6mm Button Head Screws, 50-Pack (`B0BYF4X65F`)"
 
 filament:
   - toolhead: "**Core Tree `T1`** *(Plates 1–4, 16, 17)*"
@@ -264,7 +264,7 @@ filament:
     spools: 2
     vendor_url: https://us.store.bambulab.com/products/pla-matte
 
-  - toolhead: "**Core Tree `T2`** *(Plates 5–13, 16, 18)*"
+  - toolhead: "**Core Tree `T2`** *(Plates 5–13 — Track & `apple_green_leaf`)*"
     color_name: "Translucent Teal (`32501`)"
     hex: "#00A86B"
     material: PETG
@@ -272,7 +272,7 @@ filament:
     spools: 2
     vendor_url: https://us.store.bambulab.com/products/petg-translucent
 
-  - toolhead: "**Core Tree `T3`** *(Plates 14, 16, 17, 18)*"
+  - toolhead: "**Core Tree `T3`** *(Plates 14, 16, 17; Plate 18 `T2`)*"
     color_name: "Silk+ Gold (`13405`)"
     hex: "#D4AF37"
     material: PLA
@@ -280,7 +280,7 @@ filament:
     spools: 1
     vendor_url: https://us.store.bambulab.com/products/pla-silk-upgrade
 
-  - toolhead: "**Core Tree `T4`** *(Plates 15, 16, 17)*"
+  - toolhead: "**Core Tree `T4`** *(Plates 15, 16, 17, 18)*"
     color_name: "Basic Red (`10200`)"
     hex: "#C41E3A"
     material: PLA
@@ -288,7 +288,7 @@ filament:
     spools: 1
     vendor_url: https://us.store.bambulab.com/products/pla-basic-filament
 
-  - toolhead: "**Planet Accent** *(Plate 17 `T2` & Plate 18 `T3`)*"
+  - toolhead: "**Planet & Topper Accent** *(Plates 16–17 `T2` & Plate 18 `T3`)*"
     color_name: "Matte Ivory White (`11100`)"
     hex: "#F5EFE6"
     material: PLA

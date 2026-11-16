@@ -28,7 +28,7 @@ if str(CAD_DIR) not in sys.path:
 import build123d as bd
 
 from auger import build_all_auger_parts
-from brackets import build_all_24_station_brackets, build_all_bracket_parts
+from brackets import build_all_station_brackets
 from common_params import MAX_BUILD_X, MAX_BUILD_Y, MAX_BUILD_Z
 from export_3mf_plates import export_all_3mf_plates, verify_3mf_exports
 from topper_planets import build_all_topper_planet_parts
@@ -55,7 +55,7 @@ def generate_and_export_all(output_dir: Path | None = None) -> list[dict[str, ob
     all_parts.update(build_all_trunk_parts())
     all_parts.update(build_all_auger_parts())
     all_parts.update(build_all_track_parts())
-    all_parts.update(build_all_24_station_brackets())
+    all_parts.update(build_all_station_brackets())
     all_parts.update(build_all_topper_planet_parts())
 
     # Remove stale files for obsolete/unplated parts if present
@@ -68,6 +68,10 @@ def generate_and_export_all(output_dir: Path | None = None) -> list[dict[str, ob
         "Remote_Top_Faceplate",
         "apple_topper_stem_leaf",
         "Apple_Captive_Pause_Marble",
+        "Base_Bottom_Cover",
+        "Battery_Cover",
+        "Conduit_Cover_Strip",
+        "Servo_Or_030_Adapter",
         "Track_Joint_Clip",
         "bracket_tier1_top",
         "bracket_tier2_upper_mid",

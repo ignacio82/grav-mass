@@ -50,7 +50,7 @@ We evaluated two complete engineering solutions for driving the Archimedes screw
 | Evaluation Criterion | **Option B (SELECTED PRIMARY): Replace `6V LA002` with `12V 150 RPM N20` Motor on `A092` `M1/M2`** | **Option A (SUPPORTED RETROFIT): Keep `6V LA002` + `12V→6V` Buck + External Screw-Terminal H-Bridge** |
 | :--- | :--- | :--- |
 | **Voltage Compatibility** | **100% Native (`12V` Motor on `12V` H-Bridge):** Motor winding is rated for `12.0V DC` continuous (`150 RPM` @ `12V`). Driven directly by `A092`'s `12V` TI `DRV8876` output (`0–100%` full-resolution PWM). | **100% Safe (`6V` Motor on `6V` H-Bridge):** `12V → 6.0V 3A` buck converter powers the `VM` pin of an external `DRV8871`/`DRV8876`/`TB67H420FTG` H-bridge (`0–100%` PWM at `6.0V`). |
-| **Mechanical CAD Compatibility** | **100% Identical Drop-In (`0.0 mm` CAD change):** Standard `12V 150 RPM N20` gear motors share the exact `10.0 × 12.0 × 25.0 mm` body+gearbox envelope and `Ø 3.0 mm` D-shaft as `LA002`. Slides directly into `Servo_Or_030_Adapter` and `Motor_Clutch_Driver`. | **Requires 2 Extra Modules in Root Vault:** Retains `LA002` in the central tower, but adds a `12V → 6V` buck converter module + an external screw-terminal H-bridge board inside the base vault. |
+| **Mechanical CAD Compatibility** | **100% Identical Drop-In (`0.0 mm` CAD change):** Standard `12V 150 RPM N20` gear motors share the exact `10.0 × 12.0 × 25.0 mm` body+gearbox envelope and `Ø 3.0 mm` D-shaft as `LA002`. Slides directly into `trunk_base`'s `12.8 × 10.8 × 26.2 mm` shroud pocket and clamps into `Motor_Clutch_Driver` (`1× M2.5 × 6 mm`). | **Requires 2 Extra Modules in Root Vault:** Retains `LA002` in the central tower, but adds a `12V → 6V` buck converter module + an external screw-terminal H-bridge board inside the base vault. |
 | **Module Count in Root Vault** | **2 Modules Total:** (1) `A092 + C008` stack, (2) `12V → 5V` LED Buck Converter (+ optional `U190` `INA226` sensor). | **4 Modules Total:** (1) `A092 + C008` stack, (2) `12V → 5V` LED Buck, (3) `12V → 6V` Motor Buck, (4) External H-Bridge Driver. |
 | **Solder-Free Terminations** | **14 Terminations (Simplest & Highest Reliability):** Motor wires clamp straight into `A092`'s built-in `M1`/`M2` screw terminals. | **24+ Terminations:** Requires extra `12V` branch fuse `F3`, `6V` buck `IN/OUT` wiring, external H-bridge `VM/GND/OUT1/OUT2` screw terminals, and `IN1/IN2` DuPont logic jumpers from `A092` bottom header. |
 | **Hardware Stall & Fault Protection (`GPIO22`)** | **100% Preserved:** Uses `A092`'s onboard TI `DRV8876` current-sense (`IPROPI`), hardware overcurrent protection (`OCP`), thermal shutdown (`TSD`), and active-low `nFAULT` pin (`GPIO22`) to auto-halt jams in ESPHome. | **Degraded unless External Driver Has `nFAULT`:** `A092`'s onboard `DRV8876` sits unloaded (`M1/M2` open), so `GPIO22` no longer sees motor stalls unless wired to an external `DRV8876`/`TB67H420FTG` `FAULT` pin. |
@@ -340,7 +340,7 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 ## 9. Step-by-Step Solder-Free Installation Instructions
 
 ### Step 1 — Install the N20 Auger Motor (`12V 150 RPM` Primary or `6V LA002` Option A)
-1. Slide the **`12V 150 RPM N20` gear motor** (or `6V LA002`) into the printed `Servo_Or_030_Adapter` sleeve so its `Ø 3.0 mm` D-shaft points upward.
+1. Slide the **`12V 150 RPM N20` gear motor** (or `6V LA002`) directly upward into `trunk_base`'s central `12.8 × 10.8 × 26.2 mm` motor shroud pocket (`Ø 3.0 mm` D-shaft pointing up), then clamp `Motor_Clutch_Driver` onto the D-flat with `1× M2.5 × 6 mm` screw (`B0BYF4X65F`).
 2. Push the motor + sleeve up into the central `Ø 28.0 mm` isolated motor shroud tower inside `trunk_base` (`(0, 0, 0.2..26.0 mm)`).
 3. Route the two motor leads (`Red` and `Black`) out through the bottom `-Y` shroud exit notch (`6.5 × 7.6 mm`) into the Hollow Root Vault.
 
@@ -360,7 +360,7 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
    *(For Alternative Option A with `6V LA002`: Leave `M1`/`M2` empty on `A092`, wire `WAGO-1` Port 4 → Fuse `F3 (1A)` → `12V→6V` Buck `IN+`, `WAGO-2` Port 5 → `6V` Buck `IN-`, `6V` Buck `OUT+/OUT-` → External H-Bridge `VM/GND`, `LA002` leads → External H-Bridge `OUT1/OUT2`, and connect two DuPont jumpers from `A092` bottom header `G19`/`G23` to External H-Bridge `IN1`/`IN2`).*
 4. Plug the **`M5Stack A096` Grove2Dupont cable** into the white 4-pin `HY2.0-4P` Grove socket on the **`C008` ATOM Lite**:
    - **CRITICAL:** Fold back or cap the **`Red (+5V)` DuPont pin** from the `A096` cable in an empty insulating cap so it **cannot** touch the external `5V` buck rail.
-5. Snap the `A092 + C008` stack into the `-Y` bottom electronics bay (`(0.0, -33.0 mm)`) and secure `Battery_Cover` (aligning its `Ø 5.0 mm` access port over the `C008` status LED and `GPIO39` button).
+5. Snap the `A092 + C008` stack into the `-Y` bottom electronics bay (`(0.0, -33.0 mm)`).
 
 ### Step 5 — Wire Branch 2 (`12V → 5.0V 5A` LED Buck Converter & Bulk Capacitor)
 1. Clamp the input lead of the **`F2 (3A)` inline blade fuse holder** into **`WAGO-1` (`+12V`) Port 3**, and screw its output lead into the **`VIN+` (`IN+`)** screw terminal of the **`12V → 5V 5A` Buck Converter (`UCTRONICS B07XXWQ49N` / `U6223`, `63.0 × 27.0 × 10.0 mm`)**.
@@ -377,7 +377,7 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 3. **Data Connections (via `A096` Grove Cable):**
    - Plug the **`White (GPIO26)` DuPont pin** from the `A096` Grove cable into the **Center `DATA` (`DI`) socket** of the Track Wire's 3-pin `JST-SM` connector.
    - Plug the **`Yellow (GPIO32)` DuPont pin** from the `A096` Grove cable into the **Center `DATA` (`DI`) socket** of the Topper Ring's `1 m` 3-pin `JST-SM` extension cable.
-4. Snap **`Base_Bottom_Cover`** (with its upward `Ø 23.6 × 2.8 mm` retaining ring and ventilation louvers) into the bottom of `trunk_base`.
+4. Seat and fasten **`Bottom_Electronics_Lid`** (with its integrated louvers, 4 diagonal rabbet tabs, and `Ø 5.0 mm` button/LED port over `C008`) onto the underside of `trunk_base` using `4× M2.5 × 6 mm` BHCS screws (`B0BYF4X65F`).
 
 ---
 
@@ -389,7 +389,7 @@ Using copper resistivity $\rho = 0.0172\ \Omega\cdot\text{mm}^2/\text{m}$ (round
 > 2. **Strict `5V` Rail Isolation (No Backfeeding):** Never connect the `+5.0V` output of the external LED buck converter to the `5V` pin of `A092` or `C008` (including the `Red` wire of the `A096` Grove cable). `A092` generates its own `5.0V` rail from `12V` via its internal `MP1584EN` regulator. Only **`GND`** is shared between the two `5V` domains.
 > 3. **Verify Buck Converter Voltage Before Connecting LEDs (If Using an Adjustable Module):** Fixed `5.0V` modules (`UCTRONICS B07XXWQ49N` / `U6223`) output `5.0V` out of the box. If you substitute an adjustable buck module (`LM2596` / `XL4015` with a brass trim pot), you **must** power the buck converter alone and adjust its output to **`5.00V ± 0.05V DC`** with a multimeter *before* connecting the WS2812B LEDs (voltages `> 5.5V` will permanently destroy WS2812B ICs!).
 > 4. **Verify Polarity & Electrolytic Capacitor Orientation:** Double-check that the negative stripe (`-`) of the `1000 µF, 16V` capacitor connects to `OUT-` (`GND`) and `+` connects to `OUT+` (`+5V`). Reverse polarity on an electrolytic capacitor can cause venting or rupture.
-> 5. **Thermal Ventilation in PLA:** At worst-case continuous load (`13.8W` LED output at $\eta = 88\%$), the `12V → 5V` synchronous buck converter dissipates only **$P_{\text{diss}} = 15.68 - 13.80 = 1.88\text{ W}$** (and `< 0.75W` during normal animated operation). Always use the louvered **`Base_Bottom_Cover`** so natural convection keeps internal vault temperatures `< 38 °C` (well below PLA's `55–60 °C` glass-transition temperature).
+> 5. **Thermal Ventilation in PLA:** At worst-case continuous load (`13.8W` LED output at $\eta = 88\%$), the `12V → 5V` synchronous buck converter dissipates only **$P_{\text{diss}} = 15.68 - 13.80 = 1.88\text{ W}$** (and `< 0.75W` during normal animated operation). Always use the louvered **`Bottom_Electronics_Lid`** so natural convection keeps internal vault temperatures `< 38 °C` (well below PLA's `55–60 °C` glass-transition temperature).
 
 ---
 

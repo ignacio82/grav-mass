@@ -20,6 +20,7 @@ from common_params import (
     BRACKET_PEG_DIA,
     BRACKET_PEG_HEIGHT,
     BRACKET_PEG_SPACING_U,
+    BRACKET_STATION_COUNT,
     DOVETAIL_BASE_W_TOP,
     DOVETAIL_CLEARANCE,
     DOVETAIL_DETENT_Y_HALF,
@@ -134,7 +135,9 @@ def build_cantilever_bracket(
     reach_x = track_center_radius - TRUNK_OUTER_R
     cradle_inner_x = max(6.0, reach_x - 14.5)
     cradle_outer_x = reach_x + 14.5
-    top_z = DOVETAIL_SLOT_H - 0.25  # 17.75 mm (0.25 mm axial clearance below track bottom face)
+    top_z = DOVETAIL_SLOT_H - 0.25  # 17.75 mm nominal peg datum (0.25 mm below track centerline)
+    pad_shoulder_z = top_z - 1.85   # 15.90 mm outer shoulder clears steep inner-turn helix slope
+    pad_top_z = top_z - 0.35        # 17.40 mm crowned central bearing ridge beneath split-tine pegs
 
     rib_w = 8.0
     tenon = make_male_dovetail_tenon()
@@ -151,8 +154,8 @@ def build_cantilever_bracket(
         (0.35, 0.0),
         (bot_flat_end_x, 0.0),
         (cradle_outer_x, top_z - 5.0),
-        (cradle_outer_x, top_z),
-        (0.35, top_z),
+        (cradle_outer_x, pad_shoulder_z),
+        (0.35, pad_shoulder_z),
         (0.35, 0.0),
     ]
     rib_wire = bd.Wire(
@@ -161,8 +164,10 @@ def build_cantilever_bracket(
     rib_face = bd.Plane.XZ * bd.Face(rib_wire)
     rib_body = bd.extrude(rib_face, amount=rib_w / 2.0, both=True)
 
-    # Top wider track support pad (11.0 mm wide) with 45° under-chamfer for support-free printing
+    # Top wider track support pad (11.0 mm wide shoulder, 45° under-chamfer, crowned to 4.2 mm ridge)
+    # so even the steepest 1560° inner track turn clears the downhill pad shoulder cleanly.
     pad_w = 11.0
+    crown_w = 4.2
     pad_h = 4.5
     chamfer_d = (pad_w - rib_w) / 2.0  # 1.5 mm 45-deg under-chamfer
     pad_len = cradle_outer_x - cradle_inner_x
@@ -172,16 +177,22 @@ def build_cantilever_bracket(
         bd.Pos(pad_center_x, 0.0, top_z - pad_h)
         * bd.Rectangle(pad_len, rib_w).wire()
     )
-    w_pad_mid = (
+    w_pad_mid1 = (
         bd.Pos(pad_center_x, 0.0, top_z - pad_h + chamfer_d)
         * bd.Rectangle(pad_len, pad_w).wire()
     )
-    w_pad_top = (
-        bd.Pos(pad_center_x, 0.0, top_z)
+    w_pad_mid2 = (
+        bd.Pos(pad_center_x, 0.0, pad_shoulder_z)
         * bd.Rectangle(pad_len, pad_w).wire()
     )
-    pad_solid = bd.Solid.make_loft([w_pad_bot, w_pad_mid], ruled=True) + bd.Solid.make_loft(
-        [w_pad_mid, w_pad_top], ruled=True
+    w_pad_top = (
+        bd.Pos(pad_center_x, 0.0, pad_top_z)
+        * bd.Rectangle(pad_len, crown_w).wire()
+    )
+    pad_solid = (
+        bd.Solid.make_loft([w_pad_bot, w_pad_mid1], ruled=True)
+        + bd.Solid.make_loft([w_pad_mid1, w_pad_mid2], ruled=True)
+        + bd.Solid.make_loft([w_pad_mid2, w_pad_top], ruled=True)
     )
 
     arm = tenon + rib_body + pad_solid
@@ -199,7 +210,7 @@ def build_cantilever_bracket(
     arm = arm - eyelet_hole
 
     # Cut central LED wire/strip clearance notch on top cradle pad at X = reach_x
-    led_notch = bd.Pos(reach_x, 0.0, top_z - 1.5) * bd.Box(
+    led_notch = bd.Pos(reach_x, 0.0, pad_top_z - 1.5) * bd.Box(
         LED_CHANNEL_W + 0.8,
         pad_w + 2.0,
         3.0,
@@ -207,17 +218,31 @@ def build_cantilever_bracket(
     )
     arm = arm - led_notch
 
-    # Add twin Ø 4.0 mm alignment pegs with top 45° lead-in chamfer and an integrated 45°
-    # annular snap-lock retention ring (R = 2.12 mm at z_peg = 1.9..3.1 mm) on top of cradle
-    peg_r = BRACKET_PEG_DIA / 2.0  # 2.0 mm nominal (mates with 2.20 mm socket in track)
-    snap_r = peg_r + 0.12          # 2.12 mm positive snap-lock retention ridge
-    dr_snap = snap_r - peg_r       # 0.12 mm
-    chamfer_top = 0.6
+    # Add twin Ø 4.0 mm root-filleted split-tine cantilever alignment pegs with tangential
+    # ±Y through-slots (0.85 mm wide × 2.80 mm deep from peg tip) and symmetric 0.90 mm-tall
+    # (axial Z) × Ø 4.38 mm radial snap lobes (<= 0.09 mm radial flex per tine through
+    # the Ø 4.20 mm PETG throat into the Ø 4.56 mm internal track socket pocket).
+    peg_r = BRACKET_PEG_DIA / 2.0  # 2.00 mm nominal (mates with Ø 4.20 mm socket throat)
+    lobe_r = 2.19                  # Ø 4.38 mm radial snap lobes
+    dr_lobe = lobe_r - peg_r       # 0.19 mm radial protrusion (<= 0.09 mm flex past R=2.10 throat)
+    chamfer_top = 0.60
+    root_fillet_r = 0.40
+    slot_w = 0.85
+    slot_depth = 2.80
+    slot_z0 = top_z + BRACKET_PEG_HEIGHT - slot_depth  # top_z + 1.70 mm
+    lobe_z0 = top_z + 3.00         # 0.90 mm tall lobe sits at z_peg = 3.00..3.90 (sock 2.75..3.65)
+    lobe_land = 0.90 - 2.0 * dr_lobe  # 0.52 mm crest
     for u_offset in (-BRACKET_PEG_SPACING_U, BRACKET_PEG_SPACING_U):
         peg_x = reach_x + u_offset
-        peg_cyl = bd.Pos(peg_x, 0.0, top_z) * bd.Cylinder(
+        peg_fillet = bd.Pos(peg_x, 0.0, pad_top_z) * bd.Cone(
+            bottom_radius=peg_r + root_fillet_r,
+            top_radius=peg_r,
+            height=root_fillet_r,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        peg_cyl = bd.Pos(peg_x, 0.0, pad_top_z) * bd.Cylinder(
             radius=peg_r,
-            height=BRACKET_PEG_HEIGHT - chamfer_top,
+            height=(top_z + BRACKET_PEG_HEIGHT - chamfer_top) - pad_top_z,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
         peg_tip = bd.Pos(peg_x, 0.0, top_z + BRACKET_PEG_HEIGHT - chamfer_top) * bd.Cone(
@@ -226,24 +251,32 @@ def build_cantilever_bracket(
             height=chamfer_top,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        snap_bot = bd.Pos(peg_x, 0.0, top_z + 1.9) * bd.Cone(
+        lobe_bot = bd.Pos(peg_x, 0.0, lobe_z0) * bd.Cone(
             bottom_radius=peg_r,
-            top_radius=snap_r,
-            height=dr_snap,
+            top_radius=lobe_r,
+            height=dr_lobe,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        snap_mid = bd.Pos(peg_x, 0.0, top_z + 1.9 + dr_snap) * bd.Cylinder(
-            radius=snap_r,
-            height=0.8,
+        lobe_mid = bd.Pos(peg_x, 0.0, lobe_z0 + dr_lobe) * bd.Cylinder(
+            radius=lobe_r,
+            height=lobe_land,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        snap_top = bd.Pos(peg_x, 0.0, top_z + 1.9 + dr_snap + 0.8) * bd.Cone(
-            bottom_radius=snap_r,
+        lobe_top = bd.Pos(peg_x, 0.0, lobe_z0 + dr_lobe + lobe_land) * bd.Cone(
+            bottom_radius=lobe_r,
             top_radius=peg_r,
-            height=dr_snap,
+            height=dr_lobe,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        arm = arm + peg_cyl + peg_tip + snap_bot + snap_mid + snap_top
+        peg_solid = peg_fillet + peg_cyl + peg_tip + lobe_bot + lobe_mid + lobe_top
+        tine_slot = bd.Pos(peg_x, 0.0, slot_z0) * bd.Box(
+            slot_w,
+            2.0 * lobe_r + 2.0,
+            slot_depth + 1.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        peg_split = peg_solid - tine_slot
+        arm = arm + peg_split
 
     # Deboss 1..4 support-free 45° V-notch tier identification bars on the hidden back face
     # (X = -4.35 mm) of the male dovetail tenon so builders can sort Tiers 1–4 at a glance
@@ -289,13 +322,13 @@ def build_all_bracket_parts() -> dict[str, bd.Solid]:
     }
 
 
-def build_all_24_station_brackets() -> dict[str, bd.Solid]:
-    """Generate all 24 exact-radius station cantilever brackets (`bracket_01`..`bracket_24`,
-    for stations 60°..1440° from bottom to top, Toolhead 1 - Dark Wood Brown #4A2F1D) with
-    their exact station number ('1'..'24') engraved face-up on the top saddle floor.
+def build_all_station_brackets() -> dict[str, bd.Solid]:
+    """Generate all 26 exact-radius station cantilever brackets (`bracket_01`..`bracket_26`,
+    for stations 60°..1560° from bottom to top, Toolhead 1 - Dark Wood Brown #4A2F1D) with
+    their exact station number ('1'..'26') engraved face-up on the top saddle floor.
     """
     parts: dict[str, bd.Solid] = {}
-    for k in range(1, 25):
+    for k in range(1, BRACKET_STATION_COUNT + 1):
         deg = k * 60.0
         r = helix_radius(deg)
         tier_num = max(1, 4 - (k - 1) // 6)

@@ -20,8 +20,8 @@ MAX_BUILD_Z = 280.0
 U1_BED_X = 270.0
 U1_BED_Y = 270.0
 U1_BED_Z = 270.0
-SAFE_PLATE_ZONE = 235.0
-MIN_PART_CLEARANCE = 12.0
+SAFE_PLATE_ZONE = 240.0
+MIN_PART_CLEARANCE = 8.0
 ORCA_PLATE_STRIDE_X = 324.0
 ORCA_PLATE_STRIDE_Y = 324.0
 
@@ -74,9 +74,9 @@ TRACK_INNER_WIDTH = 34.0
 TRACK_INNER_WALL_H = 12.0
 TRACK_OUTER_WALL_H = 18.0
 
-LED_CHANNEL_W = 8.0                         # 8.0 mm internal dovetail chamber width (fits Ø6.2×3.2 mm B0CCS11V7H WS2812B Pebble LEDs)
-LED_CHANNEL_THROAT_W = 4.6                  # 4.6 mm snap-in throat opening (retains Pebble LEDs & 3-wire cord without glue/tape)
-LED_CHANNEL_D = 3.6                         # 3.6 mm total channel depth (v = -12.0..-8.4 mm, 45° self-supporting retention lips)
+LED_CHANNEL_W = 8.4                         # 8.4 mm internal chamber width (fits Ø6.2×3.2 mm B0CCS11V7H WS2812B Pebble LEDs flat)
+LED_CHANNEL_THROAT_W = 4.6                  # 4.6 mm snap-in throat opening (passes 3.2 mm pill edge-on; retains 6.2 mm flat)
+LED_CHANNEL_D = 6.2                         # 6.2 mm total depth (v=-15.5..-9.3 mm: 0.7 throat + 1.9 45° flare + 3.6 mm bay)
 
 AUGER_BORE_DIA = 41.0
 AUGER_OD = 38.0
@@ -170,8 +170,8 @@ STEEL_BALL_DIA = 12.70                      # 1/2-inch (12.7 mm) steel ball bear
 STEEL_BALL_CAVITY_DIA = 13.10               # Ø 13.1 mm internal clearance cavity for steel bearing / AA050 cluster
 HEMISPHERE_SNAP_CLEARANCE = 0.15            # 0.15 mm radial snap clearance on split Apple hemispheres
 
-PUCK_SOCKET_DIA = 60.0                      # Legacy reference constant
-PUCK_SOCKET_DEPTH = 19.0
+CROWN_SOCKET_DIA = 60.0                     # Topper base centering collar socket over trunk_top crown_collar
+CROWN_SOCKET_DEPTH = 4.6                    # 4.6 mm vertical socket engagement (0.6 mm axial margin over 4.0 mm collar)
 
 # ---------------------------------------------------------------------------
 # Trunk, Hollow Root Vault, Snap-In Cradles & Connector-Pass-Through Conduit
@@ -214,16 +214,27 @@ DUAL_MOSFET_BAY_Y = 18.0
 DUAL_MOSFET_BAY_Z = 12.0
 
 DC_BARREL_JACK_BORE_DIA = 11.4              # Ø 11.40 mm clearance bore for M11x0.75 (DC-099 5.5x2.1mm 12V panel jack)
-DC_BARREL_JACK_Z_CENTER = 10.0              # Z = 10.0 mm center height on rear (-X) root flange of trunk_base
+DC_BARREL_JACK_Z_CENTER = 11.5              # Z = 11.5 mm center height on rear (-X) root flange of trunk_base (clears Z = 2.8 mm tray)
 
 TENON_HEIGHT = 15.0                         # 15 mm interlocking male/female joint height
 TENON_NOMINAL_R = 27.5                      # Nominal coupling interface radius (between R_bore=20.5 and R_out=34.0)
 TENON_KEY_FLAT_DEPTH = 2.0                  # 2 mm keyed flat to prevent axial twisting
 
-WIRE_CONDUIT_W = 10.0                       # 10.0 mm wide x 8.0 mm deep connector-pass-through trunk conduit
-WIRE_CONDUIT_D = 8.0                        # Fits JST-SM / SH1.0 / PH2.0 / Dupont plugs & inline switch without cutting
-CONDUIT_COVER_STRIP_H = 68.0                # Snap-on brown cover strip height (68.0 x 10.2 x 2.6 mm)
-BASE_BOTTOM_COVER_THICK = 3.0               # 3.0 mm thick twist-lock / magnetic ventilated bottom service lid
+WIRE_CONDUIT_ANGLE_DEG = 150.0              # Relocated to 150° (midway between 120° and 180° bracket columns)
+WIRE_CONDUIT_W = 10.6                       # 10.6 mm wide x 8.5 mm deep connector-pass-through trunk conduit
+WIRE_CONDUIT_D = 8.5                        # Fits JST-SM (SM2.54-3P) / SH1.0 / PH2.0 plugs without bracket collisions
+CONDUIT_STRIP_LEN_BASE = 100.0              # Section-matched cover strip for trunk_base (Z = 50..150 mm)
+CONDUIT_STRIP_LEN_MID = 144.0               # Section-matched cover strip for trunk_mid (Z = 3..147 mm)
+CONDUIT_STRIP_LEN_TOP = 144.0               # Section-matched cover strip for trunk_top (Z = 3..147 mm)
+
+# Upright Bottom_Electronics_Lid tray parameters (seated flush in Ø 135.0 x 3.0 mm vault rabbet)
+BOTTOM_TRAY_OUTER_DIA = 134.6               # 0.20 mm radial clearance inside Ø 135.0 mm rabbet
+BOTTOM_TRAY_RABBET_DIA = 135.0
+BOTTOM_TRAY_THICK = 2.80
+BOTTOM_TRAY_TAB_COORDS: tuple[tuple[float, float], ...] = tuple(
+    (71.0 * math.cos(math.radians(a)), 71.0 * math.sin(math.radians(a)))
+    for a in (45.0, 135.0, 225.0, 315.0)
+)
 
 # Dovetail keyhole socket parameters (45-deg overhang, downward tapered + drop-in entry window)
 DOVETAIL_RADIAL_DEPTH = 4.5                 # Radial depth into trunk wall (R=34.0 down to R=29.5)
@@ -237,6 +248,7 @@ DOVETAIL_ENTRY_H = 18.60                    # Straight vertical entry window hei
 DOVETAIL_ENTRY_PEAK_W = 1.60                # 45-deg gable roof apex width above entry window (no bridge > 8 mm)
 DOVETAIL_DETENT_Y_HALF = 3.44               # 45-deg anti-lift neck friction bump half-width (< 3.50 mm socket neck)
 DOVETAIL_ANGULAR_STEP_DEG = 60.0            # 60-deg increments along helical slope (6 per turn)
+BRACKET_STATION_COUNT = 26                  # 26 stations (60°..1560°) supporting every turn including upper feeder
 
 # ---------------------------------------------------------------------------
 # Auger Parameters
@@ -257,26 +269,23 @@ TRACK_HALF_INNER_W = TRACK_INNER_WIDTH / 2.0  # 17.0 mm
 TRACK_INNER_WALL_THICK = 3.0                # Inner wall u in [-20.0, -17.0]
 TRACK_OUTER_WALL_THICK = 3.6                # Outer wall u in [+17.0, +20.6] (houses 2.2 mm magnet pocket)
 TRACK_OUTER_LIP_INSET = 1.0                 # 1.0 mm inward-angled retention lip
-TRACK_BASE_Y = -12.0                        # Bottom datum face of track profile
+TRACK_BASE_Y = -15.5                        # Bottom datum face of track profile (clears deepened 6.2 mm LED channel)
+DOVETAIL_SLOT_Z_OFFSET = TRACK_BASE_Y - DOVETAIL_SLOT_H  # -33.5 mm exact slot base relative to helix_z(theta)
 
 TRACK_SEGMENT_ARC_DEG = 120.0               # 120-deg arc segments (3 per full rotation)
-TRACK_SCARF_ANGLE_DEG = 15.0                # 15-deg angled scarf/lap joint in roll direction
-TRACK_DOWEL_DIA = 2.0                       # Legacy reference dowel constant
-TRACK_DOWEL_DEPTH = 6.0
-TRACK_DOWEL_OFFSET_U = 14.2                 # Radial positions u = -14.2 and +14.2 mm (under flat shoulders, clear of u=±10.6 bracket sockets)
-TRACK_DOWEL_OFFSET_V = -4.2                 # Vertical position v = -4.2 mm for male/female snap tenons
-
-# Integrated Male-to-Female Snap-Lock Track Joint + Retrofittable Track_Joint_Clip
-TRACK_TENON_PEG_DIA = 3.80                  # Twin Ø 3.80 mm male under-shoulder tenon pegs on uphill end
-TRACK_TENON_SNAP_DIA = 4.08                 # Ø 4.08 mm annular snap-lock retention ring on male pegs
-TRACK_TENON_LENGTH = 5.0                    # 5.0 mm male tenon protrusion into Ø 4.30 x 5.60 mm female socket
-TRACK_SIDEWALL_TAB_LEN = 2.8                # 2.8 mm inner & outer sidewall anti-torsion tongue tabs
-TRACK_JOINT_CLIP_LEN = 16.0                 # 16.0 mm snap-on underside U-cradle splice clamp length
+TRACK_SEAM_MODE = "BRACKET_STEPPED_LAP"     # Bracket-aligned -Z stepped shoulder lap seams at 60° stations
+TRACK_LAP_ARC_DEG = 8.0                     # 8.0° circumferential overlap arc across |u| >= 5.5 mm shoulders
+TRACK_LAP_WALL_MIN = 3.2                    # Minimum 3.2 mm vertical stepped half-lap flange thickness
+CLICK_RIB_PROTRUSION_MM = 0.50              # Printable 0.50 mm inward timing-gate ridge (> 0.42 mm line width)
 
 BRACKET_PEG_DIA = 4.0                       # Nominal twin alignment peg diameter on bracket top
-BRACKET_PEG_SPACING_U = 10.6                # Pegs at u = -10.6 and +10.6 mm (straddling 13.0 mm RGBIC COB LED slot)
+BRACKET_PEG_SPACING_U = 10.6                # Pegs at u = -10.6 and +10.6 mm (straddling 8.4 mm LED bay)
 BRACKET_PEG_HEIGHT = 4.5
 BRACKET_EYELET_DIA = 2.5                    # 2.5 mm acoustic bell/chime hanging hole
+
+# Explicit Planet Pedestal Balcony Anchor Azimuths (segments 14, 12, 10, 8, 6, 5, 3, 1 -> Planets 1..8)
+# Pinned clear of all 6 timing gates (1605°, 1350°, 990°, 630°, 270°, 15°) and segment seam stations.
+PLANET_ANCHOR_DEGS: tuple[float, ...] = (1590.0, 1320.0, 1080.0, 840.0, 600.0, 480.0, 240.0, -15.0)
 
 # ---------------------------------------------------------------------------
 # Conical Helix Equations
@@ -284,17 +293,17 @@ BRACKET_EYELET_DIA = 2.5                    # 2.5 mm acoustic bell/chime hanging
 HELIX_TOTAL_DEG = HELIX_TURNS * 360.0       # 1620.0 degrees
 HELIX_TOTAL_HEIGHT = HELIX_TURNS * HELIX_PITCH  # 355.5 mm
 HELIX_Z_START = 62.5                        # Bottom track height at theta=0° (Z_marble = 69.3 mm)
-HELIX_Z_END = HELIX_Z_START + HELIX_TOTAL_HEIGHT  # 418.0 mm at theta=1620° (below Z=450 Lamp Puck)
+HELIX_Z_END = HELIX_Z_START + HELIX_TOTAL_HEIGHT  # 418.0 mm at theta=1620° (below Z=450 topper rim)
 
 # Closed-loop spiral extensions:
 #   - Bottom Return Collector & Queueing Ramp: theta = 0.0° (R=145, Z=62.5) -> -90.0° (-Y axis, R=42.0, Z=48.5)
-#   - Topper-to-Track Enclosed Catch Basin   : theta = 1715.0° (-Y/+X, R=42.5, Z=425.0) -> 1620.0° (-X, R=60, Z=418.0)
+#   - Topper-to-Track Enclosed Catch Basin   : theta = 1710.0° (-Y, R=47.0, Z=425.0) -> 1620.0° (-X, R=60, Z=418.0)
 RETURN_CHUTE_END_DEG = -90.0
 RETURN_CHUTE_END_R = 42.0
 RETURN_CHUTE_DROP_Z = 14.0
 
 TOP_FEEDER_START_DEG = 1710.0
-TOP_FEEDER_START_R = 42.5
+TOP_FEEDER_START_R = 47.0
 TOP_FEEDER_RISE_Z = 7.0
 
 
@@ -434,7 +443,7 @@ def make_engraved_label_solid(
     so placing the cutter on a planar surface (`Z_local = 0`) cleanly debosses `depth` into the
     solid while extending `depth` into air (eliminating coplanar boolean faces).
     """
-    t = stroke_w if stroke_w is not None else max(0.55, 0.22 * char_h)
+    t = stroke_w if stroke_w is not None else max(0.65, 0.22 * char_h)
     w = 0.64 * char_h
     h = char_h
     hz = 2.0 * depth

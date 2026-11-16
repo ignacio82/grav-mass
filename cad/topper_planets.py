@@ -22,6 +22,8 @@ from common_params import (
     AA050_M25_TAP_DEPTH,
     AA050_M25_TAP_DIA,
     BALL_DIAMETER,
+    CROWN_SOCKET_DEPTH,
+    CROWN_SOCKET_DIA,
     HEMISPHERE_SNAP_CLEARANCE,
     KB003_LED_SOCKET_X,
     KB003_LED_SOCKET_Y,
@@ -32,10 +34,9 @@ from common_params import (
     PG001_SERVO_BAY_X,
     PG001_SERVO_BAY_Y,
     PG001_SERVO_BAY_Z,
-    PUCK_SOCKET_DEPTH,
-    PUCK_SOCKET_DIA,
     STEEL_BALL_CAVITY_DIA,
     STEEL_BALL_DIA,
+    WIRE_CONDUIT_ANGLE_DEG,
     WIRE_CONDUIT_D,
     WIRE_CONDUIT_W,
     assign_toolhead,
@@ -114,9 +115,8 @@ def make_triangulated_antiprism_solid(
 
 def _build_stem_and_leaf(z_offset: float = 0.0) -> tuple[bd.Solid, bd.Solid]:
     """Construct the curved woody Dark Brown apple stem (Toolhead 1) rising from the top
-    stem cavity (`Z = 84.8..108.5 mm`) and a broad, realistic ovate Emerald Green apple
-    leaf (Toolhead 2) branching off the woody stem clearly above the apple crown (`Z = 95.8..107.2 mm`),
-    with >= 45° self-supporting undersides.
+    stem cavity (`Z = 84.8..108.5 mm`) with an integrated petiole burl (`Ø 6.0 mm` at `Z = 95.8 mm`),
+    and the separate Teal PETG apple leaf (Toolhead 2) with matching keyed rectangular peg.
     """
     stem_w0 = bd.Pos(0.0, 0.0, 84.8 + z_offset) * bd.RegularPolygon(radius=3.1, side_count=12).wire()
     stem_w1 = (
@@ -127,17 +127,20 @@ def _build_stem_and_leaf(z_offset: float = 0.0) -> tuple[bd.Solid, bd.Solid]:
     stem_w2 = (
         bd.Pos(2.2, 0.0, 96.5 + z_offset)
         * bd.Rot(0.0, 15.0, 0.0)
-        * bd.RegularPolygon(radius=2.2, side_count=12).wire()
+        * bd.RegularPolygon(radius=2.8, side_count=12).wire()
     )
     stem_w3 = (
         bd.Pos(5.4, 0.0, 108.5 + z_offset)
         * bd.Rot(0.0, 22.0, 0.0)
         * bd.RegularPolygon(radius=2.9, side_count=12).wire()
     )
-    stem = bd.Solid.make_loft([stem_w0, stem_w1, stem_w2, stem_w3], ruled=True)
+    stem_burl = (
+        bd.Pos(2.0, 0.0, 95.8 + z_offset)
+        * bd.Rot(0.0, 90.0, 12.0)
+        * bd.Cylinder(radius=2.7, height=3.6, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
+    )
+    stem = (bd.Solid.make_loft([stem_w0, stem_w1, stem_w2, stem_w3], ruled=True) + stem_burl).solid()
 
-    # 3D sculpted ovate apple leaf lofted across 5 cambered cross-sections from petiole on the
-    # woody stem (Z = 95.8 mm, clearly above the red apple crown!) out to a pointed tip
     def _leaf_section(
         x_c: float, y_c: float, z_c: float, half_w: float, thick: float, tilt_y: float
     ) -> bd.Wire:
@@ -153,11 +156,11 @@ def _build_stem_and_leaf(z_offset: float = 0.0) -> tuple[bd.Solid, bd.Solid]:
         w = bd.Wire([bd.Edge.make_line(pts[i], pts[i + 1]) for i in range(len(pts) - 1)])
         return bd.Pos(x_c, y_c, z_c + z_offset) * bd.Rot(0.0, tilt_y, 12.0) * w
 
-    w_l0 = _leaf_section(2.0, 0.0, 95.8, 1.7, 2.5, -30.0)
-    w_l1 = _leaf_section(-4.8, -1.2, 99.6, 6.2, 3.5, -22.0)
-    w_l2 = _leaf_section(-12.8, -2.4, 103.2, 7.6, 3.7, -14.0)
-    w_l3 = _leaf_section(-20.5, -3.3, 105.8, 4.8, 2.7, -8.0)
-    w_l4 = _leaf_section(-26.2, -4.0, 107.2, 0.9, 1.2, -4.0)
+    w_l0 = _leaf_section(-0.2, -0.45, 95.4, 0.85, 2.0, -24.0)
+    w_l1 = _leaf_section(-5.4, -1.5, 99.2, 6.2, 3.5, -18.0)
+    w_l2 = _leaf_section(-13.2, -2.6, 102.8, 7.6, 3.7, -12.0)
+    w_l3 = _leaf_section(-20.8, -3.4, 105.5, 4.8, 2.7, -6.0)
+    w_l4 = _leaf_section(-26.4, -4.1, 107.0, 0.9, 1.2, -3.0)
     leaf = bd.Solid.make_loft([w_l0, w_l1, w_l2, w_l3, w_l4], ruled=True)
     return stem.solid(), leaf.solid()
 
@@ -170,26 +173,24 @@ def topper_chute_point(u: float) -> bd.Vector:
     return bd.Vector(r_dist * math.cos(rad), r_dist * math.sin(rad), z_val)
 
 
+def _leaf_socket_plane(z_offset: float = 0.0) -> bd.Plane:
+    """Coordinate frame at the apple stem petiole junction for the separate Teal PETG leaf."""
+    loc = bd.Pos(2.0, 0.0, 95.8 + z_offset) * bd.Rot(0.0, -18.0, 12.0)
+    return bd.Plane(loc)
+
+
 def build_golden_apple_topper() -> bd.Solid:
-    """Build the Realistic Heart-Shaped 5-Lobed Crimson Red Apple Topper (~82.5 mm wide x 108.5 mm tall):
+    """Build the 2-Color PLA Heart-Shaped 5-Lobed Crimson Red Apple Topper (~82.5 mm wide × 108.5 mm tall):
       - Lower Z = 0.0..19.2 mm: Bark-Textured Dark Wood Brown Trunk-Crown Pedestal (Toolhead 1 #4A2F1D)
-        housing the Ø 60.0 x 19.0 mm Bambu Lab LED Lamp Kit 001 socket so the base merges seamlessly
-        into the bark-textured brown tree trunk (`trunk_top`).
-      - Upper Z = 19.2..93.8 mm: Classic Heart-Shaped Crimson Red Apple (Toolhead 4 #C41E3A):
-          * Narrow, tucked-in 5-knobbed bottom calyx base (Ø 46.0 mm at Z = 19.25 mm)
-          * Long, tapered lower cheeks widening gradually up to high, broad upper shoulders
-            (max Ø 82.5 mm at Z = 64..70 mm — ~72% up the apple body!)
-          * Iconic Heart-Shaped 5-Crowned Top Silhouette (`z_crown_amp = 2.6 mm` saddle wave):
-            high rounded left/right upper crown lobes (`Z = 93.8 mm`) dipping down in the center
-            (`Z = 89.5 mm`) and rolling inward into a deep funnel-like stem basin (`Z = 74.0 mm`)
-      - Tall Curved Dark Wood Brown Stem (Toolhead 1 #4A2F1D) rising out of the cleft to Z = 108.5 mm.
-      - Broad Ovate Emerald Green Apple Leaf (Toolhead 2 #00A86B) branching off the woody stem at Z = 95.8 mm
-        (clearly separated above the red apple crown so it never looks like a tomato sepal!).
+        with `CROWN_SOCKET_DIA × CROWN_SOCKET_DEPTH` (`Ø 60.0 × 4.6 mm`) collar socket, 0.5 mm lead-in
+        chamfer, `150°` cord slot, and `Ø 46.5 mm` optical light throat up to the thin-shell lantern dome.
+      - Upper Z = 19.2..93.8 mm: Classic Heart-Shaped Crimson Red Apple (Toolhead 4 #C41E3A) + Dark Wood
+        Brown Stem (`#4A2F1D`) with a `3.2 × 2.2 × 4.5 mm` keyed rectangular leaf socket (zero PETG).
     """
     n_sides = 60
     step = 360.0 / n_sides
     rings: list[tuple[float, float, float, float, float]] = [
-        # Z = 0.0..19.2 mm: Bark-Textured Brown Trunk-Crown Lamp Housing Pedestal
+        # Z = 0.0..19.2 mm: Bark-Textured Brown Trunk-Crown Pedestal
         (0.0,   33.2, 0.0,        -0.75, 0.0),
         (6.0,   32.4, step * 0.5, -0.75, 0.0),
         (13.0,  31.6, 0.0,        -0.75, 0.0),
@@ -222,18 +223,35 @@ def build_golden_apple_topper() -> bd.Solid:
         (86.0,   3.1, 0.0,         0.000, 0.00),
     ]
     apple_shell = make_triangulated_antiprism_solid(rings, n_sides=n_sides)
-    stem, leaf = _build_stem_and_leaf(z_offset=0.0)
+    stem, _leaf = _build_stem_and_leaf(z_offset=0.0)
 
-    # 1. Base cylindrical pocket (Ø 60.0 mm x 19.0 mm height) for Bambu Lab LED Lamp Kit 001
-    puck_r = PUCK_SOCKET_DIA / 2.0  # 30.0 mm
-    puck_socket = bd.Cylinder(
-        radius=puck_r,
-        height=PUCK_SOCKET_DEPTH,
+    # 1. Crown Collar Centering Socket (Ø 60.0 × 4.60 mm + 0.50 mm × 45° lead-in chamfer)
+    #    + Ø 46.5 mm optical light throat tapering cleanly at 45° into Z = 19.0 lantern chamber.
+    crown_r = CROWN_SOCKET_DIA / 2.0  # 30.0 mm
+    crown_lead = bd.Pos(0.0, 0.0, -0.05) * bd.Cone(
+        bottom_radius=crown_r + 0.55,
+        top_radius=crown_r,
+        height=0.55,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # 2. Contoured Hollow Thin-Shell Lantern Chamber (Z = 18.8..83.8 mm, reaching Z = 85.8 mm in the crown lobes):
-    # Follows the outer 5-lobed apple contour with a uniform ~2.2 mm wall thickness all the way from
-    # the lower calyx up through the widest shoulders and upper crown lobes (zero internal core infill!)
+    crown_socket = bd.Cylinder(
+        radius=crown_r,
+        height=CROWN_SOCKET_DEPTH,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    throat_r = 46.5 / 2.0  # 23.25 mm optical light throat
+    optical_throat = bd.Pos(0.0, 0.0, CROWN_SOCKET_DEPTH - 0.1) * bd.Cylinder(
+        radius=throat_r,
+        height=15.35 - (CROWN_SOCKET_DEPTH - 0.1),
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    throat_taper = bd.Pos(0.0, 0.0, 15.35) * bd.Cone(
+        bottom_radius=throat_r,
+        top_radius=19.60,
+        height=3.65,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    # 2. Contoured Hollow Thin-Shell Lantern Chamber (Z = 18.8..83.8 mm):
     lantern_cavity_rings: list[tuple[float, float, float, float, float]] = [
         (18.8,  19.8, 0.0,         0.048, 0.0),
         (23.2,  24.8, step * 0.5,  0.046, 0.25),
@@ -253,52 +271,59 @@ def build_golden_apple_topper() -> bd.Solid:
     ]
     puck_step_cone = make_triangulated_antiprism_solid(lantern_cavity_rings, n_sides=n_sides)
 
-    # Anti-pinch radial-to-vertical cable strain-relief channel at -X for Bambu LED Lamp Kit 001
-    # USB cord exiting into trunk_top's rear wire channel
-    wire_notch = bd.Pos(-puck_r, 0.0, -0.1) * bd.Box(
-        14.0,
-        6.5,
-        PUCK_SOCKET_DEPTH + 1.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    # Cable strain-relief notch rotated to 150.0° (WIRE_CONDUIT_ANGLE_DEG) matching trunk_top slot
+    wire_notch = (
+        bd.Rot(0.0, 0.0, WIRE_CONDUIT_ANGLE_DEG)
+        * bd.Pos(crown_r, 0.0, -0.1)
+        * bd.Box(
+            14.0,
+            WIRE_CONDUIT_W,
+            CROWN_SOCKET_DEPTH + 1.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
     )
 
     # Engrave hidden assembly number "4" on the inner ceiling of the hollow lantern vault
-    # (Z = 83.8 mm — continues the vertical trunk stack 1 -> 2 -> 3 -> 4 and is 100% hidden inside!)
     topper_num_4 = bd.Pos(0.0, 0.0, 83.8) * make_engraved_label_solid(
         "4", char_h=4.2, depth=0.75
     )
 
     raw_body = (
         apple_shell
-        - puck_socket
+        - crown_lead
+        - crown_socket
+        - optical_throat
+        - throat_taper
         - puck_step_cone
         - wire_notch
         - topper_num_4
     ).solid()
 
-    # Partition the bottom Z = 0..19.22 mm Bark-Textured Lamp Housing Pedestal as Dark Wood Brown
-    # (Toolhead 1 #4A2F1D) so the entire pedestal ledge up to Z = 19.22 mm is brown, while the
-    # heart-shaped Crimson Red Apple (Z = 19.22..93.8 mm) sits cleanly on top!
+    # Cut keyed 3.2 × 2.2 × 4.5 mm rectangular leaf socket into the dark brown woody stem
+    pl_sock = _leaf_socket_plane(z_offset=0.0)
+    leaf_socket_cutter = pl_sock.from_local_coords(
+        bd.Pos(-0.75, 0.0, 0.0)
+        * bd.Box(
+            4.50,
+            2.20,
+            3.20,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER),
+        )
+    )
+    stem_part = (stem - leaf_socket_cutter).solid()
+
     collar_cutter = bd.Cylinder(
         radius=36.0,
         height=19.30,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     base_collar_brown = (raw_body & collar_cutter).solid()
-
-    # Boolean-partition body, collar, leaf, and stem so subparts have 0.0 mm³ internal overlap
-    stem_part = stem.solid()
-    leaf_part = (leaf - stem_part).solid()
-    body_only = (raw_body - collar_cutter - stem_part - leaf_part).solid()
+    body_only = (raw_body - collar_cutter - stem_part).solid()
     stem_and_collar = stem_part + base_collar_brown
 
     body_only.color = bd.Color("#C41E3A")
     body_only.label = "apple_red_shell"
     assign_toolhead(body_only, "apple_red_shell", 4)
-
-    leaf_part.color = bd.Color("#00A86B")
-    leaf_part.label = "apple_green_leaf"
-    assign_toolhead(leaf_part, "apple_green_leaf", 2)
 
     brown_subparts: list[bd.Solid] = []
     for idx, b_sol in enumerate(stem_and_collar.solids()):
@@ -308,40 +333,67 @@ def build_golden_apple_topper() -> bd.Solid:
         assign_toolhead(b_sol, lbl, 1)
         brown_subparts.append(b_sol)
 
-    combined = (body_only + stem_part + base_collar_brown + leaf_part).solid()
+    combined = (body_only + stem_part + base_collar_brown).solid()
     assign_toolhead(combined, "golden_apple_topper", 4)
-    combined.colored_subparts = [body_only, *brown_subparts, leaf_part]  # type: ignore[attr-defined]
+    combined.colored_subparts = [body_only, *brown_subparts]  # type: ignore[attr-defined]
     return combined
 
 
-def build_apple_topper_stem_leaf() -> bd.Solid:
-    """Build the standalone multi-color printable Apple Topper Stem (T1 Brown #4A2F1D) &
-    Sculpted Leaf (T2 Emerald Green #00A86B) resting on Z = 0.
+def build_apple_green_leaf(
+    label: str = "apple_green_leaf",
+    orient_for_print: bool = True,
+) -> bd.Solid:
+    """Build the standalone Teal PETG Apple Leaf (Toolhead 2) with keyed rectangular peg
+    (`2.90 × 1.90 × 4.20 mm`) mating cleanly into the `3.20 × 2.20 × 4.50 mm` socket on the
+    apple stem (`CA` glue drop optional). When `orient_for_print=True`, lies flat on
+    `Z = 0.00 mm` for Plate 13; when `False`, sits in topper local assembly coordinates.
     """
-    stem, leaf = _build_stem_and_leaf(z_offset=-84.8)
-    base_pad = bd.Cylinder(
-        radius=4.5, height=2.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+    _stem, leaf = _build_stem_and_leaf(z_offset=0.0)
+    pl_sock = _leaf_socket_plane(z_offset=0.0)
+    peg_box = bd.Pos(-0.90, 0.0, 0.0) * bd.Box(
+        4.20,
+        1.90,
+        2.90,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER),
     )
-    stem_full = (base_pad + stem).solid()
-    leaf_only = (leaf - stem_full).solid()
-    part = (stem_full + leaf_only).solid()
-    bb = part.bounding_box()
-    dz = -bb.min.Z
-    part = part.moved(bd.Location((0.0, 0.0, dz)))
-    stem_moved = stem_full.moved(bd.Location((0.0, 0.0, dz)))
-    leaf_moved = leaf_only.moved(bd.Location((0.0, 0.0, dz)))
+    peg_chamfer = bd.Pos(1.05, 0.0, 0.0) * bd.Box(
+        0.50,
+        1.40,
+        2.40,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER),
+    )
+    leaf_world = (leaf + pl_sock.from_local_coords(peg_box) - pl_sock.from_local_coords(peg_chamfer)).solid()
 
-    stem_moved.color = bd.Color("#4A2F1D")
-    stem_moved.label = "stem_brown"
-    assign_toolhead(stem_moved, "stem_brown", 1)
+    # Lay upside-down onto flat -Y/-X arched twin top ridges and apply a 0.60 mm coplanar datum skim
+    # so the leaf prints support-free with >= 45 mm² bed contact without altering the keyed peg or petiole.
+    flat_xf = bd.Location((0.0, 0.0, 0.0), (180.0, -25.0, 0.0)) * bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, -12.0))
+    leaf_rot = leaf_world.moved(flat_xf)
+    bb_rot = leaf_rot.bounding_box()
+    z_shift = -bb_rot.min.Z
+    skim_cut = bd.Pos(
+        0.5 * (bb_rot.min.X + bb_rot.max.X),
+        0.5 * (bb_rot.min.Y + bb_rot.max.Y),
+        -1.0,
+    ) * bd.Box(
+        80.0,
+        80.0,
+        1.60,  # Cuts Z in [0.00, 0.60] mm above bb_rot.min.Z -> >= 48 mm² bed contact
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    leaf_skimmed = (leaf_rot.moved(bd.Location((0.0, 0.0, z_shift))) - skim_cut).solid()
 
-    leaf_moved.color = bd.Color("#00A86B")
-    leaf_moved.label = "leaf_green"
-    assign_toolhead(leaf_moved, "leaf_green", 2)
+    if not orient_for_print:
+        # Return exact inverse transform into golden_apple_topper local assembly coordinates
+        leaf_asm = leaf_skimmed.moved(bd.Location((0.0, 0.0, -z_shift))).moved(flat_xf.inverse())
+        leaf_asm.color = bd.Color("#00A86B")
+        return assign_toolhead(leaf_asm, label, 2)
 
-    assign_toolhead(part, "apple_topper_stem_leaf", 2)
-    part.colored_subparts = [leaf_moved, stem_moved]  # type: ignore[attr-defined]
-    return part
+    bb_flat = leaf_skimmed.bounding_box()
+    leaf_flat = leaf_skimmed.moved(
+        bd.Location((-0.5 * (bb_flat.min.X + bb_flat.max.X), -0.5 * (bb_flat.min.Y + bb_flat.max.Y), -bb_flat.min.Z))
+    )
+    leaf_flat.color = bd.Color("#00A86B")
+    return assign_toolhead(leaf_flat, label, 2)
 
 
 PLANET_ORDER_NUM = {
@@ -368,13 +420,28 @@ def _make_planet_socket_cutter(planet_num: int | None = None) -> bd.Shape:
     """
     r_sock = PLANET_PEG_SOCKET_DIA / 2.0  # 4.00 mm (Ø 8.00 mm)
     h_sock = PLANET_PEG_SOCKET_DEPTH      # 10.00 mm
-    r_groove = r_sock + 0.22              # 4.22 mm (Ø 8.44 mm internal snap-detent groove)
+    r_groove = r_sock + 0.23              # 4.23 mm (Ø 8.46 mm internal snap-detent groove)
 
-    peg_socket = bd.Pos(0.0, 0.0, -0.10) * bd.Cylinder(
+    peg_socket_cyl = bd.Pos(0.0, 0.0, -0.10) * bd.Cylinder(
         radius=r_sock,
         height=h_sock + 0.10,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
+    # 4× 0.85 mm-wide inward radial crush ribs inside Z = 3.60..9.60 mm LED chamber
+    # protruding inward to R = 3.55 mm (Ø 7.10 mm inscribed, retaining Ø 7.50 mm KA006 LED)
+    peg_socket = peg_socket_cyl
+    for rib_ang in (45.0, 135.0, 225.0, 315.0):
+        rib_keep_block = (
+            bd.Rot(0.0, 0.0, rib_ang)
+            * bd.Pos(3.55 + 0.50, 0.0, BAMBU_MAG_LED_Z_OFFSET + 0.15)
+            * bd.Box(
+                1.00,
+                0.85,
+                BAMBU_MAG_LED_HEIGHT - 0.15,
+                align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+            )
+        )
+        peg_socket = peg_socket - rib_keep_block
     entry_funnel = bd.Pos(0.0, 0.0, -0.10) * bd.Cone(
         bottom_radius=r_sock + 0.65,
         top_radius=r_sock,
@@ -809,14 +876,16 @@ def build_planet_earth() -> bd.Solid:
     )
     polar_and_clouds = arctic_cap + cloud_swirl_1 + cloud_swirl_2
 
+    # Plate 18 Single-Polymer 3-Color PLA Palette:
+    # T1 = #1E5AA8 (Marine Blue), T2 = #D4AF37 (Silk Gold), T3 = #F5EFE6 (Matte Ivory White)
+    gold_landmasses = continents + mountains
     return _finalize_multicolor_planet(
         "planet_earth",
         1,
         [
             (ocean_globe, "earth_cobalt_ocean_globe", "#1E5AA8", 1),
-            (continents, "earth_emerald_continents", "#00A86B", 2),
-            (mountains, "earth_gold_mountain_ranges", "#D4AF37", 4),
-            (polar_and_clouds, "earth_white_polar_ice_clouds", "#F0F4F8", 3),
+            (gold_landmasses, "earth_gold_continents", "#D4AF37", 2),
+            (polar_and_clouds, "earth_white_polar_ice_clouds", "#F5EFE6", 3),
         ],
     )
 
@@ -1120,14 +1189,16 @@ def build_planet_uranus() -> bd.Solid:
     )
     white_polar_features = polar_hood + methane_plume
 
+    # Plate 18 Single-Polymer 3-Color PLA Palette:
+    # T1 = #1E5AA8 (Marine Blue), T2 = #D4AF37 (Silk Gold), T3 = #F5EFE6 (Matte Ivory White)
+    ice_white_features = cobalt_bands + white_polar_features
     return _finalize_multicolor_planet(
         "planet_uranus",
-        2,
+        1,
         [
-            (uranus_globe, "uranus_cyan_ice_globe", "#00A86B", 2),
-            (cobalt_bands, "uranus_cobalt_latitude_bands", "#1E5AA8", 1),
-            (tilted_ring, "uranus_gold_epsilon_ring", "#D4AF37", 4),
-            (white_polar_features, "uranus_white_polar_hood", "#F0F4F8", 3),
+            (uranus_globe, "uranus_blue_ice_globe", "#1E5AA8", 1),
+            (tilted_ring, "uranus_gold_epsilon_ring", "#D4AF37", 2),
+            (ice_white_features, "uranus_white_polar_hood", "#F5EFE6", 3),
         ],
     )
 
@@ -1193,14 +1264,16 @@ def build_planet_neptune() -> bd.Solid:
     ).solid()
     white_cirrus = gds_companion + scooter_storm + polar_cap
 
+    # Plate 18 Single-Polymer 3-Color PLA Palette:
+    # T1 = #1E5AA8 (Marine Blue), T2 = #D4AF37 (Silk Gold), T3 = #F5EFE6 (Matte Ivory White)
+    ivory_wind_clouds = teal_belts + white_cirrus
     return _finalize_multicolor_planet(
         "planet_neptune",
         1,
         [
             (neptune_globe, "neptune_cobalt_ice_globe", "#1E5AA8", 1),
-            (teal_belts, "neptune_teal_wind_belts", "#00A86B", 2),
-            (gold_features, "neptune_gold_dark_spot_ring", "#D4AF37", 4),
-            (white_cirrus, "neptune_white_cirrus_scooter", "#F0F4F8", 3),
+            (gold_features, "neptune_gold_dark_spot_ring", "#D4AF37", 2),
+            (ivory_wind_clouds, "neptune_ivory_wind_cirrus", "#F5EFE6", 3),
         ],
     )
 
@@ -1254,8 +1327,8 @@ def build_apple_hemisphere_a(label: str = "Apple_Hemisphere_A") -> bd.Solid:
     sph = _make_exact_25mm_apple_sphere_centered()
     r_y_led = 9.35      # Ø 18.70 mm bore (+0.70 mm clearance for Ø 18.0 x 6.5 mm Bambu Y-Shape LED KC012/KC013!)
     r_neck = 10.30      # Smooth cylindrical male bayonet neck (0.95 mm solid wall, Ø 20.60 mm)
-    r_lug = 11.15       # 3 protruding bayonet lugs (+0.85 mm radial / +1.70 mm diametrical lock!)
-    lip_h = 2.65
+    r_lug = 11.24       # 3 protruding bayonet lugs (+0.94 mm radial / +1.88 mm diametrical lock!)
+    lip_h = 2.95
 
     up_box = bd.Box(30.0, 30.0, 15.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
     upper_dome = (sph & up_box).solid()
@@ -1283,24 +1356,39 @@ def build_apple_hemisphere_a(label: str = "Apple_Hemisphere_A") -> bd.Solid:
         height=0.45,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    male_collar_base = ef_chamfer + neck_cyl + scarf_cone + scarf_top_join
+    # 45° conical exterior chamfer seam skirt (R = 11.40 -> 11.65 mm over z = -0.25..0.00 mm)
+    # seating flush into Apple_Hemisphere_B's 45° female rim seat while preserving wide bed ring on B
+    seam_skirt_cone = bd.Pos(0.0, 0.0, -0.25) * bd.Cone(
+        bottom_radius=11.40,
+        top_radius=11.65,
+        height=0.25,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    seam_skirt_join = bd.Cylinder(
+        radius=11.65,
+        height=0.25,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    male_collar_base = (
+        ef_chamfer + neck_cyl + scarf_cone + scarf_top_join + seam_skirt_cone + seam_skirt_join
+    )
 
-    # 2. 3 Male Bayonet Lugs (32° wide each at 0°, 120°, 240°) with 45° bottom lead-in & 45° top locking ramp:
-    # - z = -2.65..-1.80 mm (Z_print = 0.00..0.85 mm): 45° bottom lead-in & elephant's-foot relief (10.30 -> 11.15 mm)
-    # - z = -1.80..-1.40 mm (Z_print = 0.85..1.25 mm): Cylindrical lug land at R_lug = 11.15 mm
-    # - z = -1.40..-0.55 mm (Z_print = 1.25..2.10 mm): 45° top locking cam ramp (11.15 -> 10.30 mm)
+    # 2. 3 Male Bayonet Lugs (36° wide each at 0°, 120°, 240°) with 45° bottom lead-in & 45° top locking ramp:
+    # - z = -2.95..-2.01 mm (Z_print = 0.00..0.94 mm): 45° bottom lead-in & elephant's-foot relief (10.30 -> 11.24 mm)
+    # - z = -2.01..-1.45 mm (Z_print = 0.94..1.50 mm): Cylindrical lug land at R_lug = 11.24 mm
+    # - z = -1.45..-0.51 mm (Z_print = 1.50..2.44 mm): 45° top locking cam ramp (11.24 -> 10.30 mm)
     lug_bot_cone = bd.Pos(0.0, 0.0, -lip_h) * bd.Cone(
         bottom_radius=r_neck,
         top_radius=r_lug,
         height=r_lug - r_neck,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    lug_mid_cyl = bd.Pos(0.0, 0.0, -1.80) * bd.Cylinder(
+    lug_mid_cyl = bd.Pos(0.0, 0.0, -2.01) * bd.Cylinder(
         radius=r_lug,
-        height=0.40,
+        height=0.56,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    lug_top_cone = bd.Pos(0.0, 0.0, -1.40) * bd.Cone(
+    lug_top_cone = bd.Pos(0.0, 0.0, -1.45) * bd.Cone(
         bottom_radius=r_lug,
         top_radius=r_neck,
         height=r_lug - r_neck,
@@ -1311,7 +1399,7 @@ def build_apple_hemisphere_a(label: str = "Apple_Hemisphere_A") -> bd.Solid:
     lugs_list = []
     for k in range(3):
         c_deg = k * 120.0
-        wedge = _make_sector_wedge(14.0, -lip_h - 0.2, 0.0, c_deg - 16.0, c_deg + 16.0, n_arc=24)
+        wedge = _make_sector_wedge(14.0, -lip_h - 0.2, 0.0, c_deg - 18.0, c_deg + 18.0, n_arc=24)
         lugs_list.append((lug_ring_full & wedge).solid())
 
     # 3. Wide Ø 18.70 mm (R = 9.35 mm) Y-Shape LED & Universal Core Chamber (z = -2.55..+3.65 mm)
@@ -1361,14 +1449,14 @@ def build_apple_hemisphere_b(label: str = "Apple_Hemisphere_B") -> bd.Solid:
     """
     sph = _make_exact_25mm_apple_sphere_centered()
     r_y_led = 9.35      # Ø 18.70 mm bore (+0.70 mm clearance for Ø 18.0 x 6.5 mm Bambu Y-Shape LED KC012/KC013!)
-    r_bore = 10.52      # +0.22 mm radial (+0.44 mm diametrical) clearance around R_neck = 10.30 mm
-    r_tunnel = 11.38    # +0.23 mm radial (+0.46 mm diametrical) clearance around R_lug = 11.15 mm
-    r_seat_top = 10.76  # 0.24 mm top entry chamfer leaving a wide 1.74 mm flat bed ring AND full retaining roof!
+    r_bore = 10.50      # +0.20 mm radial (+0.40 mm diametrical) clearance around R_neck = 10.30 mm
+    r_tunnel = 11.44    # +0.20 mm radial (+0.40 mm diametrical) clearance around R_lug = 11.24 mm
+    r_seat_top = 10.74  # 0.24 mm top entry chamfer leaving a wide 1.76 mm flat bed ring AND full retaining roof!
 
     low_box = bd.Box(30.0, 30.0, 15.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MAX))
     lower_dome = (sph & low_box).solid()
 
-    # 1. Axisymmetric Female Entry Chamfer + Central Throat Bore (R_bore = 10.52 mm)
+    # 1. Axisymmetric Female Entry Chamfer + Central Throat Bore (R_bore = 10.50 mm)
     #    + 45° self-supporting transition to the Ø 18.70 mm (R = 9.35 mm) Y-Shape LED chamber:
     seat_top_cyl = bd.Pos(0.0, 0.0, -0.05) * bd.Cylinder(
         radius=r_seat_top,
@@ -1381,26 +1469,34 @@ def build_apple_hemisphere_b(label: str = "Apple_Hemisphere_B") -> bd.Solid:
         height=0.24,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    throat_cyl = bd.Pos(0.0, 0.0, -2.75) * bd.Cylinder(
+    throat_cyl = bd.Pos(0.0, 0.0, -3.15) * bd.Cylinder(
         radius=r_bore,
-        height=2.55,
+        height=2.95,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    throat_roof_cone = bd.Pos(0.0, 0.0, -2.75 - (r_bore - r_y_led)) * bd.Cone(
+    throat_roof_cone = bd.Pos(0.0, 0.0, -3.15 - (r_bore - r_y_led)) * bd.Cone(
         bottom_radius=r_y_led,
         top_radius=r_bore,
         height=r_bore - r_y_led,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    fem_bore_base = seat_top_cyl + seat_cone + throat_cyl + throat_roof_cone
-
-    # 2. 3 Vertical Entry Keyway Slots (42° wide at 0°, 120°, 240°, R = 11.40 mm):
-    kw_cyl = bd.Pos(0.0, 0.0, -1.95) * bd.Cylinder(
-        radius=r_tunnel + 0.02,
-        height=2.15,
+    # 45° self-centering conical exterior chamfer seam seat (R = 11.44 -> 11.82 mm over z = -0.36..+0.02),
+    # leaving a >= 0.68 mm wide flat bed contact annulus (R = 11.82..12.50 mm, ~51.9 mm² >= 25.0 mm²)
+    rim_seat_cone = bd.Pos(0.0, 0.0, -0.36) * bd.Cone(
+        bottom_radius=11.44,
+        top_radius=11.82,
+        height=0.38,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    kw_floor_cone = bd.Pos(0.0, 0.0, -1.95 - (r_tunnel + 0.02 - r_bore)) * bd.Cone(
+    fem_bore_base = seat_top_cyl + seat_cone + throat_cyl + throat_roof_cone + rim_seat_cone
+
+    # 2. 3 Vertical Entry Keyway Slots (44° wide at 0°, 120°, 240°, R = 11.44 mm):
+    kw_cyl = bd.Pos(0.0, 0.0, -2.20) * bd.Cylinder(
+        radius=r_tunnel + 0.02,
+        height=2.40,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    kw_floor_cone = bd.Pos(0.0, 0.0, -2.20 - (r_tunnel + 0.02 - r_bore)) * bd.Cone(
         bottom_radius=r_bore,
         top_radius=r_tunnel + 0.02,
         height=r_tunnel + 0.02 - r_bore,
@@ -1408,28 +1504,28 @@ def build_apple_hemisphere_b(label: str = "Apple_Hemisphere_B") -> bd.Solid:
     )
     kw_ring_full = (kw_cyl + kw_floor_cone).solid()
 
-    # 3. 3 Two-Stage Helical Cam Undercut Twist-Lock Tunnels (spanning -64° to +21° around 0°, 120°, 240°):
-    # - Stage 1 Entry Ramp (-28° to +21°): ceiling starts higher (z = -0.34 -> -1.20 mm) for effortless lead-in
-    # - Stage 2 Locked Seat (-64° to -24°): ceiling steps down (z = -0.46 -> -1.32 mm) to cinch the 45° lug ramp
+    # 3. 3 Two-Stage Helical Cam Undercut Twist-Lock Tunnels (spanning -66° to +22° around 0°, 120°, 240°):
+    # - Stage 1 Entry Ramp (-28° to +22°): ceiling starts higher (z = -0.31 -> -1.25 mm) for effortless lead-in
+    # - Stage 2 Locked Seat (-66° to -25°): ceiling steps down (z = -0.46 -> -1.40 mm) to cinch the 45° lug ramp
     #   underneath a thick solid PLA retaining ceiling once twisted -45° clockwise!
-    tun_entry_ceil = bd.Pos(0.0, 0.0, -1.20) * bd.Cone(
+    tun_entry_ceil = bd.Pos(0.0, 0.0, -1.25) * bd.Cone(
         bottom_radius=r_tunnel,
         top_radius=r_bore,
         height=r_tunnel - r_bore,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    tun_lock_ceil = bd.Pos(0.0, 0.0, -1.32) * bd.Cone(
+    tun_lock_ceil = bd.Pos(0.0, 0.0, -1.40) * bd.Cone(
         bottom_radius=r_tunnel,
         top_radius=r_bore,
         height=r_tunnel - r_bore,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    tun_mid_cyl = bd.Pos(0.0, 0.0, -1.95) * bd.Cylinder(
+    tun_mid_cyl = bd.Pos(0.0, 0.0, -2.20) * bd.Cylinder(
         radius=r_tunnel,
-        height=0.75,
+        height=0.95,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    tun_floor_cone = bd.Pos(0.0, 0.0, -1.95 - (r_tunnel - r_bore)) * bd.Cone(
+    tun_floor_cone = bd.Pos(0.0, 0.0, -2.20 - (r_tunnel - r_bore)) * bd.Cone(
         bottom_radius=r_bore,
         top_radius=r_tunnel,
         height=r_tunnel - r_bore,
@@ -1441,11 +1537,11 @@ def build_apple_hemisphere_b(label: str = "Apple_Hemisphere_B") -> bd.Solid:
     bayonet_cutters = []
     for k in range(3):
         c_deg = k * 120.0
-        kw_wedge = _make_sector_wedge(14.0, -3.5, 0.5, c_deg - 21.0, c_deg + 21.0, n_arc=24)
+        kw_wedge = _make_sector_wedge(14.0, -3.5, 0.5, c_deg - 22.0, c_deg + 22.0, n_arc=24)
         bayonet_cutters.append((kw_ring_full & kw_wedge).solid())
-        entry_wedge = _make_sector_wedge(14.0, -3.5, 0.0, c_deg - 28.0, c_deg + 21.0, n_arc=24)
+        entry_wedge = _make_sector_wedge(14.0, -3.5, 0.0, c_deg - 28.0, c_deg + 22.0, n_arc=24)
         bayonet_cutters.append((tun_entry_ring & entry_wedge).solid())
-        lock_wedge = _make_sector_wedge(14.0, -3.5, 0.0, c_deg - 64.0, c_deg - 24.0, n_arc=24)
+        lock_wedge = _make_sector_wedge(14.0, -3.5, 0.0, c_deg - 66.0, c_deg - 25.0, n_arc=24)
         bayonet_cutters.append((tun_lock_ring & lock_wedge).solid())
 
     # 4. Wide Ø 18.70 mm (R = 9.35 mm) Y-Shape LED Chamber (z = -3.65..0.00 mm)
@@ -1492,7 +1588,7 @@ def build_assembled_apple_marble(
     Returns (assembled_solid, hemi_a_placed, hemi_b_placed).
     """
     r_half = BALL_DIAMETER / 2.0  # 12.50 mm
-    lip_h = 2.65
+    lip_h = 2.95
     hemi_a_print = build_apple_hemisphere_a()
     hemi_b_print = build_apple_hemisphere_b()
 
@@ -1613,13 +1709,13 @@ def build_magic_led_wand() -> bd.Solid:
         bd.RegularPolygon(radius=6.8, side_count=12), amount=2.0
     )
     bezel_inner = bd.Pos(42.0, 0.0, 4.5) * bd.Cylinder(
-        radius=4.15, height=3.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+        radius=8.05 / 2.0, height=3.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
     )
     raw_bezel_crimson = (bezel_outer - bezel_inner).solid()
 
-    # 4. Cut Ø 8.30 x 2.20 mm magnet press-fit socket (Z = 4.80..7.00 mm) + Ø 3.2 mm push-out hole
+    # 4. Cut Ø 8.05 x 2.20 mm magnet bore (Z = 4.80..7.00 mm) + Ø 3.2 mm push-out hole
     mag_pocket = bd.Pos(42.0, 0.0, 4.80) * bd.Cylinder(
-        radius=8.30 / 2.0,  # 4.15 mm (0.15 mm radial clearance for Ø 8.00 mm magnet)
+        radius=8.05 / 2.0,  # 4.025 mm (tight slip fit for Ø 8.00 mm magnet, CA glue fallback)
         height=2.50,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
@@ -1664,6 +1760,7 @@ def build_all_topper_planet_parts() -> dict[str, bd.Solid]:
     """
     return {
         "golden_apple_topper": build_golden_apple_topper(),
+        "apple_green_leaf": build_apple_green_leaf(),
         "planet_mercury": build_planet_mercury(),
         "planet_venus": build_planet_venus(),
         "planet_earth": build_planet_earth(),

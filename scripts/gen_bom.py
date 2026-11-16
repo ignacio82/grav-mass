@@ -70,28 +70,28 @@ flowchart TB
         WAGO -->|"Branch 1 & 3: Fuse F1 (2A) -> VIN & GND"| C008["M5Stack Atomic H-Driver (A092, 9-24V Rated) + ATOM Lite ESP32 (C008)"]
         WAGO -->|"Branch 2: Fuse F2 (3A) -> VIN+ & GND"| BUCK5["UCTRONICS 12V -> 5.0V 5A Screw-Terminal Buck (B07XXWQ49N) + 1000µF Cap (B07WPWFSNQ)"]
         HA_CTRL <-->|"Encrypted ESPHome API"| C008
-        BC["Battery_Cover (2x M2.5x6mm Screws B0BYF4X65F)"] -.->|"Ø 5.0mm Port Exposes Atom Button (GPIO39) & RGB LED (GPIO27)"| C008
+        BC["Bottom_Electronics_Lid (4x M2.5x6mm Screws B0BYF4X65F)"] -.->|"Ø 5.0mm Port Exposes Atom Button (GPIO39) & RGB LED (GPIO27)"| C008
     end
 
     subgraph LIFT["🌲 2. Central Trunk Stack, Archimedes Auger & Topper Ring"]
         C008 -->|"Screw Terminals M1 & M2 (12V PWM GPIO19/23 + GPIO22 nFAULT)"| N20["12V 150 RPM N20 Gear Motor (B0BFRPMSW6)"]
-        N20 -->|"Ø 3.0mm D-Shaft"| MCD["Motor_Clutch_Driver (Gold Hex Coupler)"]
+        N20 -->|"Ø 3.0mm D-Shaft + 1x M2.5 Clamp Screw"| MCD["Motor_Clutch_Driver (Brown T1 Hex Coupler)"]
         MCD -->|"Bottom Female Hex Socket"| AL["auger_lower (#1)"]
         AL -->|"Male/Female Hex Joint (#1 -> #2)"| AU["auger_upper (#2)"]
         TB["trunk_base (#1)"] -->|"Keyed Tenon (#1 -> #2)"| TM["trunk_mid (#2)"]
         TM -->|"Keyed Tenon (#2 -> #3)"| TT["trunk_top (#3)"]
-        TT -->|"Top Rim (#3 -> #4)"| TOP["golden_apple_topper (#4)"]
-        BUCK5 -->|"+5.0V & GND via WAGO-3/4 + B0CT827QQC Rear -X Conduit"| RING["Sparkleiot 16-Bit WS2812 RGB Ring (B09YTMNGTD, Ø 45mm)"]
+        TT -->|"Top Rim (#3 -> #4)"| TOP["golden_apple_topper (#4) + PETG Leaf"]
+        BUCK5 -->|"+5.0V & GND via WAGO-3/4 + B0CT827QQC 150 deg Rear-Left Conduit"| RING["Sparkleiot 16-Bit WS2812 RGB Ring (B09YTMNGTD, Ø 45mm)"]
         C008 -->|"A096 Grove Yellow (GPIO32 Data Only)"| RING
         RING -.->|"Seated in Ø 46.2mm Rim Recess of trunk_top (Z = 447.5mm)"| TOP
     end
 
     subgraph TRACK["🎢 3. Cantilever Brackets & 4.5-Turn Helical Track"]
-        TB & TM & TT -->|"24x Helical Dovetail Slots (60 deg step)"| BRK["24x Cantilever Brackets (Tiers #4, #3, #2, #1)"]
-        BRK -->|"Twin Ø 4.0mm Snap-Lock Pegs (u = ±10.6mm)"| SEG["14x Helical Track Segments (track_seg_01 #1 -> track_seg_14 #14)"]
+        TB & TM & TT -->|"26x Helical Keyhole Slots (60 deg step)"| BRK["26x Cantilever Brackets (Tiers #4, #3, #2, #1)"]
+        BRK -->|"Twin Ø 4.0mm Split-Tine Snap Pegs (u = ±10.6mm)"| SEG["14x Helical Track Segments (track_seg_01 #1 -> track_seg_14 #14)"]
         BUCK5 -->|"+5.0V & GND via WAGO-3/4 (Start + Top Dual-End Injection)"| COB["BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Wire (B0CCS11V7H, 50 LEDs)"]
         C008 -->|"A096 Grove White (GPIO26 Data Only)"| COB
-        COB -.->|"8.0 x 3.6mm Snap-In Dovetail Channel (4.6mm Throat)"| SEG
+        COB -.->|"8.4 x 6.2mm Snap-In Dovetail Channel (4.6mm Throat)"| SEG
     end
 
     subgraph WIRELESS["🪄 4. Wireless Magnetic LEDs & Closed-Loop Marble Cascade"]
@@ -224,7 +224,7 @@ def render_markdown_tables(data: dict) -> str:
     lines.append("")
 
     # Section 2: Fasteners
-    lines.append("### 2. Fasteners (Only 2 Screws Needed!)")
+    lines.append("### 2. Fasteners (Only 5 Screws Needed!)")
     lines.append("")
     lines.append("| Qty | Part Number / ASIN | Component | Spec / Dimensions | Direct Product Link | Purpose |")
     lines.append("| :---: | :---: | :--- | :--- | :--- | :--- |")

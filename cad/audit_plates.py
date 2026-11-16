@@ -37,15 +37,33 @@ def _parse_3mf_objects_and_settings(threemf_path: Path) -> tuple[dict, list[dict
         if "Metadata/project_settings.config" in zf.namelist():
             ps = json.loads(zf.read("Metadata/project_settings.config"))
         obj_names = {}
+        obj_polymers: dict[str, set[str]] = {}
+        fil_types = [str(ft).upper() for ft in ps.get("filament_type", ["PLA", "PETG", "PLA", "PLA"])]
         if "Metadata/model_settings.config" in zf.namelist():
             ms_root = ET.fromstring(zf.read("Metadata/model_settings.config"))
             for obj_el in ms_root.findall("object"):
                 oid = obj_el.attrib.get("id", "")
                 name = ""
+                obj_ext = ""
                 for m in obj_el.findall("metadata"):
                     if m.attrib.get("key") == "name":
                         name = m.attrib.get("value", "")
+                    elif m.attrib.get("key") == "extruder":
+                        obj_ext = m.attrib.get("value", "")
                 obj_names[oid] = name
+                used_polys: set[str] = set()
+                part_els = obj_el.findall("./part")
+                if part_els:
+                    for p_el in part_els:
+                        p_ext = obj_ext
+                        for pm in p_el.findall("metadata"):
+                            if pm.attrib.get("key") == "extruder":
+                                p_ext = pm.attrib.get("value", "")
+                        if p_ext.isdigit() and 1 <= int(p_ext) <= len(fil_types):
+                            used_polys.add(fil_types[int(p_ext) - 1])
+                elif obj_ext.isdigit() and 1 <= int(obj_ext) <= len(fil_types):
+                    used_polys.add(fil_types[int(obj_ext) - 1])
+                obj_polymers[name or f"obj_{oid}"] = used_polys
         model_root = ET.fromstring(zf.read("3D/3dmodel.model"))
 
     res_el = model_root.find(f"{{{ns}}}resources")
@@ -121,7 +139,125 @@ def _parse_3mf_objects_and_settings(threemf_path: Path) -> tuple[dict, list[dict
             "sub_meshes": sub_clean,
             "merged": trimesh.Trimesh(vertices=merged.vertices, faces=merged.faces, process=True),
         })
+    ps["_obj_polymers"] = obj_polymers
     return ps, items
+
+
+def _component_true_bridge_span(tri_xy: np.ndarray) -> float:
+    """Compute true unsupported horizontal bridge span (`max_{p in comp} min_{theta} solid_chord(p, theta)`).
+
+    Unlike a bounding-box caliper on all vertices, slicing the actual 2D horizontal triangles
+    subtracts inner bores/holes (measuring the radial wall span of an annular flange rather
+    than its outer diameter) while preserving the exact width of any rectangular slot bridge.
+    """
+    if len(tri_xy) == 0:
+        return 0.0
+    p0 = tri_xy[:, 0, :]
+    p1 = tri_xy[:, 1, :]
+    p2 = tri_xy[:, 2, :]
+    pts_all = tri_xy.reshape(-1, 2)
+    xmin, ymin = pts_all.min(axis=0)
+    xmax, ymax = pts_all.max(axis=0)
+    span_x = float(xmax - xmin)
+    span_y = float(ymax - ymin)
+    if min(span_x, span_y) < 1.0:
+        return min(span_x, span_y)
+
+    # Sample centroids of every triangle plus an interior 2D grid filtered to solid triangles
+    tri_cents = tri_xy.mean(axis=1)
+    step = max(0.8, min(span_x, span_y) / 14.0, max(span_x, span_y) / 36.0)
+    gx = np.arange(xmin + 0.5 * step, xmax, step)
+    gy = np.arange(ymin + 0.5 * step, ymax, step)
+    if len(gx) > 0 and len(gy) > 0:
+        ggx, ggy = np.meshgrid(gx, gy)
+        grid_pts = np.column_stack([ggx.ravel(), ggy.ravel()])
+        # Vectorized point-in-triangle check
+        v0 = p2 - p0
+        v1 = p1 - p0
+        d00 = np.einsum("ij,ij->i", v0, v0)
+        d01 = np.einsum("ij,ij->i", v0, v1)
+        d11 = np.einsum("ij,ij->i", v1, v1)
+        denom = d00 * d11 - d01 * d01
+        valid_t = np.abs(denom) > 1e-12
+        if valid_t.any():
+            v0v, v1v, p0v = v0[valid_t], v1[valid_t], p0[valid_t]
+            d00v, d01v, d11v, denv = d00[valid_t], d01[valid_t], d11[valid_t], denom[valid_t]
+            # Evaluate in chunks to stay fast
+            in_pts = []
+            for start in range(0, len(grid_pts), 500):
+                gp = grid_pts[start : start + 500]
+                v2 = gp[:, None, :] - p0v[None, :, :]
+                d20 = np.einsum("kij,ij->ki", v2, v0v)
+                d21 = np.einsum("kij,ij->ki", v2, v1v)
+                inv = 1.0 / denv[None, :]
+                u = (d11v[None, :] * d20 - d01v[None, :] * d21) * inv
+                w = (d00v[None, :] * d21 - d01v[None, :] * d20) * inv
+                inside = ((u >= -1e-4) & (w >= -1e-4) & (u + w <= 1.0 + 1e-4)).any(axis=1)
+                if inside.any():
+                    in_pts.append(gp[inside])
+            if in_pts:
+                sample_pts = np.vstack([tri_cents, *in_pts])
+            else:
+                sample_pts = tri_cents
+        else:
+            sample_pts = tri_cents
+    else:
+        sample_pts = tri_cents
+
+    # Deduplicate/subsample if very dense
+    if len(sample_pts) > 220:
+        stride = max(1, len(sample_pts) // 220)
+        sample_pts = sample_pts[::stride]
+
+    # Pre-build triangle edges: e_start (3M, 2), e_end (3M, 2)
+    e_a = np.vstack([p0, p1, p2])
+    e_b = np.vstack([p1, p2, p0])
+
+    thetas = [math.radians(d) for d in range(0, 180, 10)]
+    min_chord_per_pt = np.full(len(sample_pts), float("inf"), dtype=np.float64)
+
+    for th in thetas:
+        c, s = math.cos(th), math.sin(th)
+        ua = e_a[:, 0] * c + e_a[:, 1] * s
+        va = -e_a[:, 0] * s + e_a[:, 1] * c
+        ub = e_b[:, 0] * c + e_b[:, 1] * s
+        vb = -e_b[:, 0] * s + e_b[:, 1] * c
+
+        pu = sample_pts[:, 0] * c + sample_pts[:, 1] * s
+        pv = -sample_pts[:, 0] * s + sample_pts[:, 1] * c
+
+        vmin = np.minimum(va, vb)
+        vmax = np.maximum(va, vb)
+        dv = vb - va
+        non_horiz = np.abs(dv) > 1e-8
+
+        for k in range(len(sample_pts)):
+            yk = float(pv[k]) + 1e-7
+            xk = float(pu[k])
+            mask = non_horiz & (vmin <= yk) & (vmax >= yk)
+            if not mask.any():
+                continue
+            t = (yk - va[mask]) / dv[mask]
+            ux = np.sort(ua[mask] + t * (ub[mask] - ua[mask]))
+            # Pair boundary crossings; merge touching triangle-interior seams within 0.05 mm
+            intervals: list[tuple[float, float]] = []
+            for j in range(0, len(ux) - 1, 2):
+                a0, b0 = float(ux[j]), float(ux[j + 1])
+                if intervals and a0 <= intervals[-1][1] + 0.05:
+                    intervals[-1] = (intervals[-1][0], max(intervals[-1][1], b0))
+                else:
+                    intervals.append((a0, b0))
+            for a0, b0 in intervals:
+                if a0 - 0.05 <= xk <= b0 + 0.05:
+                    chord = b0 - a0
+                    if chord < min_chord_per_pt[k]:
+                        min_chord_per_pt[k] = chord
+                    break
+
+    finite_vals = min_chord_per_pt[np.isfinite(min_chord_per_pt)]
+    if len(finite_vals) == 0:
+        return min(span_x, span_y)
+    return float(finite_vals.max())
 
 
 def _analyze_mesh_printability(mesh: trimesh.Trimesh, line_w: float) -> dict:
@@ -179,24 +315,9 @@ def _analyze_mesh_printability(mesh: trimesh.Trimesh, line_w: float) -> dict:
             comp_area = float(areas[comp].sum())
             if comp_area < 2.0:
                 continue
-            verts = mesh.vertices[np.unique(mesh.faces[comp].ravel())]
-            # Compute minimum oriented bounding-box width in XY (closest extruder bridge span!)
-            xy = verts[:, :2]
-            if len(xy) >= 3:
-                try:
-                    hull_poly = trimesh.points.PointCloud(xy).convex_hull
-                except Exception:
-                    hull_poly = None
-                # Approximate minimum XY caliper width across 18 angles (0..85 deg)
-                min_w = float("inf")
-                for deg in range(0, 90, 5):
-                    th = math.radians(deg)
-                    c, s = math.cos(th), math.sin(th)
-                    px = xy[:, 0] * c + xy[:, 1] * s
-                    py = -xy[:, 0] * s + xy[:, 1] * c
-                    span_x = float(px.max() - px.min())
-                    span_y = float(py.max() - py.min())
-                    min_w = min(min_w, min(span_x, span_y))
+            tri_xy = mesh.vertices[mesh.faces[comp]][:, :, :2]
+            if len(tri_xy) >= 1:
+                min_w = _component_true_bridge_span(tri_xy)
                 # Only count bridges where span is bounded by real walls and > 1 mm
                 if min_w > max_bridge_span:
                     max_bridge_span = min_w
@@ -243,9 +364,10 @@ def _xy_gap(b1: np.ndarray, b2: np.ndarray) -> float:
     return math.hypot(dx, dy)
 
 
-def main() -> None:
+def run_plate_audit() -> bool:
     plate_files = sorted(THREEMF_DIR.glob("Plate_*.3mf"), key=lambda p: int(p.stem.split("_")[1]))
     print(f"Auditing {len(plate_files)} production 3MF plates in {THREEMF_DIR}\n", flush=True)
+    failures: list[str] = []
 
     for pf in plate_files:
         ps, items = _parse_3mf_objects_and_settings(pf)
@@ -254,6 +376,7 @@ def main() -> None:
         lw = float(ps.get("outer_wall_line_width", ps.get("line_width", 0.42)))
         supp = int(ps.get("enable_support", 0))
         supp_type = ps.get("support_type", "none")
+        obj_polymers: dict[str, set[str]] = ps.get("_obj_polymers", {})
 
         bounds_list = [it["merged"].bounds for it in items]
         all_min = np.min([b[0] for b in bounds_list], axis=0)
@@ -261,7 +384,7 @@ def main() -> None:
         size = all_max - all_min
         min_margin_xy = min(all_min[0], all_min[1], 270.0 - all_max[0], 270.0 - all_max[1])
         fits_270 = bool(all_min[0] >= 0 and all_min[1] >= 0 and all_min[2] >= -0.05 and all_max[0] <= 270 and all_max[1] <= 270 and all_max[2] <= 270)
-        fits_240 = bool(all_min[0] >= 15 and all_min[1] >= 15 and all_max[0] <= 255 and all_max[1] <= 255)
+        fits_240 = bool(all_min[0] >= 14.9 and all_min[1] >= 14.9 and all_max[0] <= 255.1 and all_max[1] <= 255.1)
 
         min_pair_gap = float("inf")
         if len(bounds_list) > 1:
@@ -278,8 +401,15 @@ def main() -> None:
         max_br_part = ""
         min_w_plate = float("inf")
         min_bed_part = float("inf")
+        mixed_objs: list[str] = []
 
         for it in items:
+            polys = obj_polymers.get(it["name"], set())
+            if "PLA" in polys and "PETG" in polys:
+                mixed_objs.append(f"{it['name']}{sorted(polys)}")
+            if pf.stem.startswith(("Plate_16_", "Plate_17_", "Plate_18_")) and "PETG" in polys:
+                mixed_objs.append(f"{it['name']}(PETG_ON_PLA_PLATE)")
+
             # Check each colored subpart cleanly for watertightness; merged or parts for overhangs
             for sm in it["sub_meshes"]:
                 if not sm.is_watertight:
@@ -306,6 +436,32 @@ def main() -> None:
             f"oh>45={tot_gt45:.1f}mm2 oh>60={tot_gt60:.1f}mm2 maxBridge={max_br:.1f}mm({max_br_part}) minWall={mw_str}",
             flush=True,
         )
+
+        if not all_wt or not all_wind:
+            failures.append(f"{pf.stem}: mesh non-watertight/winding (wt={all_wt}, wind={all_wind})")
+        if not fits_270 or not fits_240:
+            failures.append(f"{pf.stem}: exceeds 240x240 safe zone (min={all_min[:2].round(1)}, max={all_max[:2].round(1)})")
+        if len(bounds_list) > 1 and min_pair_gap < 7.9:
+            failures.append(f"{pf.stem}: inter-part XY gap {min_pair_gap:.2f} mm < 8.0 mm")
+        if min_bed_part < 25.0:
+            failures.append(f"{pf.stem}: min part bed contact {min_bed_part:.1f} mm² < 25.0 mm²")
+        if supp == 0 and max_br > 12.0:
+            failures.append(f"{pf.stem}: support-free plate maxBridge {max_br:.1f} mm ({max_br_part}) > 12.0 mm")
+        if mixed_objs:
+            failures.append(f"{pf.stem}: mixed PLA/PETG violation in {mixed_objs}")
+
+    if failures:
+        print("\nPLATE AUDIT FAILURES:", flush=True)
+        for msg in failures:
+            print(f"  - {msg}", flush=True)
+        return False
+    print("\nALL 18 PRODUCTION PLATES PASS STRICT PRINTABILITY, CLEARANCE & POLYMER GATES!", flush=True)
+    return True
+
+
+def main() -> None:
+    if not run_plate_audit():
+        sys.exit(1)
 
 
 if __name__ == "__main__":

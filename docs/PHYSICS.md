@@ -8,7 +8,7 @@ Three precision measurement systems are molded directly into the 3D-printed trac
 - **6 Timing Gates (`G0`–`G5`) on the Helical Track (`track_seg_14_top_entry` → `track_seg_01`):**
   - **Engraved Outer-Wall Labels (`G0`–`G5`):** Deeply debossed on the outer rail wall at each gate.
   - **`3.6 mm` Top-Rim Sighting V-Notches:** Cut into the top rim of the outer rail so you can visually sight (or film) the exact instant a marble's center crosses each gate.
-  - **`0.35 mm` Acoustic Click Micro-Ribs:** Molded across the bottom of the curved trough at each gate (`G0`–`G5`). As a marble rolls over each gate, it emits a crisp, audible **`"tick!"`** without slowing down—allowing **$\pm 1\text{ ms}$ acoustic timing** using a smartphone microphone!
+  - **`0.50 mm` Acoustic Click Micro-Ribs:** Molded across the bottom of the curved trough at each gate (`G0`–`G5`). As a marble rolls over each gate, it emits a crisp, audible **`"tick!"`** without slowing down—allowing **$\pm 1\text{ ms}$ acoustic timing** using a smartphone microphone!
 - **Continuous `100 mm` (`10 cm`) Helical Arc-Length Scale (`s`):** Engraved tick marks every `100 mm` along the true 3D conical spiral path from `G0` (`s = 0 mm`) to `G5` (`s = 2,868.3 mm`), with bold double-ticks every `500 mm`.
 - **Front Trunk Vertical Elevation Scale (`Δh`):** Horizontal graduation ticks every `25 mm` (`50 mm` medium, `100 mm` major) flanking the front `-Y` gothic viewing windows of [`trunk_base`](../output/trunk_base.stl), [`trunk_mid`](../output/trunk_mid.stl), and [`trunk_top`](../output/trunk_top.stl).
 
@@ -32,7 +32,7 @@ Notice that gates **`G1`, `G2`, `G3`, and `G4`** all lie directly on the **front
 1. **Method 1 — Smartphone Acoustic Stopwatch via [Phyphox](https://phyphox.org/) ($\pm 1\text{ ms}$ Precision, Recommended):**
    - Install the free open-source **[Phyphox](https://phyphox.org/)** physics app (iOS / Android) and open **Acoustic Stopwatch** (or **Audio Scope**).
    - Set your phone beside the tree and release a single marble from rest at **`G0`** (or let the auger discharge it at the top).
-   - As the marble crosses the `0.35 mm` acoustic micro-ribs at **`G0` → `G5`**, it produces sharp audio click spikes. Log the elapsed time $\Delta t$ into the **[Web App Gravity Lab (`newton.martinez.fyi`)](https://newton.martinez.fyi/)**.
+   - As the marble crosses the `0.50 mm` acoustic micro-ribs at **`G0` → `G5`**, it produces sharp audio click spikes. Log the elapsed time $\Delta t$ into the **[Web App Gravity Lab (`newton.martinez.fyi`)](https://newton.martinez.fyi/)**.
 2. **Method 2 — Smartphone Slow-Motion Video (`120 fps` or `240 fps`):**
    - Point your phone camera at the front `-Y` face of the tree in `120 fps` or `240 fps` slow-motion mode (where `G1`, `G2`, `G3`, and `G4` are stacked vertically in a single frame).
    - Count the video frames between the start gate (`f_A`) and finish gate (`f_B`):

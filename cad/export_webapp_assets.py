@@ -219,13 +219,13 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
                 "cutaway_candidate": True,
             }
         )
-    elif "base_bottom_cover" in n:
+    elif "bottom_electronics_lid" in n:
         meta.update(
             {
                 "subsystem": "trunk_base",
-                "label": "Base_Bottom_Cover (Twist-Lock / 4× Captive Magnet Service Lid with Ventilation Louvers)",
+                "label": "Bottom_Electronics_Lid (Flush Ø134.6×2.8 mm Vault Tray + 4× M2.5×6 mm Screws, Clears All Wiring Bays)",
                 "step": 2,
-                "sub_delay": 1.75,
+                "sub_delay": 1.45,
                 "anim_dur": 0.65,
                 "insert_offset": [0.0, 0.0, -65.0],
                 "explode": [0.0, 0.0, -145.0],
@@ -238,12 +238,12 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
         meta.update(
             {
                 "subsystem": "trunk_mid",
-                "label": "Conduit_Cover_Strip (Snap-On Brown Cover Strip for 10×8mm Rear Connector-Pass-Through Conduit)",
+                "label": "Conduit_Cover_Strip (Section-Matched Snap-On Brown Cover for 10.6×8.5mm 150° Connector Conduit)",
                 "step": 9,
                 "sub_delay": 0.30,
                 "anim_dur": 0.65,
-                "insert_offset": [-55.0, 0.0, 0.0],
-                "explode": [-95.0, 0.0, 0.0],
+                "insert_offset": [-47.63, 27.5, 0.0],
+                "explode": [-82.27, 47.5, 0.0],
                 "toolhead": 1,
                 "color": "#4A2F1D",
                 "kinematic_group": "static",
@@ -309,26 +309,6 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
                 "kinematic_group": "auger_driven",
             }
         )
-    elif "track_joint_clip" in n:
-        rad_120 = math.radians(120.0)
-        meta.update(
-            {
-                "subsystem": "track",
-                "label": "Track_Joint_Clip (Snap-On Underside U-Cradle Splice Clamp — Bridges Across Track Seams & Retrofits Older Prints)",
-                "step": 7,
-                "sub_delay": 0.36,
-                "anim_dur": 0.55,
-                "insert_offset": [
-                    round(48.0 * math.cos(rad_120), 2),
-                    round(48.0 * math.sin(rad_120), 2),
-                    -28.0,
-                ],
-                "explode": [125.0 * math.cos(rad_120), 125.0 * math.sin(rad_120), -45.0],
-                "toolhead": 2,
-                "color": "#00A86B",
-                "opacity": 0.95,
-            }
-        )
     elif "track_seg" in n:
         # Extract segment index 1..14
         digits = "".join(ch for ch in n if ch.isdigit())
@@ -338,14 +318,14 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
         meta.update(
             {
                 "subsystem": "track",
-                "label": f"Helical Track Segment {seg_idx:02d} (Clicks into Seg {seg_idx - 1:02d}'s Twin Ø3.8mm Male Snap-Tenons + Sidewall Tongues & Bracket Pegs)",
+                "label": f"Helical Track Segment {seg_idx:02d} (8.0° Stepped Shoulder Half-Laps & Split-Tine Bracket Snap Sockets — Drops Vertically -Z)",
                 "step": 7,
                 "sub_delay": round((seg_idx - 1) * 0.24, 3),
                 "anim_dur": 0.55,
                 "insert_offset": [
-                    round(48.0 * math.cos(rad), 2),
-                    round(48.0 * math.sin(rad), 2),
-                    28.0,
+                    round(28.0 * math.cos(rad), 2),
+                    round(28.0 * math.sin(rad), 2),
+                    36.0,
                 ],
                 "explode": [115.0 * math.cos(rad), 115.0 * math.sin(rad), (seg_idx - 7) * 10.0],
                 "toolhead": 2,
@@ -353,24 +333,24 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
                 "opacity": 0.90,
             }
         )
-    elif "golden_apple_topper" in n:
+    elif "golden_apple_topper" in n or "apple_green_leaf" in n:
         is_collar = "collar" in n
         is_stem = "stem" in n
         is_leaf = "leaf" in n
         if is_collar:
-            tid_top, lbl_top = 1, "Upper Trunk Crown Collar (Wood Brown — Seats onto Trunk Top #3)"
+            tid_top, lbl_top = 1, "Upper Trunk Crown Collar (Wood Brown PLA — Seats onto Trunk Top #3)"
             s_delay = 0.55
             ins_off = [0.0, 0.0, 65.0]
         elif is_stem:
-            tid_top, lbl_top = 1, "Apple Topper Woody Stem (Toolhead 1 Brown — Branches into Sculpted Leaf)"
+            tid_top, lbl_top = 1, "Apple Topper Woody Stem (Toolhead 1 Brown PLA — Sockets into Topper Crown)"
             s_delay = 1.35
             ins_off = [0.0, 0.0, 85.0]
         elif is_leaf:
-            tid_top, lbl_top = 2, "Apple Topper 3D Sculpted Leaf (Toolhead 2 Emerald Green)"
-            s_delay = 1.35
-            ins_off = [0.0, 0.0, 85.0]
+            tid_top, lbl_top = 2, "Apple Topper 3D Sculpted Leaf (Translucent Green PETG on Plate 13 — Snaps into Stem Socket)"
+            s_delay = 1.50
+            ins_off = [14.0, 0.0, 40.0]
         else:
-            tid_top, lbl_top = 4, "Sculpted Heart-Shaped Crimson Apple Topper (#4 — Contoured ~2.2 mm Thin-Walled Hollow Lantern Shell)"
+            tid_top, lbl_top = 4, "Sculpted Heart-Shaped Crimson Apple Topper (#4 PLA — Contoured ~2.2 mm Thin-Walled Hollow Lantern Shell)"
             s_delay = 1.35
             ins_off = [0.0, 0.0, 80.0]
         meta.update(
@@ -392,13 +372,13 @@ def _classify_assembly_part(name: str, default_color: str) -> dict[str, object]:
         parts = n.replace("asm_", "").split("_")
         p_key = f"{parts[0]}_{parts[1]}" if len(parts) >= 2 else "planet"
         planet_angles = {
-            "planet_neptune": (60.0, 0, 8),
-            "planet_uranus": (300.0, 1, 7),
-            "planet_saturn": (540.0, 2, 6),
-            "planet_jupiter": (660.0, 3, 5),
-            "planet_mars": (900.0, 4, 4),
-            "planet_earth": (1140.0, 5, 3),
-            "planet_venus": (1380.0, 6, 2),
+            "planet_neptune": (-15.0, 0, 8),
+            "planet_uranus": (240.0, 1, 7),
+            "planet_saturn": (480.0, 2, 6),
+            "planet_jupiter": (600.0, 3, 5),
+            "planet_mars": (840.0, 4, 4),
+            "planet_earth": (1080.0, 5, 3),
+            "planet_venus": (1320.0, 6, 2),
             "planet_mercury": (1590.0, 7, 1),
         }
         deg, p_order, p_num = planet_angles.get(p_key, (900.0, 4, 4))
@@ -526,76 +506,36 @@ def export_webapp_bundle() -> None:
     assembled_entries.append(
         {
             "name": "asm_Motor_Clutch_Driver",
-            "label": "Motor_Clutch_Driver (Direct Mechanical Hex Motor Coupler — Presses onto N20 D-Shaft)",
+            "label": "Motor_Clutch_Driver (D-Shaft Clamp Coupler w/ 1× M2.5×6 mm Pinch Screw + Hex Drive)",
             "subsystem": "clutch",
             "step": 3,
             "sub_delay": 0.0,
             "anim_dur": 0.85,
             "insert_offset": [0.0, 0.0, 68.0],
             "explode": [0.0, -110.0, -60.0],
-            "toolhead": 3,
-            "color": "#D4AF37",
+            "toolhead": 1,
+            "color": "#4A2F1D",
             "kinematic_group": "motor_driver",
             "pivot": [0.0, 0.0, 31.20],
             **_pack_mesh(v_mcd_asm, t_mcd),
         }
     )
 
-    # 2b. Battery_Cover & Servo_Or_030_Adapter at base of trunk_base
-    v_bc, t_bc = _read_binary_stl(OUTPUT_DIR / "Battery_Cover.stl")
-    v_bc_asm = _transform_verts(v_bc, translate=(0.0, -33.0, -2.5), center_xy=True, drop_z0=True)
-    assembled_entries.append(
-        {
-            "name": "asm_Battery_Cover",
-            "label": "Battery_Cover (Bottom M5Stack ESPHome Bay Cover + Ø5.0 mm Button/LED Port + 2× M2.5 Screws)",
-            "subsystem": "trunk_base",
-            "step": 2,
-            "sub_delay": 1.45,
-            "anim_dur": 0.65,
-            "insert_offset": [0.0, -15.0, -55.0],
-            "explode": [0.0, -85.0, -135.0],
-            "toolhead": 1,
-            "color": "#4A2F1D",
-            "kinematic_group": "static",
-            **_pack_mesh(v_bc_asm, t_bc),
-        }
-    )
-
-    v_adp, t_adp = _read_binary_stl(OUTPUT_DIR / "Servo_Or_030_Adapter.stl")
-    v_adp_asm = _transform_verts(v_adp, translate=(0.0, 0.0, 0.2), center_xy=True, drop_z0=True)
-    assembled_entries.append(
-        {
-            "name": "asm_Servo_Or_030_Adapter",
-            "label": "Servo_Or_030_Adapter (N20 Gear Motor Mounting Sleeve)",
-            "subsystem": "trunk_base",
-            "step": 1,
-            "sub_delay": 0.70,
-            "anim_dur": 0.70,
-            "insert_offset": [0.0, 0.0, -60.0],
-            "explode": [0.0, 0.0, -125.0],
-            "toolhead": 1,
-            "color": "#4A2F1D",
-            "kinematic_group": "static",
-            **_pack_mesh(v_adp_asm, t_adp),
-        }
-    )
-
-    # 2c. All 24 Exact-Radius Cantilever Brackets (bracket_01..24, placed every 60° from 60° to 1440° around the trunk)
-    for k_idx in range(24):
+    # 2b. All 26 Exact-Radius Cantilever Brackets (bracket_01..26, placed every 60° from 60° to 1560° around the trunk)
+    for k_idx in range(26):
         b_num = k_idx + 1
-        b_deg = b_num * 60.0  # 60° .. 1440°
-        if k_idx < 6:
-            t_num, t_lbl = 4, "Tier 4 Bottom"
-        elif k_idx < 12:
-            t_num, t_lbl = 3, "Tier 3 Lower-Mid"
-        elif k_idx < 18:
-            t_num, t_lbl = 2, "Tier 2 Upper-Mid"
-        else:
-            t_num, t_lbl = 1, "Tier 1 Top"
+        b_deg = b_num * 60.0  # 60° .. 1560°
+        t_num = max(1, 4 - (k_idx // 6))
+        t_lbl = {
+            4: "Tier 4 Bottom",
+            3: "Tier 3 Lower-Mid",
+            2: "Tier 2 Upper-Mid",
+            1: "Tier 1 Top",
+        }[t_num]
 
         vb_station, tb_base = _read_binary_stl(OUTPUT_DIR / f"bracket_{b_num:02d}.stl")
         rad_b = math.radians(b_deg)
-        z_slot = (62.5 + 79.0 * (b_deg / 360.0)) - 30.0
+        z_slot = (62.5 + 79.0 * (b_deg / 360.0)) - 33.5
         vb_asm = _transform_verts(
             vb_station,
             translate=(34.0 * math.cos(rad_b), 34.0 * math.sin(rad_b), z_slot),
@@ -624,24 +564,24 @@ def export_webapp_bundle() -> None:
 
     # 3. Export all 18 Snapmaker U1 Build Plates (15 Single-Color + 3 Dedicated 4-Color Plates) for the 3D Plate & Layer Inspector
     plate_files = [
-        ("Plate_1_SingleColor_Brown_Trunk_Base", "Plate 1 (Single-Color T1 Brown) — Trunk Base #1 & Bottom Service Cover"),
-        ("Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers", "Plate 2 (Single-Color T1 Brown) — Trunk Mid #2, Trunk Top #3, Battery Cover, 3× Conduit Covers & Motor Adapter"),
-        ("Plate_3_SingleColor_Brown_Brackets_01_To_12", "Plate 3 (Single-Color T1 Brown) — 12× Exact-Radius Station Brackets (#1 to #12)"),
-        ("Plate_4_SingleColor_Brown_Brackets_13_To_24", "Plate 4 (Single-Color T1 Brown) — 12× Exact-Radius Station Brackets (#13 to #24)"),
-        ("Plate_5_SingleColor_Green_Track_01", "Plate 5 (Single-Color T2 Green) — Dedicated Full-Scale Track Segment 01 (Return Ramp, 230.8×230.1 mm)"),
-        ("Plate_6_SingleColor_Green_Track_02", "Plate 6 (Single-Color T2 Green) — Dedicated Full-Scale Track Segment 02"),
-        ("Plate_7_SingleColor_Green_Track_03", "Plate 7 (Single-Color T2 Green) — Dedicated Full-Scale Track Segment 03"),
-        ("Plate_8_SingleColor_Green_Track_04", "Plate 8 (Single-Color T2 Green) — Dedicated Full-Scale Track Segment 04"),
-        ("Plate_9_SingleColor_Green_Track_05_And_13", "Plate 9 (Single-Color T2 Green) — Full-Scale Track Segments 05 & 13 (Side-by-Side)"),
-        ("Plate_10_SingleColor_Green_Track_06_And_12", "Plate 10 (Single-Color T2 Green) — Full-Scale Track Segments 06 & 12 (Side-by-Side)"),
-        ("Plate_11_SingleColor_Green_Track_07_And_11", "Plate 11 (Single-Color T2 Green) — Full-Scale Track Segments 07 & 11 (Side-by-Side)"),
-        ("Plate_12_SingleColor_Green_Track_08_And_10", "Plate 12 (Single-Color T2 Green) — Full-Scale Track Segments 08 & 10 (Side-by-Side)"),
-        ("Plate_13_SingleColor_Green_Track_09_And_14", "Plate 13 (Single-Color T2 Green) — Full-Scale Track Segments 09 & 14 (Top Entry, Side-by-Side)"),
-        ("Plate_14_SingleColor_Gold_Auger_And_Drive", "Plate 14 (Single-Color T3 Gold) — Archimedes Auger Halves & Hex Coupler"),
-        ("Plate_15_SingleColor_Red_Apple_Marbles", "Plate 15 (Single-Color T4 Red) — 12× Glowing Apple Hemispheres A/B (6× Complete Marbles)"),
-        ("Plate_16_MultiColor_Topper_And_Wand", "Plate 16 (4-Color Tree Palette) — Unified Apple Topper (with Stem & Leaf) & Magic LED Wand"),
-        ("Plate_17_MultiColor_Planets_Warm_And_Gas_Giants", "Plate 17 (4-Color Warm Palette: Umber/Alabaster/Gold/Crimson) — Mercury, Venus, Mars, Jupiter & Saturn"),
-        ("Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants", "Plate 18 (4-Color Ocean/Ice Palette: Cobalt/Emerald/Ice White/Gold) — Earth, Uranus & Neptune"),
+        ("Plate_1_SingleColor_Brown_Trunk_Base", "Plate 1 (Single-Color T1 Brown PLA) — Trunk Base #1"),
+        ("Plate_2_SingleColor_Brown_Trunk_Upper_And_Covers", "Plate 2 (Single-Color T1 Brown PLA) — Trunk Mid #2, Top #3, Bottom Electronics Lid, 3× Conduit Covers & Motor Clamp Coupler"),
+        ("Plate_3_SingleColor_Brown_Brackets_01_To_12", "Plate 3 (Single-Color T1 Brown PLA) — 12× Exact-Radius Station Brackets (#1 to #12)"),
+        ("Plate_4_SingleColor_Brown_Brackets_13_To_26", "Plate 4 (Single-Color T1 Brown PLA) — 14× Exact-Radius Station Brackets (#13 to #26)"),
+        ("Plate_5_SingleColor_Green_Track_01", "Plate 5 (Single-Color T2 PETG) — Track Segment 01 (Bottom Return Ramp & Root-Flare Relief)"),
+        ("Plate_6_SingleColor_Green_Track_02", "Plate 6 (Single-Color T2 PETG) — Track Segment 02"),
+        ("Plate_7_SingleColor_Green_Track_03", "Plate 7 (Single-Color T2 PETG) — Track Segment 03"),
+        ("Plate_8_SingleColor_Green_Track_04", "Plate 8 (Single-Color T2 PETG) — Track Segment 04"),
+        ("Plate_9_SingleColor_Green_Track_05_And_13", "Plate 9 (Single-Color T2 PETG) — Track Segments 05 & 13"),
+        ("Plate_10_SingleColor_Green_Track_06_And_12", "Plate 10 (Single-Color T2 PETG) — Track Segments 06 & 12"),
+        ("Plate_11_SingleColor_Green_Track_07_And_11", "Plate 11 (Single-Color T2 PETG) — Track Segments 07 & 11"),
+        ("Plate_12_SingleColor_Green_Track_08_And_10", "Plate 12 (Single-Color T2 PETG) — Track Segments 08 & 10"),
+        ("Plate_13_SingleColor_Green_Track_09_And_14", "Plate 13 (Single-Color T2 PETG) — Track Segments 09, 14 (Top Entry) & Apple Green Leaf"),
+        ("Plate_14_SingleColor_Gold_Auger_And_Drive", "Plate 14 (Single-Color T3 Silk Gold PLA) — Archimedes Auger Lower #1 & Upper #2"),
+        ("Plate_15_SingleColor_Red_Apple_Marbles", "Plate 15 (Single-Color T4 Red PLA) — 12× Glowing Apple Hemispheres A/B (6× Marbles)"),
+        ("Plate_16_MultiColor_Topper_And_Wand", "Plate 16 (3-Color PLA Tree Palette) — Apple Topper Shell + Stem/Collar & Magic LED Wand"),
+        ("Plate_17_MultiColor_Planets_Warm_And_Gas_Giants", "Plate 17 (4-Color Warm PLA Palette) — Mercury, Venus, Mars, Jupiter & Saturn"),
+        ("Plate_18_MultiColor_Planets_Ocean_And_Ice_Giants", "Plate 18 (3-Color Ocean/Ice PLA Palette) — Earth, Uranus & Neptune"),
     ]
     plates_manifest: list[dict[str, object]] = []
     for p_key, p_title in plate_files:
@@ -670,40 +610,40 @@ def export_webapp_bundle() -> None:
         {
             "step": 1,
             "title": "Step 1 — Place Trunk Base (#1), Mount Rear 12V DC Barrel Jack (J1) & Insert N20 Motor Into Shroud Tower",
-            "subtitle": "1a) Mount 5.5×2.1mm DC Barrel Jack (J1) in rear -X Ø11.40mm port → 1b) Slide 12V 150RPM N20 Motor (Option B) or 6V LA002 (Option A) up into Ø28.0 mm Shroud Tower",
+            "subtitle": "1a) Mount 5.5×2.1mm DC Barrel Jack (J1) in rear -X Ø11.40mm port → 1b) Slide 12V 150RPM N20 Motor straight up into 12.8×10.8×26.2 mm Shroud Pocket",
             "camera_target": [0, 0, 42],
             "camera_pos": [195, -205, 110],
             "hardware": [
-                "1a. Place Bark-Textured Trunk_Base (#1, Ø185mm diagonal root footprint, Ø135×50mm Hollow Root Vault) flat on build surface and thread the 5.5×2.1mm DC Barrel Jack (J1, DC-099) into the rear -X Ø11.40 mm port (Z = 10.0 mm)",
-                "1b. Slide the 12V 150rpm N20 Gear Motor (Option B primary drop-in, or 6V LA002 for Option A) + Servo_Or_030_Adapter up into the central Ø28.0 mm Isolated Motor Shroud Tower (D-shaft pointing up through Z=27.2 mm roof bore)",
+                "1a. Place Bark-Textured Trunk_Base (#1, Ø185mm diagonal root footprint, Ø135×50mm Hollow Root Vault) flat on build surface and thread the 5.5×2.1mm DC Barrel Jack (J1, DC-099) through the 6.8 mm stepped rear -X Ø11.40 mm port (Z = 11.5 mm)",
+                "1b. Slide the 12V 150rpm N20 Gear Motor directly up into the central Ø28.0 mm Isolated Motor Shroud Tower's direct-fit 12.8×10.8×26.2 mm rectangular pocket (D-shaft pointing up through Z=27.2 mm roof bore — zero printed sleeve adapter needed!)",
                 "1c. Route the 2-wire motor lead out the bottom -Y shroud wire exit notch (6.5×7.6 mm) so loose cables in the vault can never rub against the spinning clutch or auger",
             ],
-            "clearance_note": "The central Ø28.0 mm Isolated Motor & Clutch Shroud Tower physically walls off the spinning N20 motor and coupler from the >150 cm³ open Cable Slack Dump Zone.",
+            "clearance_note": "The central Ø28.0 mm Isolated Motor & Clutch Shroud Tower holds the N20 gearbox directly (anti-rotation rectangular walls) and isolates the spinning D-shaft from the >150 cm³ Cable Slack Dump Zone.",
         },
         {
             "step": 2,
-            "title": "Step 2 — Install 12V→5V Buck Converter, WAGO 221 Lever Nuts & M5Stack (A092 + C008) in Root Vault",
-            "subtitle": "2a) Seat A092+C008 & 12V→5V 5A Buck in vault cradles → 2b) Wire WAGO-1..4 with inline fuses (cap Grove Red +5V!) → 2c) Close Battery_Cover & Base_Bottom_Cover",
+            "title": "Step 2 — Install 12V→5V Buck Converter, WAGO 221 Lever Nuts, M5Stack (A092+C008) & Bottom_Electronics_Lid",
+            "subtitle": "2a) Seat A092+C008 & 12V→5V 5A Buck in vault cradles → 2b) Wire WAGO-1..4 (cap Grove Red +5V!) → 2c) Secure Bottom_Electronics_Lid w/ 4× M2.5×6 mm screws",
             "camera_target": [0, -20, 22],
             "camera_pos": [175, -195, 78],
             "hardware": [
-                "2a. Seat M5Stack ATOM Lite (C008) + Atomic H-Driver Base (A092) into the -Y cradle (powered from WAGO-1 +12V_BUS via 2A fuse F1 into VIN/GND; A092's internal buck powers C008 with zero USB cable needed) and seat the 12V→5.0V 5A screw-terminal Buck Converter into the +X cradle (fed via 3A fuse F2)",
-                "2b. Clamp the 12V 150RPM N20 Motor leads into A092 M1/M2 (or wire Option A 12V→6V buck + H-bridge for 6V LA002), plug the A096 Grove2Dupont cable into C008 (leave A096 Red +5V wire CAPPED in an empty WAGO port to prevent 5V backfeeding!), and connect the 5V Buck output (+ 1000µF cap) to WAGO-3 (+5V_LED) & WAGO-4 (GND_LED)",
-                "2c. Secure the primary Battery_Cover with 2× M2.5 × 6 mm screws (omit Base_Bottom_Cover — audit shows it overlaps Battery_Cover by 438.8 mm³ and its 4× CA001 magnet tabs are unused)",
+                "2a. Seat M5Stack ATOM Lite (C008) + Atomic H-Driver Base (A092) into the -Y cradle (powered from WAGO-1 +12V_BUS via 2A fuse F1 into VIN/GND) and seat the 12V→5.0V 5A Buck Converter into the 64.2×28.2 mm bay (fed via 3A fuse F2)",
+                "2b. Clamp the 12V 150RPM N20 Motor leads into A092 M1/M2, plug the A096 Grove2Dupont cable into C008 (leave A096 Red +5V wire CAPPED in an empty WAGO port to prevent 5V backfeeding!), and connect the 5V Buck output (+ 1000µF cap) to WAGO-3 (+5V_LED) & WAGO-4 (GND_LED)",
+                "2c. Seat the flush upright Bottom_Electronics_Lid (Ø134.6×2.8 mm) into the bottom vault rabbet and fasten with 4× M2.5 × 6 mm BHCS screws (100% flush with Z=0 root pads)",
             ],
-            "clearance_note": "With >150 cm³ of unobstructed perimeter volume inside the Ø135×50 mm Hollow Root Vault and >= 18 mm finger gap around every cradle, WAGO 221 lever nuts and inline fuse holders fit cleanly with zero soldering.",
+            "clearance_note": "With >150 cm³ of unobstructed perimeter volume inside the Ø135×50 mm Hollow Root Vault and the single flush Bottom_Electronics_Lid, all WAGO 221 blocks and bays fit cleanly with zero soldering.",
         },
         {
             "step": 3,
-            "title": "Step 3 — Press Gold Hex Coupler (Motor_Clutch_Driver) Onto N20 Motor D-Shaft",
-            "subtitle": "Lower Motor_Clutch_Driver straight down through the Trunk_Base bore onto the N20 motor's D-shaft at Z = 26.2 mm",
+            "title": "Step 3 — Clamp Motor_Clutch_Driver Onto N20 Motor D-Shaft (1× M2.5×6 mm Pinch Screw)",
+            "subtitle": "Lower Motor_Clutch_Driver (Brown PLA) onto the N20 D-shaft at Z = 26.2 mm and tighten 1× M2.5×6 mm side pinch screw",
             "camera_target": [0, 0, 36],
             "camera_pos": [155, -160, 95],
             "hardware": [
-                "3a. Align the flat inside Motor_Clutch_Driver's bottom D-bore with the flat on the LA002 N20 motor shaft",
-                "3b. Press down firmly until seated at Z = 26.2 mm with its 4.85 mm AF male hex peg pointing straight up",
+                "3a. Align the flat inside Motor_Clutch_Driver's split clamp D-bore with the flat on the LA002 N20 motor shaft",
+                "3b. Press down until seated at Z = 26.2 mm and tighten 1× M2.5 × 6 mm BHCS radial pinch screw into the split clamp ear for zero-slip positive lock",
             ],
-            "clearance_note": "Direct positive hex drive eliminates magnet slippage while allowing the auger to lift straight out from above.",
+            "clearance_note": "The M2.5 pinch-screw clamp eliminates D-shaft slippage while keeping its hex peg ready for top-down auger insertion.",
         },
         {
             "step": 4,
@@ -731,67 +671,67 @@ def export_webapp_bundle() -> None:
         },
         {
             "step": 6,
-            "title": "Step 6 — Drop In All 24 Keyhole Cantilever Brackets (#1 at 60° → #24 at 1440°)",
-            "subtitle": "CRITICAL: Pre-thread the 1m JST-SM topper cable through the rear -X conduit BEFORE inserting 180° brackets (#3, #9, #15, #21)! Push each bracket radially into its keyhole entry window, then slide down 16.0 mm into the dovetail wedge",
-            "camera_target": [0, 0, 215],
-            "camera_pos": [310, -295, 250],
+            "title": "Step 6 — Drop In All 26 Keyhole Cantilever Brackets (#1 at 60° → #26 at 1560°)",
+            "subtitle": "Push each bracket tenon radially inward into its keyhole entry window (+16.0 mm Z), then slide straight down -Z into the 45° dovetail wedge",
+            "camera_target": [0, 0, 225],
+            "camera_pos": [310, -295, 260],
             "hardware": [
-                "6a. FIRST thread the 1m 3-pin JST-SM topper extension cable up through the 10×8 mm rear (-X) trunk conduit so it exits at Z=450 mm BEFORE fitting the 180° brackets (#3, #9, #15, #21) whose tenons overlap the conduit groove",
-                "6b. Lower (#1–#6, engraved '1'..'6'), Middle (#7–#18, '7'..'18', incl. seams at Z=150 & Z=300 mm), & Upper (#19–#24, '19'..'24'): push tenon radially inward into the upper keyhole entry window (0.000 mm³ collision), then drop vertically -16.0 mm into the 45° dovetail over the ±Y neck detent bumps",
-                "6c. Retrofit for already-printed Pre-Fix trunk_base: use Trunk_Keyhole_Cutting_Jig.stl with a flush-cut saw to open slots #1–#7 entry roofs downward into drop-in keyhole windows",
+                "6a. Push tenon radially inward into the upper keyhole entry window (0.000 mm³ collision), then drop vertically -16.0 mm into the 45° dovetail over the ±Y neck detent bumps",
+                "6b. Install brackets #1–#26 in order (60°..1560°): #25 (1500°) and #26 (1560°) support the upper Seg 13/14 feeder curve",
+                "6c. With the conduit relocated to 150° (midway between 120° and 180° brackets), all 26 brackets clear the wiring channel completely!",
             ],
-            "clearance_note": "Every socket now has an upper drop-in keyhole window (16.2×4.85×18.6 mm, 45° support-free gable roof) giving a verified 0.0000 mm³ rigid L-path for all 24 brackets while stacked.",
+            "clearance_note": "All 26 sockets have upper drop-in keyhole windows (16.2×4.85×18.6 mm, 45° gable roof) giving a verified 0.0000 mm³ L-path while stacked.",
         },
         {
             "step": 7,
-            "title": "Step 7 — Snap Together Helical Track Segments 01 → 14 (Built-In Male/Female Tenons + Seam Brackets)",
-            "subtitle": "Slide each segment's downhill Female Sockets onto the previous segment's Twin Ø3.8mm Male Snap-Lock Tenon Pegs + Sidewall Tongues and click onto the 24 Bracket Pegs",
+            "title": "Step 7 — Drop Helical Track Segments 01 → 14 (-Z Onto Stepped Half-Laps & Split-Tine Bracket Pegs)",
+            "subtitle": "Drop Seg 01 into Trunk_Base & brackets #1/#2, then drop Seg 02 → 14 vertically -Z onto each downhill 8.0° stepped shoulder half-lap & split-tine bracket pegs!",
             "camera_target": [0, 0, 220],
             "camera_pos": [370, -350, 275],
             "hardware": [
-                "7a. Dock track_seg_01's bottom return ramp into Trunk_Base's -Y intake port (Z = 50 mm) and click its underside sockets onto the Tier #4 bracket pegs at 60° and 120°",
-                "7b. Snap track_seg_02 → track_seg_13 together in ascending order: each segment's uphill end has Twin Ø3.80×5.0 mm Under-Shoulder Male Snap-Lock Tenon Pegs (u = ±14.2 mm, v = -4.2 mm, with Ø4.08 mm detent rings) + Inner/Outer Sidewall Anti-Torsion Tongues that click directly into the next segment's Ø4.30×5.6 mm Female Sockets, while the even-60° cantilever brackets lock into the underside seam sockets!",
-                "7c. Dock track_seg_14_top_entry into Trunk_Top's -Y discharge chute (Z = 431.4 mm) and snap its downhill socket onto track_seg_13's male tenon pegs at 1560°.",
+                "7a. Lower track_seg_01 (-Z) into Trunk_Base's -Y intake port (Z = 48.5 mm) and press onto the Tier #4 bracket pegs at 60° and 120°",
+                "7b. Lower track_seg_02 → track_seg_13 vertically (-Z) in ascending order: each downhill 8.0° stepped shoulder half-lap drops flush onto the previous uphill shoulder directly above its 60° cantilever bracket while both underside sockets snap-lock onto the bracket's split-tine pegs!",
+                "7c. Lower track_seg_14_top_entry vertically onto Seg 13 at 1560°, Bracket #26 (1560°), and Trunk_Top's -Y discharge chute (Z = 431.8 mm).",
             ],
-            "clearance_note": "Every track seam locks in 3D via Twin Ø3.8mm Under-Shoulder Snap-Tenons + Sidewall Anti-Torsion Tongues (0.000 mm³ collision, 84.1 mm³ shear lock) and Even-60° Underside Seam Bracket Sockets!",
+            "clearance_note": "Single vertical -Z assembly eliminates the old orthogonal deadlock: the marble rides a continuous zero-snag top groove while the stepped half-lap overlaps directly onto the bracket saddle below.",
         },
         {
             "step": 8,
             "title": "Step 8 — Snap In BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Wire (B0CCS11V7H) & Connect to Grove GPIO26 + WAGO-3/4",
-            "subtitle": "8a) Seat B0CCS11V7H starter pocket under track_seg_01 → 8b) Snap 50-LED Pebble wire into 4.6mm dovetail throat up Seg 01→14 → 8c) Connect Data to GPIO26 & Power to 5V Buck (WAGO-3/4)",
+            "subtitle": "8a) Seat B0CCS11V7H starter pocket under track_seg_01 → 8b) Snap 50-LED Pebble wire into 8.4×6.2 mm dovetail chamber → 8c) Connect Data to GPIO26 & Power to WAGO-3/4",
             "camera_target": [0, -15, 195],
             "camera_pos": [340, -340, 210],
             "hardware": [
                 "8a. Seat the starter end of the BTF-LIGHTING DC5V WS2812B Pebble/Seed Pixel Flexible Wire (B0CCS11V7H) into the 10.0×16.0 mm starter pocket underneath track_seg_01 (theta = -70°)",
-                "8b. Press the 360°-flexible 3-wire cord and 6.2×3.2 mm oval Pebble LEDs through the 4.6 mm snap-in throat into the 8.0×3.6 mm internal dovetail chamber all the way up to Segment 14 (zero glue or tape needed!)",
-                "8c. Route the pre-terminated 3-pin JST-SM input plug (and power-injection pigtails) through Trunk_Base's cob_wire_conduit into the Hollow Root Vault: connect White Data to Grove GPIO26 and clamp Red (+5V) / Black (GND) into WAGO-3 (+5V_LED) & WAGO-4 (GND_LED) fed by the dedicated 12V→5V 5A buck converter",
+                "8b. Press the 360°-flexible 3-wire cord and 6.2×3.2 mm oval Pebble LEDs edge-on through the 4.6 mm snap-in throat into the deep 8.4×6.2 mm (3.6 mm flat bay) internal dovetail chamber up to Segment 14 — completely flush above bracket saddles!",
+                "8c. Route the pre-terminated 3-pin JST-SM input plug through Trunk_Base's cob_wire_conduit into the Hollow Root Vault: White Data to Grove GPIO26 and Red (+5V) / Black (GND) into WAGO-3 (+5V_LED) & WAGO-4 (GND_LED)",
             ],
-            "clearance_note": "The track's 8.0×3.6 mm underside dovetail chamber has a 4.6 mm snap-in throat (with 45° self-supporting retention lips) that mechanically locks both the 6.2 mm oval Pebble LEDs and 3-wire cord in place with zero glue or tape.",
+            "clearance_note": "The deepened 8.4×6.2 mm dovetail channel (3.6 mm full-width bay above the 4.6 mm throat) recesses all 6.2×3.2 mm LED pills cleanly above bracket saddles.",
         },
         {
             "step": 9,
-            "title": "Step 9 — Thread Topper Cable Through 10×8mm Conduit, Snap On Conduit_Cover_Strip & Seat Apple Topper (#4)",
-            "subtitle": "9a) Thread pre-terminated JST-SM plug straight through 10×8mm rear (-X) conduit to GPIO32 & WAGO-3/4 → 9b) Seat Sparkleiot 16-Bit Ring → 9c) Place Apple Topper (#4)",
+            "title": "Step 9 — Route Topper Cable Through 150° Conduit, Snap Covers, Seat Topper & Snap Green PETG Leaf",
+            "subtitle": "9a) Drop JST-SM plug through 150° conduit & snap 3 full-length covers → 9b) Seat Sparkleiot Ring → 9c) Place Apple Topper (#4) + snap Green PETG Leaf (Plate 13)",
             "camera_target": [0, 0, 465],
             "camera_pos": [225, -225, 525],
             "hardware": [
-                "9a. Connect the already-threaded 1m 3-Pin JST-SM Extension Cable (B0CT827QQC, threaded before Step 6 180° brackets) to Grove Yellow GPIO32 and WAGO-3/4, then trim Conduit_Cover_Strip strips to <=35 mm spans between the 180° brackets before pressing flush",
-                "9b. Seat the Ø45.0 mm Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD) flat into the Ø46.2×2.5 mm recessed ring seat on the top rim of Trunk_Top (#3 at Z = 447.5 mm)",
-                "9c. Lower the Sculpted Heart-Shaped Crimson Apple Topper (#4, with Woody Stem & Emerald Leaf) onto Trunk_Top's upward Ø59.40×4.0 mm Crown Centering Tenon Collar (which telescopes inside the topper's Ø60.00 mm base socket with 0.30 mm radial clearance so the topper locks concentrically onto the trunk!)",
+                "9a. Route the 1m 3-Pin JST-SM Extension Cable (B0CT827QQC) straight through the unobstructed 10.6×8.5 mm 150° conduit to GPIO32 & WAGO-3/4, then snap Conduit_Cover_Strip_Base (100 mm), Mid (144 mm), and Top (144 mm) flush",
+                "9b. Seat the Ø45.0 mm Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD) flat into the Ø46.2×2.5 mm recessed ring seat on Trunk_Top at Z = 447.5 mm",
+                "9c. Lower the 3-color PLA Apple Topper (#4 + Brown Stem) onto Trunk_Top's Ø59.40×4.0 mm Crown Centering Collar, then press the standalone Translucent Emerald Green PETG apple_green_leaf (Plate 13) into the upper stem socket!",
             ],
-            "clearance_note": "The upgraded 10.0 mm wide × 8.0 mm deep rear (-X) conduit lets pre-terminated JST-SM, PH2.0, SH1.0, and Dupont plugs pass straight through without cutting or de-pinning wires!",
+            "clearance_note": "Keeping apple_green_leaf as a dedicated snap-in PETG print (Plate 13) gives every multi-color Plate 16–18 print pure 100% single-polymer PLA adhesion with zero PETG/PLA contamination!",
         },
         {
             "step": 10,
             "title": "Step 10 — Insert 8 Magnetic Switch LEDs Into Upgraded 4-Color Planets #8 → #1 & Snap-Click Onto Balconies",
-            "subtitle": "For each larger 4-color sculpted planet (#8 Neptune at bottom to #1 Mercury at top): insert its wireless Magnetic Switch LED and snap-click onto Balcony Peg #8 → #1",
+            "subtitle": "For each 4-color PLA planet (#8 Neptune at -15° to #1 Mercury at 1590°): press wireless KA006 LED into 4× crush ribs & snap onto Balcony Peg #8 → #1",
             "camera_target": [0, 0, 235],
             "camera_pos": [395, -380, 290],
             "hardware": [
-                "10a. Press 1× wireless Bambu Single LED Magnetic Control Switch Light (Ø7.5×6.0 mm) through the 45° self-centering entry funnel into the upper Ø8.0×6.0 mm LED chamber of each Planet (#8 Neptune → #1 Mercury)",
-                "10b. Match the hidden number inside each planet's bottom bore (8..1) with the number engraved on top of each Track Balcony Peg (8..1) and press down until the internal Ø8.44 mm detent groove clicks onto the peg's Ø8.12 mm snap bead",
+                "10a. Press 1× wireless Bambu Single LED Magnetic Control Switch Light (Ø7.5×6.0 mm) past the 4× internal 0.85 mm crush ribs inside each Planet (#8 Neptune → #1 Mercury)",
+                "10b. Match the hidden number inside each planet's bottom bore (8..1) with the number on each Track Balcony Peg (8..1) and press down until the internal Ø8.46 mm groove clicks onto the peg's Ø8.36 mm snap bead",
             ],
-            "clearance_note": "Each upgraded 4-color planet is 40–55% larger in diameter with an integrated Ø13.6 mm Orbital Pedestal Foot Collar that raises the globe and rings above the track wall and rolling marbles (0.000 mm³ collision!).",
+            "clearance_note": "Planets print 100% single-polymer PLA (Plates 17 & 18) with 4× internal crush ribs clamping the KA006 LEDs and 0.18 mm radial snap interference on the balcony pegs.",
         },
         {
             "step": 11,
@@ -842,15 +782,15 @@ def export_webapp_bundle() -> None:
             "helix_total_deg": 1620.0,
             "helix_z_start": 62.5,
             "helix_z_end": 418.0,
-            "return_chute_end_deg": -62.0,
-            "return_chute_end_r": 25.0,
-            "top_feeder_start_deg": 1700.0,
-            "top_feeder_start_r": 35.0,
-            "top_feeder_rise_z": 17.55,
-            "auger_pitch": 48.0,
-            "auger_ball_orbit_r": 25.0,
-            "auger_z_start": 47.0,
-            "auger_z_end": 435.5,
+            "return_chute_end_deg": -90.0,
+            "return_chute_end_r": 42.0,
+            "top_feeder_start_deg": 1710.0,
+            "top_feeder_start_r": 47.0,
+            "top_feeder_rise_z": 7.0,
+            "auger_pitch": 46.0,
+            "auger_ball_orbit_r": 17.5,
+            "auger_z_start": 37.22,
+            "auger_z_end": 433.32,
         },
         "assembled_meshes": assembled_entries,
         "assembly_steps": assembly_steps,

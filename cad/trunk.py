@@ -23,18 +23,17 @@ from common_params import (
     AA050_M25_TAP_DEPTH,
     AA050_M25_TAP_DIA,
     AA050_M25_THROUGH_DIA,
-    ATOM_LITE_CRADLE_X,
-    ATOM_LITE_CRADLE_Y,
-    ATOM_LITE_CRADLE_Z,
     AUGER_BALL_ORBIT_R,
     AUGER_BORE_DIA,
     AUGER_FLUTE_R,
-    BALL_DIAMETER,
-    BASE_BOTTOM_COVER_THICK,
-    BATTERY_14500_BAY_X,
-    BATTERY_14500_BAY_Y,
-    BATTERY_14500_BAY_Z,
-    CONDUIT_COVER_STRIP_H,
+    BOTTOM_TRAY_OUTER_DIA,
+    BOTTOM_TRAY_RABBET_DIA,
+    BOTTOM_TRAY_TAB_COORDS,
+    BOTTOM_TRAY_THICK,
+    BRACKET_STATION_COUNT,
+    CONDUIT_STRIP_LEN_BASE,
+    CONDUIT_STRIP_LEN_MID,
+    CONDUIT_STRIP_LEN_TOP,
     DC_BARREL_JACK_BORE_DIA,
     DC_BARREL_JACK_Z_CENTER,
     DOVETAIL_ANGULAR_STEP_DEG,
@@ -46,53 +45,60 @@ from common_params import (
     DOVETAIL_NECK_W_TOP,
     DOVETAIL_RADIAL_DEPTH,
     DOVETAIL_SLOT_H,
+    DOVETAIL_SLOT_Z_OFFSET,
     DOVETAIL_TAPER_W,
-    DUAL_MOSFET_BAY_X,
-    DUAL_MOSFET_BAY_Y,
-    DUAL_MOSFET_BAY_Z,
     FIT_TOLERANCE,
-    HELIX_TOTAL_DEG,
-    IA005_PDB_BAY_X,
-    IA005_PDB_BAY_Y,
-    IA005_PDB_BAY_Z,
+    HELIX_Z_END,
     LA002_N20_POCKET_X,
     LA002_N20_POCKET_Y,
     LA002_N20_POCKET_Z,
-    MAGNET_DEPTH,
-    MAGNET_DIA,
     MOTOR_SHROUD_OD,
-    PG002_SERVO_BAY_X,
-    PG002_SERVO_BAY_Y,
-    PG002_SERVO_BAY_Z,
     ROOT_VAULT_CLEAR_R,
     TENON_HEIGHT,
     TENON_KEY_FLAT_DEPTH,
     TENON_NOMINAL_R,
+    TOP_FEEDER_RISE_Z,
+    TOP_FEEDER_START_R,
+    TRACK_BASE_Y,
     TRUNK_BASE_FLANGE_R,
-    TRUNK_FLARE_HEIGHT,
     TRUNK_OUTER_R,
     TRUNK_SECTION_HEIGHT,
     UCTRONICS_BUCK_BAY_X,
     UCTRONICS_BUCK_BAY_Y,
-    UCTRONICS_BUCK_BAY_Z,
     WAGO_221_BAY_X,
     WAGO_221_BAY_Y,
-    WAGO_221_BAY_Z,
+    WIRE_CONDUIT_ANGLE_DEG,
     WIRE_CONDUIT_D,
     WIRE_CONDUIT_W,
-    XA007_SWITCH_BAY_X,
-    XA007_SWITCH_BAY_Y,
-    XA007_SWITCH_BAY_Z,
     assign_toolhead,
+    closed_loop_track_point,
     helix_z,
     make_engraved_label_solid,
 )
 
 
+def _tenon_keep_envelope(r_clip_150: float, x_max: float, y_min: float, r_max: float, z_h: float) -> bd.Solid:
+    """Build combined XY key-flat & 150° conduit radial flat clipping prism for trunk tenon/socket."""
+    xy_box = bd.Pos(0.5 * (-r_max + x_max), 0.5 * (y_min + r_max), -0.5) * bd.Box(
+        x_max - (-r_max),
+        r_max - y_min,
+        z_h,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    # Clip radially along WIRE_CONDUIT_ANGLE_DEG (150°) at u_150 <= r_clip_150
+    w_150 = r_clip_150 - (-45.0)
+    clip_150 = (
+        bd.Rot(0.0, 0.0, WIRE_CONDUIT_ANGLE_DEG)
+        * bd.Pos(0.5 * (-45.0 + r_clip_150), 0.0, -0.5)
+        * bd.Box(w_150, 90.0, z_h, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+    )
+    return (xy_box & clip_150).solid()
+
+
 def make_keyed_male_tenon(z_base: float, height: float = TENON_HEIGHT) -> bd.Solid:
     """Create a male cylindrical tenon with 0.20 mm radial clearance, +X keyed flat,
-    -X flat for the 10.0 x 8.0 mm rear wire conduit, and -Y flat behind the vertical ball
-    guide flute (Y >= -14.50 mm) so the flute walls & cusps are 100% continuous across seams.
+    150° radial chord flat behind the relocated connector conduit (R <= 24.50 mm), and -Y
+    flat behind the vertical ball guide flute (Y >= -14.50 mm).
     """
     r_male = TENON_NOMINAL_R - FIT_TOLERANCE  # 27.30 mm
     cyl = bd.Cylinder(
@@ -100,25 +106,14 @@ def make_keyed_male_tenon(z_base: float, height: float = TENON_HEIGHT) -> bd.Sol
         height=height,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # Keep X in [-24.50, r_male - TENON_KEY_FLAT_DEPTH] and Y in [-14.50, r_male + 1.0]
-    x_max = r_male - TENON_KEY_FLAT_DEPTH     # +25.30 mm
-    x_min = -(TRUNK_OUTER_R - WIRE_CONDUIT_D - 1.50)  # -24.50 mm
-    y_min = -14.50
-    y_max = r_male + 1.0
-    keep_box = bd.Pos(0.5 * (x_min + x_max), 0.5 * (y_min + y_max), 0.0) * bd.Box(
-        x_max - x_min,
-        y_max - y_min,
-        height + 1.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    tenon = (cyl & keep_box).locate(bd.Location((0.0, 0.0, z_base)))
-    return tenon
+    x_max = r_male - TENON_KEY_FLAT_DEPTH  # +25.30 mm
+    r_clip_150 = TRUNK_OUTER_R - WIRE_CONDUIT_D - 1.00  # 24.50 mm (1.0 mm behind 25.50 mm conduit floor)
+    keep_env = _tenon_keep_envelope(r_clip_150, x_max, -14.50, r_male + 2.0, height + 2.0)
+    return (cyl & keep_env).locate(bd.Location((0.0, 0.0, z_base))).solid()
 
 
 def make_keyed_female_socket_cutter(z_base: float = 0.0, height: float = TENON_HEIGHT) -> bd.Solid:
-    """Create the female socket cutter with 0.20 mm clearance, +X/-X/-Y keyed flats, and 45-deg roof.
-    Clips Y >= -14.70 mm so the -Y vertical ball flute (Y <= -15.70 mm) has zero recess or overhang at seams.
-    """
+    """Create the female socket cutter with 0.20 mm clearance, +X/150°/-Y keyed flats, and 45-deg roof."""
     r_female = TENON_NOMINAL_R  # 27.50 mm (0.20 mm radial gap vs r_male = 27.30 mm)
     socket_h = height + FIT_TOLERANCE  # 15.20 mm axial clearance
     cyl = bd.Cylinder(
@@ -126,18 +121,10 @@ def make_keyed_female_socket_cutter(z_base: float = 0.0, height: float = TENON_H
         height=socket_h,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # Keep X in [-24.70, +25.50 mm] and Y in [-14.70, r_female + 1.0]
     x_max = (TENON_NOMINAL_R - FIT_TOLERANCE - TENON_KEY_FLAT_DEPTH) + FIT_TOLERANCE  # +25.50 mm
-    x_min = -(TRUNK_OUTER_R - WIRE_CONDUIT_D - 1.50) - FIT_TOLERANCE                  # -24.70 mm
-    y_min = -14.70
-    y_max = r_female + 1.0
-    keep_box = bd.Pos(0.5 * (x_min + x_max), 0.5 * (y_min + y_max), 0.0) * bd.Box(
-        x_max - x_min,
-        y_max - y_min,
-        socket_h + 1.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    keyed_cyl = cyl & keep_box
+    r_clip_150 = (TRUNK_OUTER_R - WIRE_CONDUIT_D - 1.00) + FIT_TOLERANCE  # 24.70 mm
+    keep_env = _tenon_keep_envelope(r_clip_150, x_max, -14.70, r_female + 2.0, socket_h + 2.0)
+    keyed_cyl = cyl & keep_env
 
     # Self-supporting 45-degree conical roof transition from r_female to auger bore radius
     r_bore = AUGER_BORE_DIA / 2.0
@@ -148,13 +135,9 @@ def make_keyed_female_socket_cutter(z_base: float = 0.0, height: float = TENON_H
         height=cone_h,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    cutter = (keyed_cyl + (roof_cone & bd.Pos(0.5 * (x_min + x_max), 0.5 * (y_min + y_max), socket_h) * bd.Box(
-        x_max - x_min,
-        y_max - y_min,
-        cone_h + 1.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    ))).locate(bd.Location((0.0, 0.0, z_base)))
-    return cutter
+    roof_keep = _tenon_keep_envelope(r_clip_150, x_max, -14.70, r_female + 2.0, socket_h + cone_h + 2.0)
+    cutter = (keyed_cyl + (roof_cone & roof_keep)).locate(bd.Location((0.0, 0.0, z_base)))
+    return cutter.solid()
 
 
 def make_female_dovetail_slot_cutter() -> bd.Solid:
@@ -251,22 +234,20 @@ def _cut_helical_dovetails_for_section(
 ) -> bd.Solid:
     """Subtract female keyhole dovetail sockets at 60-degree increments along the helical slope.
 
-    Uses the exact unclamped mathematical height `z_global = helix_z(theta_deg) - 30.0`
-    for every 60° station (60°..1440°). Whenever a keyhole slot's vertical span overlaps
-    the section `[z_section_min, z_section_max]`, it cuts cleanly at `z_local = z_global - z_section_min`
-    so slots near section seams (Z = 150 mm and Z = 300 mm) align seamlessly across
-    stacked trunk sections.
+    Uses the exact unclamped mathematical height `z_global = helix_z(theta_deg) + DOVETAIL_SLOT_Z_OFFSET`
+    for every 60° station (`60°..1560°`, stations 1..26). Whenever a keyhole slot's vertical span
+    overlaps the section `[z_section_min, z_section_max]`, it cuts cleanly at
+    `z_local = z_global - z_section_min` so slots near section seams (Z = 150 mm and Z = 300 mm)
+    align seamlessly across stacked trunk sections.
     """
     _ = (local_z_min_safe, local_z_max_safe)
     base_cutter = make_female_dovetail_slot_cutter()
     roof_dz = (DOVETAIL_ENTRY_W - DOVETAIL_ENTRY_PEAK_W) / 2.0
     slot_total_h = DOVETAIL_SLOT_H + DOVETAIL_ENTRY_H + roof_dz + 0.6
-    num_steps = int(round(HELIX_TOTAL_DEG / DOVETAIL_ANGULAR_STEP_DEG))
 
-    for k in range(1, num_steps):
+    for k in range(1, BRACKET_STATION_COUNT + 1):
         theta_deg = k * DOVETAIL_ANGULAR_STEP_DEG
-        # Bracket engages trunk at Z = helix_z(theta_deg) + TRACK_BASE_Y (-12.0) - DOVETAIL_SLOT_H (18.0)
-        z_global = helix_z(theta_deg) - 30.0
+        z_global = helix_z(theta_deg) + DOVETAIL_SLOT_Z_OFFSET
         if (z_global + slot_total_h) >= z_section_min and z_global <= z_section_max:
             z_local = z_global - z_section_min
             rad = math.radians(theta_deg)
@@ -279,36 +260,46 @@ def _cut_helical_dovetails_for_section(
 
 
 def _cut_rear_wire_conduit(part: bd.Solid, total_h: float, is_base: bool = False) -> bd.Solid:
-    """Cut the oversized vertical rear (-X) 'Connector-Pass-Through' wiring conduit:
-      - 10.0 mm wide (Y in [-5.0, +5.0 mm]) x 8.0 mm deep (X in [-34.0, -26.0 mm])
-      - Allows pre-terminated JST-SM (SM2.54-3P), SH1.0, PH2.0, or Dupont plugs (and inline
-        switches) to be threaded straight through Trunk_Base, Trunk_Middle, and Trunk_Top
-        without cutting or de-pinning wires, then concealed behind Conduit_Cover_Strip.
+    """Cut the 150-degree 'Connector-Pass-Through' wiring conduit (`10.6 mm wide x 8.5 mm deep`):
+      - Relocated from 180° to `WIRE_CONDUIT_ANGLE_DEG = 150.0°` (midway between the 120° and 180°
+        bracket columns so brackets never bridge across the conduit or pinch the JST-SM topper cable).
+      - On `trunk_base`, runs along `R = 25.5..34.0 mm` above Z = 50.0 mm (matching
+        `Conduit_Cover_Strip_Base` L = 100.0 mm) and drops inside the sloped vault ceiling
+        (Z = 24.0..50.0 mm) straight into the hollow root vault without piercing the outer root hub.
     """
     z_top = total_h + TENON_HEIGHT + 2.0
+    conduit_loc = bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, WIRE_CONDUIT_ANGLE_DEG))
     if is_base:
-        # From Z = 0..38 mm inside the widened base hub, keep X in [-34.2, -26.0 mm] so the
-        # XA007 switch pocket at X = -46.0 mm (X in [-57.0, -35.0 mm]) retains its inner wall,
-        # while above Z = 38 mm the conduit opens cleanly through the R = 34.0 mm bark surface.
-        lower_conduit = bd.Pos(-30.1, 0.0, -0.5) * bd.Box(
-            8.2,
-            WIRE_CONDUIT_W,
-            40.0,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        # Upper open groove for Z = 50..167 mm along outer R = 25.5..34.0 mm at 150 deg
+        upper_conduit = conduit_loc * (
+            bd.Pos(TRUNK_OUTER_R, 0.0, 50.0)
+            * bd.Box(
+                WIRE_CONDUIT_D * 2.0,
+                WIRE_CONDUIT_W,
+                z_top - 50.0,
+                align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+            )
         )
-        upper_conduit = bd.Pos(-TRUNK_OUTER_R, 0.0, 38.0) * bd.Box(
+        # Internal drop chute (Z = 28..50.5 mm) along R = 25.5..34.0 mm entering directly into raw_vault
+        inner_drop = conduit_loc * (
+            bd.Pos(TRUNK_OUTER_R - WIRE_CONDUIT_D * 0.5, 0.0, 28.0)
+            * bd.Box(
+                WIRE_CONDUIT_D,
+                WIRE_CONDUIT_W,
+                22.5,
+                align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+            )
+        )
+        return part - upper_conduit - inner_drop
+
+    conduit = conduit_loc * (
+        bd.Pos(TRUNK_OUTER_R, 0.0, -0.5)
+        * bd.Box(
             WIRE_CONDUIT_D * 2.0,
             WIRE_CONDUIT_W,
-            z_top - 38.0,
+            z_top,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        return part - lower_conduit - upper_conduit
-
-    conduit = bd.Pos(-TRUNK_OUTER_R, 0.0, -0.5) * bd.Box(
-        WIRE_CONDUIT_D * 2.0,
-        WIRE_CONDUIT_W,
-        z_top,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     return part - conduit
 
@@ -316,19 +307,18 @@ def _cut_rear_wire_conduit(part: bd.Solid, total_h: float, is_base: bool = False
 def _bark_furrow_depth(deg: float, z_global: float, max_depth: float = 1.45) -> float:
     """Compute organic support-free vertical & gently twisting bark furrow depth (in mm).
 
-    Keeps the 60° bracket dovetail columns (`d60 <= 6.5°`) and the 270° (-Y) ball port /
-    viewing window strip (`d270 <= 16.0°`) smooth at `R = TRUNK_OUTER_R = 34.0 mm` so every
-    cantilever bracket and track endcap mates flush with 0.000 mm³ interference, while
-    sculpting deep gnarled wood-bark ridges and crevices across all inter-bracket panels.
-    Because `z_global` is continuous across `trunk_base` (0..150), `trunk_mid` (150..300),
-    and `trunk_top` (300..450), the bark ridges align 100% seamlessly across section joints
-    and never exceed a 3° vertical overhang angle (100% support-free).
+    Keeps the 60° bracket dovetail columns (`d60 <= 6.5°`), the 150° rear conduit strip
+    (`d150 <= 10.0°`), and the 270° (-Y) ball port / viewing window strip (`d270 <= 16.0°`)
+    smooth at `R = TRUNK_OUTER_R = 34.0 mm` so every bracket, track endcap, and conduit cover
+    strip mates flush with 0.000 mm³ interference.
     """
     d60 = abs(((deg + 30.0) % 60.0) - 30.0)
+    d150 = abs(((deg - WIRE_CONDUIT_ANGLE_DEG + 180.0) % 360.0) - 180.0)
     d270 = abs(((deg - 270.0 + 180.0) % 360.0) - 180.0)
     env60 = 0.0 if d60 <= 6.5 else min(1.0, (d60 - 6.5) / 4.5)
+    env150 = 0.0 if d150 <= 10.0 else min(1.0, (d150 - 10.0) / 4.5)
     env270 = 0.0 if d270 <= 16.0 else min(1.0, (d270 - 16.0) / 5.0)
-    env = min(env60, env270)
+    env = min(env60, env150, env270)
     if env <= 1e-6:
         return 0.0
 
@@ -365,20 +355,25 @@ def _make_bark_textured_trunk_column(
 
 
 def _make_bark_textured_base_hub() -> bd.Solid:
-    """Create the widened Hollow Root Vault electronics pedestal (`Z = 0..18 mm`, `R = 72.5 mm`
+    """Create the widened Hollow Root Vault electronics pedestal (`Z = 0..14 mm`, `R = 72.5 mm`
     housing the Ø 135.0 mm internal clear electronics vault) and support-free root-flare
-    transition cone (`Z = 18..45 mm`, `R = 72.5 -> 34.0 mm`) with continuous organic bark ridges.
-    Includes a -Y intake terrace so `track_seg_01`'s return ramp (Z >= 38 mm) has 0.0 mm³ interference.
+    transition cone (`Z = 14..52 mm`, `R = 72.5 -> 34.0 mm`) with continuous organic bark ridges.
+    Reaches `R = 34.0 mm` early in the -Y intake sector (`Z = 34 mm`), the 60° bracket_01
+    column (`Z = 41.5 mm`), and the 150° conduit channel (`Z = 48.0 mm`) while preserving
+    smooth wall thickness around the 45° internal vault cone.
     """
     z_rings = [
         (0.0, 72.5, 1.25),
         (9.0, 72.5, 1.25),
-        (17.5, 72.5, 1.25),
-        (24.0, 63.0, 1.30),
-        (30.0, 53.5, 1.35),
-        (35.0, 46.0, 1.40),
-        (40.0, 39.5, 1.42),
-        (45.0, TRUNK_OUTER_R, 1.45),
+        (14.0, 72.5, 1.25),
+        (19.0, 67.4, 1.28),
+        (21.8, 64.6, 1.30),
+        (28.0, 58.3, 1.35),
+        (35.0, 51.2, 1.40),
+        (41.5, 44.6, 1.42),
+        (48.0, 38.1, 1.44),
+        (50.0, 36.1, 1.44),
+        (52.0, TRUNK_OUTER_R, 1.45),
     ]
     n_pts = 120
     wires: list[bd.Wire] = []
@@ -388,7 +383,9 @@ def _make_bark_textured_base_hub() -> bd.Solid:
             deg = ip * (360.0 / n_pts)
             rad = math.radians(deg)
             d180 = abs(((deg - 180.0 + 180.0) % 360.0) - 180.0)
+            d150 = abs(((deg - WIRE_CONDUIT_ANGLE_DEG + 180.0) % 360.0) - 180.0)
             d30 = abs(((deg - 30.0 + 180.0) % 360.0) - 180.0)
+            d60 = abs(((deg - 60.0 + 180.0) % 360.0) - 180.0)
             d270 = abs(((deg - 270.0 + 180.0) % 360.0) - 180.0)
             hub_env = 1.0
             if z_val < 28.0:
@@ -396,28 +393,86 @@ def _make_bark_textured_base_hub() -> bd.Solid:
                     hub_env = min(hub_env, max(0.0, (d180 - 11.0) / 5.0))
                 if d30 < 16.0:
                     hub_env = min(hub_env, max(0.0, (d30 - 11.0) / 5.0))
-            # In the -Y ball intake sector (d270 <= 62°), taper inward faster above Z = 17.5 mm
-            # so the front wall is already at R = TRUNK_OUTER_R (34.0 mm) by Z = 34.0 mm
+            if d150 < 14.5:
+                hub_env = min(hub_env, max(0.0, (d150 - 10.0) / 4.5))
+
             r_eff = r_nom
-            if z_val > 17.5 and d270 < 62.0:
+            # Fast taper in -Y intake sector (Z = 16 -> 34 mm)
+            if z_val > 16.0 and d270 < 62.0:
                 w270 = 1.0 if d270 <= 46.0 else (62.0 - d270) / 16.0
-                u_fast = min(1.0, (z_val - 17.5) / (34.0 - 17.5))
+                u_fast = min(1.0, (z_val - 16.0) / (34.0 - 16.0))
                 r_fast = 72.5 + (TRUNK_OUTER_R - 72.5) * u_fast
-                r_eff = r_nom * (1.0 - w270) + r_fast * w270
+                r_eff = min(r_eff, r_nom * (1.0 - w270) + r_fast * w270)
+            # Clear bracket_01 (theta = 60°, Z_slot = 42.17 mm) without blocking its saddle or dovetail
+            if z_val > 14.0 and d60 < 24.0:
+                w60 = 1.0 if d60 <= 12.0 else (24.0 - d60) / 12.0
+                u_60 = min(1.0, (z_val - 14.0) / (41.5 - 14.0))
+                r_60 = 72.5 + (TRUNK_OUTER_R - 72.5) * u_60
+                r_eff = min(r_eff, r_nom * (1.0 - w60) + r_60 * w60)
+            # Reach R = 34.0 mm by Z = 50.0 mm at 150° conduit so the 100 mm cover strip seats at Z = 50..150
+            if z_val > 14.0 and d150 < 18.0:
+                w150 = 1.0 if d150 <= 10.0 else (18.0 - d150) / 8.0
+                u_150 = min(1.0, (z_val - 14.0) / (50.0 - 14.0))
+                r_150 = 72.5 + (TRUNK_OUTER_R - 72.5) * u_150
+                r_eff = min(r_eff, r_nom * (1.0 - w150) + r_150 * w150)
+
             furrow = hub_env * _bark_furrow_depth(deg, z_val, max_depth=depth)
+
+            # Clear DC-099 M11 hex nut & barrel pocket inside the rear -X (180°) wall up to Z = 20.5 mm
+            if z_val > 14.0 and d180 < 20.0:
+                w180 = 1.0 if d180 <= 12.0 else (20.0 - d180) / 8.0
+                r_180 = 72.5 if z_val <= 20.5 else max(34.0, 72.5 - (z_val - 20.5) * (38.5 / 31.5))
+                r_eff = max(r_eff, r_nom * (1.0 - w180) + r_180 * w180)
             r = r_eff - furrow
             pts.append(bd.Vector(r * math.cos(rad), r * math.sin(rad), z_val))
         wires.append(bd.Wire.make_polygon(pts))
-    hub = bd.Solid.make_loft(wires, ruled=True)
-    # Add rear +Y dorsal root-arch dome (Z = 30..53.5 mm) so the internal clear electronics
-    # vault reaches a full 50.0 mm tall beneath the bulkhead with >= 3.2 mm wall thickness
-    dorsal_dome = bd.Pos(0.0, 20.0, 28.0) * bd.Cone(
-        bottom_radius=26.0,
-        top_radius=9.5,
-        height=26.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    return hub + dorsal_dome
+    return bd.Solid.make_loft(wires, ruled=True)
+
+
+def _make_vault_cavity_solid() -> bd.Solid:
+    """Create the smooth, 45°-self-supporting Hollow Root Vault cavity (`Ø 135.0 mm` at Z = 0..12 mm,
+    conical 45° dome tapering up to Z = 52.0 mm, `>= 150,000 mm³` unobstructed cable slack dome)
+    with `>= 5.0 mm` radial wood margin beneath `_make_bark_textured_base_hub()` everywhere.
+    """
+    z_levels = [-0.1, 12.0, 16.0, 19.0, 22.2, 28.0, 31.0, 35.0, 41.5, 48.0, 50.0, 52.0]
+    n_pts = 120
+    wires: list[bd.Wire] = []
+    for z_val in z_levels:
+        pts: list[bd.Vector] = []
+        for ip in range(n_pts):
+            deg = ip * (360.0 / n_pts)
+            rad = math.radians(deg)
+            d60 = abs(((deg - 60.0 + 180.0) % 360.0) - 180.0)
+            d150 = abs(((deg - WIRE_CONDUIT_ANGLE_DEG + 180.0) % 360.0) - 180.0)
+            d180 = abs(((deg - 180.0 + 180.0) % 360.0) - 180.0)
+            d270 = abs(((deg - 270.0 + 180.0) % 360.0) - 180.0)
+
+            r_eff = ROOT_VAULT_CLEAR_R if z_val <= 12.0 else max(18.0, ROOT_VAULT_CLEAR_R - (z_val - 12.0))
+            if z_val > 16.0 and d270 < 62.0:
+                w270 = 1.0 if d270 <= 46.0 else (62.0 - d270) / 16.0
+                if z_val <= 22.2:
+                    rf = 63.5 + (54.5 - 63.5) * (z_val - 16.0) / (22.2 - 16.0)
+                else:
+                    u_fast = min(1.0, (z_val - 22.2) / (31.0 - 22.2))
+                    rf = 54.5 + (22.0 - 54.5) * u_fast
+                r_eff = min(r_eff, r_eff * (1.0 - w270) + rf * w270)
+            if z_val > 14.0 and d60 < 24.0:
+                w60 = 1.0 if d60 <= 12.0 else (24.0 - d60) / 12.0
+                u_60 = min(1.0, (z_val - 14.0) / (41.5 - 14.0))
+                r_60 = 65.5 + (26.5 - 65.5) * u_60
+                r_eff = min(r_eff, r_eff * (1.0 - w60) + r_60 * w60)
+            if z_val > 14.0 and d150 < 18.0:
+                w150 = 1.0 if d150 <= 10.0 else (18.0 - d150) / 8.0
+                u_150 = min(1.0, (z_val - 14.0) / (50.0 - 14.0))
+                r_150 = 65.5 + (28.0 - 65.5) * u_150
+                r_eff = min(r_eff, r_eff * (1.0 - w150) + r_150 * w150)
+            if z_val > 12.0 and d180 < 20.0:
+                w180 = 1.0 if d180 <= 12.0 else (20.0 - d180) / 8.0
+                r_180 = 67.5 if z_val <= 20.5 else max(18.0, 67.5 - (z_val - 20.5) * (38.5 / 31.5))
+                r_eff = max(r_eff, r_eff * (1.0 - w180) + r_180 * w180)
+            pts.append(bd.Vector(r_eff * math.cos(rad), r_eff * math.sin(rad), z_val))
+        wires.append(bd.Wire.make_polygon(pts))
+    return bd.Solid.make_loft(wires, ruled=True)
 
 
 def _make_five_root_flare_solid() -> bd.Solid:
@@ -542,21 +597,18 @@ def _cut_front_elevation_ruler_for_section(
 
 def build_trunk_base() -> bd.Solid:
     """Build Section 1 (trunk_base): Z = 0..150 mm + 15 mm male tenon (total H = 165 mm).
-    Features the 'Zero-Fuss Cable Management' Hollow Root Vault (Ø 185.0 mm diagonal root footprint,
-    Ø 135.0 x 50.0 mm internal clear electronics vault with > 200,000 mm³ unobstructed Cable Slack
-    Dump Zone):
-      - Isolated Ø 28.0 mm Motor & Magnetic Safety Clutch Shroud Tower (Z = 0..42.0 mm) with bottom wire notch
-      - Dedicated +Y Snap-In Cradle at (-4.0, +36.5) for the UCTRONICS B07XXWQ49N (U6223,
-        63.0 x 27.0 x 10.0 mm) 12V->5V 5A Screw-Terminal Buck Converter (64.2 x 28.2 x 12.0 mm pocket
-        with open -X/+X screw-terminal wire portals)
-      - Dedicated +X Snap-In Organizer Cradle at (+44.5, -12.0) for the WAGO 221-415 (30.0 x 18.6 x 8.4 mm)
-        5-Port Lever-Nut Bus Blocks (19.8 x 31.2 x 18.0 mm dual-stack pocket with open -X wire portal)
-      - Stepped -Y ESPHome / Battery Cradle (0.0, -33.0) for M5Stack Atomic H-Driver (A092 + C008,
-        48.0 x 24.0 x 18.0 mm) or 14500 pack, with inner +Y Grove/terminal wire portal into the vault
-      - Oversized 10.0 x 8.0 mm Rear (-X) Connector-Pass-Through Trunk Wiring Conduit
+    Features the simplified 'Upright Electronics Tray + Hollow Root Vault' architecture
+    (`>= 150,000 mm³` unobstructed 45° dome slack zone, zero internal pocket bridges > 12 mm):
+      - Flush `Ø 135.0 x 3.00 mm` vault rabbet + 4x diagonal buttress root tab pockets with
+        M2.5 tap holes (`BOTTOM_TRAY_TAB_COORDS`) receiving upright `Bottom_Electronics_Lid`.
+      - Isolated `Ø 28.0 mm` (`Z = 0..44 mm`) N20 motor shroud tower (Z = 1.20..26.40 mm pocket,
+        -Y wire exit tunnel at Z = 3.20..11.20 mm above the tray, and Ø 19.20 mm top-drop bore
+        clearing `Motor_Clutch_Driver` down to `Z = 37.20 mm` auger thrust seat).
+      - Outer `-X` `Ø 16.0 mm` `45°-gabled` `DC-099` spotface leaving exact `3.80 mm` M11
+        bulkhead (`X = -71.30..-67.50 mm`) + `Ø 11.40 mm` center bore.
+      - `+30°` root-flare Magic Wand holster (`Ø 19.0 mm` pillar, `Ø 12.0 mm` bore).
+      - `150.0°` `WIRE_CONDUIT_ANGLE_DEG` JST-SM conduit (Z = 50..165 open groove + vault drop).
     """
-    # 1. 4-diagonal-root spreading flare (Ø 185.0 mm span) + widened bark-textured vault drum (R=72.5 mm)
-    #    + support-free bark-textured upper trunk column (Z=0..150 mm)
     flare_base = _make_five_root_flare_solid()
     elec_hub_bark = _make_bark_textured_base_hub()
     upper_col = _make_bark_textured_trunk_column(
@@ -566,154 +618,95 @@ def build_trunk_base() -> bd.Solid:
     )
     body = flare_base + elec_hub_bark + upper_col
 
-    # 2. Add top interlocking male tenon (Z = 150..165 mm) with +X/-X keyed flats
+    # Male tenon at Z = 150..165 mm with +X/-X and 150° conduit keyed flats
     tenon = make_keyed_male_tenon(z_base=TRUNK_SECTION_HEIGHT, height=TENON_HEIGHT)
     body = body + tenon
 
-    # 2b. Excavate the cavernous Hollow Root Vault (Ø 135.0 mm = R 67.5 mm internal diameter,
-    #     50.0 mm tall beneath bulkhead) while preserving the internal structural towers & cradle frames:
+    # Hollow 45° Root Vault retaining only motor_shroud_tower (0,0) and wand_pillar (+45.03,+26.00)
     wand_x = 52.0 * math.cos(math.radians(30.0))  # +45.03 mm
     wand_y = 52.0 * math.sin(math.radians(30.0))  # +26.00 mm
+    raw_vault = _make_vault_cavity_solid()
 
-    vault_cyl = bd.Pos(0.0, 0.0, -0.1) * bd.Cylinder(
-        radius=ROOT_VAULT_CLEAR_R,  # 67.5 mm (Ø 135.0 mm)
-        height=16.6,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    motor_shroud_tower = (
+        bd.Pos(0.0, 0.0, 0.0)
+        * bd.Cylinder(
+            radius=MOTOR_SHROUD_OD / 2.0,  # R = 14.0 mm (Ø 28.0 mm)
+            height=36.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        + bd.Pos(0.0, 0.0, 36.0)
+        * bd.Cone(
+            bottom_radius=MOTOR_SHROUD_OD / 2.0,
+            top_radius=26.0,
+            height=12.0,  # 45° support-free flare around upper expand_cone merging into trunk column
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        + bd.Pos(0.0, 0.0, 48.0)
+        * bd.Cylinder(
+            radius=26.0,
+            height=6.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
     )
-    vault_cone = bd.Pos(0.0, 0.0, 16.4) * bd.Cone(
-        bottom_radius=ROOT_VAULT_CLEAR_R,
-        top_radius=28.0,
-        height=21.6,                # Z = 16.4..38.0 mm support-free conical vault ceiling
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # Clip vault_cone in the -Y intake sector above Z = 29.0 mm so the Z = 34.0 mm intake terrace has a thick floor
-    intake_floor_keep = bd.Pos(0.0, -52.0, 29.0) * bd.Box(
-        90.0,
-        64.0,
-        25.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    vault_upper_dome = bd.Pos(0.0, 20.0, 34.0) * bd.Cone(
-        bottom_radius=19.0,
-        top_radius=5.0,
-        height=16.0,                # Reaches Z = 50.0 mm tall beneath bulkhead!
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    raw_vault = (vault_cyl + (vault_cone - intake_floor_keep)) + vault_upper_dome
-
-    # Internal structures preserved inside the Hollow Root Vault (extend Z = -0.2..42.0 mm so every
-    # cradle column merges 100% into the vault roof above, guaranteeing a single manifold solid!):
-    # (i) Isolated Ø 28.0 mm (R = 14.0 mm) Motor & Magnetic Safety Clutch Shroud Tower at (0, 0)
-    motor_shroud_tower = bd.Pos(0.0, 0.0, -0.2) * bd.Cylinder(
-        radius=MOTOR_SHROUD_OD / 2.0,  # R = 14.0 mm (Ø 28.0 mm)
-        height=44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # (ii) Front -Y Stepped ESPHome / Battery Cradle Frame at (0.0, -33.0)
-    front_cradle_frame = bd.Pos(0.0, -33.0, -0.2) * bd.Box(
-        65.0,
-        36.0,
-        44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # (iii) Rear -X XA007 Switch Housing Boss at (-47.0, 0.0)
-    xa007_boss = bd.Pos(-47.0, 0.0, -0.2) * bd.Box(
-        26.0,
-        22.0,
-        44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # (iv) +30° Magic Wand Holster Internal Pillar at (+45.03, +26.00)
-    wand_pillar = bd.Pos(wand_x, wand_y, -0.2) * bd.Cylinder(
+    wand_pillar = bd.Pos(wand_x, wand_y, 0.0) * bd.Cylinder(
         radius=9.5,
         height=44.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # (v) North (+Y) Dedicated UCTRONICS B07XXWQ49N (U6223, 63.0 x 27.0 x 10.0 mm) 5V 5A Buck Cradle at (-4.0, +36.5)
-    buck_cradle_frame = bd.Pos(-4.0, 36.5, -0.2) * bd.Box(
-        UCTRONICS_BUCK_BAY_X + 3.6,  # 67.8 mm
-        UCTRONICS_BUCK_BAY_Y + 3.6,  # 31.8 mm
-        44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # (vi) East (+X) Dedicated WAGO 221-415 (30.0 x 18.6 x 8.4 mm) Dual-Stack Lever-Nut Cradle at (+44.5, -12.0)
-    wago_cradle_frame = bd.Pos(44.5, -12.0, -0.2) * bd.Box(
-        WAGO_221_BAY_X + 3.6,        # 23.4 mm
-        WAGO_221_BAY_Y + 3.6,        # 34.8 mm
-        44.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
+    body = body - (raw_vault - (motor_shroud_tower + wand_pillar))
 
-    internal_structures = (
-        motor_shroud_tower
-        + front_cradle_frame
-        + xa007_boss
-        + wand_pillar
-        + buck_cradle_frame
-        + wago_cradle_frame
-    )
-    body = body - (raw_vault - internal_structures)
+    # 4x Diagonal root-tab rabbet pockets (Z = 0..2.95 mm, 10.6 mm width <= 12 mm bridge limit)
+    # + M2.5 tap holes (Ø 2.25 x 6.5 mm into Z = 2.95..9.50 mm solid diagonal root buttresses)
+    for tx, ty in BOTTOM_TRAY_TAB_COORDS:
+        tdeg = math.degrees(math.atan2(ty, tx))
+        tab_pocket = bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, tdeg)) * (
+            bd.Pos(71.5, 0.0, -0.1)
+            * bd.Box(
+                10.6,
+                10.6,
+                BOTTOM_TRAY_THICK + 0.25,  # Z = 0..2.95 mm flush seating ceiling
+                align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+            )
+        )
+        tap_hole = bd.Pos(tx, ty, BOTTOM_TRAY_THICK + 0.1) * bd.Cylinder(
+            radius=AA050_M25_TAP_DIA / 2.0,
+            height=AA050_M25_TAP_DEPTH,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        body = body - tab_pocket - tap_hole
 
-    # Cut the internal pockets of the UCTRONICS 5V 5A Buck Cradle & WAGO 221-415 Lever-Nut Cradle:
-    buck_pocket = bd.Pos(-4.0, 36.5, -0.1) * bd.Box(
-        UCTRONICS_BUCK_BAY_X,        # 64.2 mm (fits 63.0 mm UCTRONICS B07XXWQ49N PCB)
-        UCTRONICS_BUCK_BAY_Y,        # 28.2 mm (fits 27.0 mm UCTRONICS B07XXWQ49N PCB)
-        UCTRONICS_BUCK_BAY_Z + 0.1,  # 12.1 mm clear height (fits 10.0 mm tall module)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    buck_terminal_wire_slots = bd.Pos(-4.0, 36.5, -0.1) * bd.Box(
-        UCTRONICS_BUCK_BAY_X + 8.0,  # 72.2 mm — opens both -X (VIN) and +X (5V OUT) end walls for 18 AWG wires
-        20.0,                        # 20.0 mm wide wire pass-through centered on the screw terminals
-        UCTRONICS_BUCK_BAY_Z + 0.1,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    buck_sight_vent = bd.Pos(-4.0, 36.5, -0.1) * bd.Cylinder(
-        radius=3.5,
-        height=18.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    wago_pocket = bd.Pos(44.5, -12.0, -0.1) * bd.Box(
-        WAGO_221_BAY_X,              # 19.8 mm (fits 18.6 mm deep WAGO 221-415 / 221-413 blocks)
-        WAGO_221_BAY_Y,              # 31.2 mm (fits 30.0 mm wide 5-port WAGO 221-415 blocks)
-        WAGO_221_BAY_Z + 0.1,        # 18.1 mm clear height (fits 2x 8.4 mm = 16.8 mm stacked blocks)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    wago_wire_open = bd.Pos(34.0, -12.0, -0.1) * bd.Box(
-        6.0,                         # Opens -X inner vault wall of wago_cradle_frame for all 5 lever-nut wire ports
-        26.0,                        # Leaves 2.6 mm retention corner lips at ±Y to hold WAGO blocks captive
-        WAGO_221_BAY_Z + 0.1,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    body = (
-        body
-        - buck_pocket
-        - buck_terminal_wire_slots
-        - buck_sight_vent
-        - wago_pocket
-        - wago_wire_open
-    )
-
-    # 3. Cut lower Ø 24.0 mm clutch/collar bore (Z = -0.5..42.0 mm), 45° support-free expansion cone
-    #    (Z = 42.0..50.5 mm, R = 12.0 -> 20.5 mm), full Ø 41.0 mm upper auger bore (Z = 50.5..166.5 mm),
-    #    and the -Y vertical ball guide flute (Z = 38.0..166.5 mm) with 45° self-supporting floor cone.
-    r_clutch_bore = 12.00
+    # 3. Top-drop Auger / Clamped Driver Bore & 45° Thrust Seat:
+    #    - Z = 1.20..26.20 mm: N20 (12.8 x 10.8 mm) rectangular pocket + 1.20 mm solid bed floor
+    #    - Z = 24.50..26.00 mm: 45° cone expanding from R = 8.1 to R = 9.60 mm (zero flat step bridge)
+    #    - Z = 26.00..37.20 mm: Ø 19.20 mm (R = 9.60 mm) bore clearing Ø 18.0 mm Motor_Clutch_Driver
+    #    - Z = 37.20 mm: flat 2.20 mm upward thrust shelf (R = 9.60..11.80 mm) for Ø 22.0 mm auger flange
+    #    - Z = 37.20..45.90 mm: 45° expand_cone from R = 11.80 to R = 20.50 mm (parallel 3.4 mm shroud wall)
+    #    - Z = 45.80..167.0 mm: full Ø 41.0 mm upper auger bore + -Y vertical ball flute
+    r_driver_bore = 9.60
+    r_thrust_outer = 11.80  # Ø 23.60 mm clears CLUTCH_FLANGE_OD = 22.0 mm (R = 11.0 mm) cleanly
     r_upper_bore = AUGER_BORE_DIA / 2.0  # 20.50 mm
-    cone_expand_h = r_upper_bore - r_clutch_bore  # 8.50 mm (45° support-free slope)
+    cone_expand_h = r_upper_bore - r_thrust_outer  # 8.70 mm (45° support-free slope)
 
-    lower_bore = bd.Pos(0.0, 0.0, -0.5) * bd.Cylinder(
-        radius=r_clutch_bore,
-        height=42.6,
+    la002_transition = bd.Pos(0.0, 0.0, 24.50) * bd.Cone(
+        bottom_radius=8.10,
+        top_radius=r_driver_bore,
+        height=1.50,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    expand_cone = bd.Pos(0.0, 0.0, 42.0) * bd.Cone(
-        bottom_radius=r_clutch_bore,
+    driver_bore = bd.Pos(0.0, 0.0, 25.95) * bd.Cylinder(
+        radius=r_driver_bore,
+        height=11.25,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    expand_cone = bd.Pos(0.0, 0.0, 37.20) * bd.Cone(
+        bottom_radius=r_thrust_outer,
         top_radius=r_upper_bore,
         height=cone_expand_h,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    upper_bore = bd.Pos(0.0, 0.0, 42.0 + cone_expand_h - 0.1) * bd.Cylinder(
+    upper_bore = bd.Pos(0.0, 0.0, 37.20 + cone_expand_h - 0.1) * bd.Cylinder(
         radius=r_upper_bore,
-        height=TRUNK_SECTION_HEIGHT + TENON_HEIGHT - (42.0 + cone_expand_h) + 2.0,
+        height=TRUNK_SECTION_HEIGHT + TENON_HEIGHT - (37.20 + cone_expand_h) + 2.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     flute_cutter = _make_vertical_ball_flute_cutter(
@@ -728,42 +721,57 @@ def build_trunk_base() -> bd.Solid:
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
     )
-    body = body - lower_bore - expand_cone - upper_bore - flute_cutter
+    body = body - la002_transition - driver_bore - expand_cone - upper_bore - flute_cutter
 
-    # 3b. Add internal horizontal thrust ledge / collar at Z = 37.20 mm (R_inner = 8.50 mm -> R_outer = 12.00 mm)
-    #     with a support-free 45° underside taper (Z = 33.70..37.20 mm) to support the outer 1.50 mm rim
-    #     of the Ø 20.0 mm Auger_Bottom flange with a 1.00 mm axial air gap above Motor_Clutch_Driver (Z = 26.2..36.2 mm)
-    r_ledge_inner = 8.50           # Supports R = 8.50..10.00 mm (1.50 mm outer rim of Ø 20.0 mm flange)
-    ledge_h = r_clutch_bore - r_ledge_inner  # 3.50 mm (Z = 33.70..37.20 mm)
-    thrust_collar_outer = bd.Pos(0.0, 0.0, 37.20 - ledge_h) * bd.Cylinder(
-        radius=r_clutch_bore + 0.5,
-        height=ledge_h,
+    # N20 motor pocket (Z = 1.20..26.40 mm) + -Y side wire tunnel (Z = 3.20..11.20 mm + 45° gable roof)
+    la002_pocket = bd.Pos(0.0, 0.0, 1.20) * bd.Box(
+        LA002_N20_POCKET_X + 0.4,  # 12.8 mm
+        LA002_N20_POCKET_Y + 0.4,  # 10.8 mm
+        LA002_N20_POCKET_Z + 0.2,  # 26.2 mm height (Z = 1.20..27.40 mm, merges into transition cone)
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    thrust_collar_bore = bd.Pos(0.0, 0.0, 37.20 - ledge_h) * bd.Cone(
-        bottom_radius=r_clutch_bore,
-        top_radius=r_ledge_inner,
-        height=ledge_h,
+    la002_wire_chase = bd.Pos(0.0, -7.2, 1.20) * bd.Box(
+        6.5,
+        5.0,
+        11.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    body = body + (thrust_collar_outer - thrust_collar_bore)
+    motor_wire_pts = [
+        (-4.0, 3.20),
+        (4.0, 3.20),
+        (4.0, 11.20),
+        (0.8, 14.40),
+        (-0.8, 14.40),
+        (-4.0, 11.20),
+        (-4.0, 3.20),
+    ]
+    def _motor_wire_wire(y_pos: float) -> bd.Wire:
+        return bd.Wire([
+            bd.Edge.make_line((motor_wire_pts[i][0], y_pos, motor_wire_pts[i][1]),
+                              (motor_wire_pts[i + 1][0], y_pos, motor_wire_pts[i + 1][1]))
+            for i in range(len(motor_wire_pts) - 1)
+        ])
 
-    # 4. Cut front vertical gothic-arched viewing window slot (Z = 82..136 mm along -Y, 14.0 mm inner width < 25.0 mm ball)
-    #    PLUS Lower Ball Return Intake Portal along -Y (X = 0.0, Y = -34.0..-17.5 mm, Z = 41.5..71.5 mm
-    #    with 45° self-supporting roof) connecting track_seg_01's enclosed -90° catch basin
-    #    (X = 0.0, Y = -42.0 mm, Z_marble = 56.8 mm) directly into the -Y vertical ball guide flute
-    #    at (X = 0.0, Y = -17.5 mm, Z_marble = 54.5 mm)!
+    motor_wire_tunnel = bd.Solid.make_loft(
+        [_motor_wire_wire(-4.5), _motor_wire_wire(-16.0)],
+        ruled=True,
+    )
+    body = body - la002_pocket - la002_wire_chase - motor_wire_tunnel
+
+    # 4. Front vertical gothic-arched viewing window slot (Z = 82..136 mm along -Y)
+    #    + Lower Ball Return Intake Portal along -Y
     view_slot = _make_arched_viewing_window_cutter(z_min=82.0, straight_h=47.0)
     p_in_outer = bd.Vector(0.0, -45.5, 56.3)
     p_in_inner = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 52.0)
     in_vec = p_in_inner - p_in_outer
     in_plane = bd.Plane(origin=p_in_outer, z_dir=in_vec.normalized())
     intake_chute = (
-        (bd.Pos(p_in_inner.X, p_in_inner.Y, p_in_inner.Z) * bd.Sphere(radius=13.8))
+        (bd.Pos(p_in_inner.X, p_in_inner.Y, p_in_inner.Z) * bd.Sphere(radius=13.75))
         + (
             in_plane
-            * bd.Cylinder(
-                radius=13.8,
+            * bd.Cone(
+                bottom_radius=16.40,
+                top_radius=13.75,
                 height=in_vec.length,
                 align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
             )
@@ -780,128 +788,41 @@ def build_trunk_base() -> bd.Solid:
     )
     body = body - view_slot - intake_chute
 
-    # 5a. Dual-Compatible Auger Lift Motor Bay at (0, 0) inside the Ø 28.0 mm Shroud Tower:
-    la002_pocket = bd.Pos(0.0, 0.0, -0.1) * bd.Box(
-        LA002_N20_POCKET_X + 0.4,  # 12.8 mm
-        LA002_N20_POCKET_Y + 0.4,  # 10.8 mm
-        LA002_N20_POCKET_Z + 0.3,  # 26.3 mm (Z = 0..26.2 mm)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    pg002_bay = bd.Pos(0.0, 0.0, -0.1) * bd.Box(
-        PG002_SERVO_BAY_X + 0.4,   # 23.6 mm
-        PG002_SERVO_BAY_Y + 0.4,   # 12.9 mm
-        PG002_SERVO_BAY_Z + 0.3,   # 24.3 mm (Z = 0..24.2 mm)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    body = body - la002_pocket - pg002_bay
-
-    # 5b. Stepped Bottom Electronics Bay at (X = 0.0, Y = -33.0):
-    batt_bay = bd.Pos(0.0, -33.0, -0.1) * bd.Box(
-        BATTERY_14500_BAY_X + 0.6,  # 54.6 mm
-        BATTERY_14500_BAY_Y + 0.6,  # 31.6 mm
-        BATTERY_14500_BAY_Z + 0.4,  # 16.9 mm (Z = 0.0..16.8 mm)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    m5_atom_hdriver_bay = bd.Pos(0.0, -33.0, -0.1) * bd.Box(
-        49.2,                       # 48.0 mm M5Stack Atomic H-Driver + 1.2 mm clearance
-        25.2,                       # 24.0 mm M5Stack Atomic H-Driver + 1.2 mm clearance
-        20.4,                       # Z = 0.0..20.3 mm (18.9 mm clear above Z = 1.4 mm cover lip)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    body = body - batt_bay - m5_atom_hdriver_bay
-    for bx in (-30.0, 30.0):
-        batt_m25 = bd.Pos(bx, -33.0, -0.1) * bd.Cylinder(
-            radius=AA050_M25_TAP_DIA / 2.0,
-            height=AA050_M25_TAP_DEPTH + 0.1,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-        body = body - batt_m25
-
-    # 5c. Rear (-X) Single-Cable 12V DC Barrel Jack Port (Ø 11.40 mm M11 DC-099 5.5x2.1mm Panel Mount)
-    #     & Dual-Compatible Power Switch / Entry Bay at (X = -46.0, Y = 0.0, Z = 4.0..16.0 mm):
-    xa007_bay = bd.Pos(-46.0, 0.0, 3.8) * bd.Box(
-        XA007_SWITCH_BAY_X + 0.6,  # 22.6 mm
-        XA007_SWITCH_BAY_Y + 0.6,  # 14.6 mm
-        XA007_SWITCH_BAY_Z + 0.6,  # 12.6 mm (Z = 3.8..16.4 mm)
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    xa007_toggle_slot = bd.Pos(-68.0, 0.0, 6.0) * bd.Box(
-        24.0,
-        10.0,
-        8.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # Horizontal Ø 11.40 mm (R = 5.70 mm) panel-mount DC barrel jack bore along -X (Y = 0, Z = 10.0 mm)
-    # with internal +Y/-Y pigtail routing portals straight into the Ø 135 mm Hollow Root Vault
-    r_dc_jack = DC_BARREL_JACK_BORE_DIA / 2.0  # 5.70 mm (fits Ø 11.0-11.2 mm M11x0.75 DC-099 barrel jack)
+    # 5. Rear (-X, 180°) Single-Cable 12V DC Barrel Jack Port (DC-099):
+    #    - Outer Ø 16.0 mm spotface with 45° self-supporting gable roof stopping at X = -71.30 mm,
+    #      leaving an exact 3.80 mm thick M11x0.75 bulkhead against the Ø 135.0 mm vault wall (X = -67.50 mm)
+    #    - Center Ø 11.40 mm bore (R = 5.70 mm) along +X at Y = 0.0, Z = 10.0 mm
+    r_dc_jack = DC_BARREL_JACK_BORE_DIA / 2.0  # 5.70 mm
     dc_jack_bore = (
-        bd.Plane(origin=(-75.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0))
+        bd.Plane(origin=(-76.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0))
         * bd.Cylinder(
             radius=r_dc_jack,
-            height=19.0,  # X = -75.0 .. -56.0 mm (opens into rear nut-seat chamber)
+            height=11.0,  # X = -76.0..-65.0 mm cleanly pierces X = -71.30..-67.50 bulkhead
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
     )
-    dc_jack_vault_portal = bd.Pos(-46.0, 0.0, 4.5) * bd.Box(
-        12.0,
-        24.0,  # Opens +Y and -Y sides of xa007_boss into the Hollow Root Vault for 18 AWG pigtails
-        9.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    body = body - xa007_bay - xa007_toggle_slot - dc_jack_bore - dc_jack_vault_portal
-    for sw_y in (-9.5, 9.5):
-        sw_m25 = bd.Pos(-46.0, sw_y, 4.0) * bd.Cylinder(
-            radius=AA050_M25_TAP_DIA / 2.0,
-            height=AA050_M25_TAP_DEPTH,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    r_sf = 8.00  # Ø 16.0 mm outer spotface for DC-099 bezel/washer
+    sf_pts: list[tuple[float, float]] = []
+    for deg_a in range(45, -226, -15):  # Lower/side circular arc from +45° clockwise to +135°
+        ra = math.radians(deg_a)
+        sf_pts.append((r_sf * math.cos(ra), DC_BARREL_JACK_Z_CENTER + r_sf * math.sin(ra)))
+    # 45° gable roof peak above (-5.657, +15.657) to (+5.657, +15.657) with 1.6 mm flat apex
+    sf_pts.append((-0.80, DC_BARREL_JACK_Z_CENTER + r_sf * math.sin(math.radians(45.0)) + 4.857))
+    sf_pts.append((0.80, DC_BARREL_JACK_Z_CENTER + r_sf * math.sin(math.radians(45.0)) + 4.857))
+    sf_pts.append(sf_pts[0])
+    def _sf_wire(x_pos: float) -> bd.Wire:
+        return bd.Wire(
+            [bd.Edge.make_line((x_pos, sf_pts[i][0], sf_pts[i][1]), (x_pos, sf_pts[i + 1][0], sf_pts[i + 1][1]))
+             for i in range(len(sf_pts) - 1)]
         )
-        body = body - sw_m25
 
-    # 6. Cut bottom cable exit slot & internal wire-routing pass-through notches
-    #    (including the bottom wire exit notch in the Ø 28.0 mm central motor shroud tower)
-    cable_slot = bd.Pos(-TRUNK_BASE_FLANGE_R / 2.0, 0.0, -0.1) * bd.Box(
-        TRUNK_BASE_FLANGE_R + 10.0,
-        6.0,
-        5.1,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    motor_to_pdb_tunnel = bd.Pos(0.0, -11.5, -0.1) * bd.Box(
-        6.5,
-        14.0,
-        7.6,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    cob_wire_entry_port = bd.Pos(16.5, -31.5, 35.0) * bd.Box(
-        7.5,
-        12.0,
-        6.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    cob_wire_conduit = bd.Pos(16.5, -27.5, 6.0) * bd.Box(
-        7.5,
-        7.0,
-        35.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    cob_wire_conduit_roof = bd.Pos(16.5, -29.5, 41.5) * bd.Cone(
-        bottom_radius=5.0,
-        top_radius=0.6,
-        height=4.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    body = (
-        body
-        - cable_slot
-        - motor_to_pdb_tunnel
-        - cob_wire_entry_port
-        - cob_wire_conduit
-        - cob_wire_conduit_roof
-    )
+    dc_spotface = bd.Solid.make_loft([_sf_wire(-75.0), _sf_wire(-71.60)], ruled=True)  # -71.60..-67.80 = 3.80 mm!
+    dc_inner_nut_seat = bd.Solid.make_loft([_sf_wire(-67.80), _sf_wire(-62.50)], ruled=True)
+    body = body - dc_spotface - dc_inner_nut_seat - dc_jack_bore
 
-    # 6c. Integrated Root-Flare Holster Socket for the Magic_LED_Wand at theta = +30°
-    #     (R = 52.0 mm -> X = +45.03 mm, Y = +26.00 mm)
+    # 6. Integrated Root-Flare Holster Socket for Magic_LED_Wand at theta = +30°
     wand_boss = bd.Pos(wand_x, wand_y, 0.0) * bd.Cylinder(
-        radius=9.0,
+        radius=9.5,
         height=27.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
@@ -924,25 +845,24 @@ def build_trunk_base() -> bd.Solid:
     )
     body = (body + wand_boss) - wand_bore - wand_bore_floor - wand_bore_chamfer
 
-    # 7. Cut oversized 10.0 x 8.0 mm rear (-X) Connector-Pass-Through wire conduit along trunk wall
+    # 7. Cut 150° Connector-Pass-Through wire conduit along trunk wall
     body = _cut_rear_wire_conduit(body, TRUNK_SECTION_HEIGHT, is_base=True)
 
-    # 8. Cut 60-degree helical female dovetail sockets (above electronics hub cone)
+    # 8. Cut 60-degree helical female dovetail sockets (stations 1..26 at Z_offset = -33.5 mm)
     body = _cut_helical_dovetails_for_section(
         body,
         z_section_min=0.0,
         z_section_max=TRUNK_SECTION_HEIGHT,
-        local_z_min_safe=46.0,
+        local_z_min_safe=40.0,
         local_z_max_safe=TRUNK_SECTION_HEIGHT - DOVETAIL_SLOT_H - 4.0,
     )
 
-    # 8b. Cut front (-Y) vertical elevation ruler ticks alongside viewing window (Z = 95..125 mm)
+    # 8b. Front (-Y) vertical elevation ruler ticks alongside viewing window
     body = _cut_front_elevation_ruler_for_section(
         body, z_section_min=0.0, local_z_min=92.0, local_z_max=132.0
     )
 
-    # 9. Engrave hidden assembly number "1" on the flat top annular rim of the male tenon
-    #    (Z = 165.0 mm, Y = +23.9 mm — 100% hidden inside trunk_mid's bottom socket once stacked!)
+    # 9. Engrave hidden assembly number "1" on top rim of male tenon
     num_1 = bd.Pos(0.0, 23.9, TRUNK_SECTION_HEIGHT + TENON_HEIGHT) * make_engraved_label_solid(
         "1", char_h=4.4, depth=0.85
     )
@@ -951,169 +871,170 @@ def build_trunk_base() -> bd.Solid:
     return body.solid()
 
 
-def build_base_bottom_cover() -> bd.Solid:
-    """Build the removable Twist-Lock / Magnetic Bottom Service Lid (`Base_Bottom_Cover`,
-    Toolhead 1 - Dark Wood Brown #4A2F1D):
-      - Flat, 100% support-free 3.0 mm thick circular service lid (Ø 45.0 mm disk + 4x quarter-turn
-        bayonet / captive-magnet tabs = Ø 52.0 mm diagonal span, 45.0 x 45.0 mm cardinal AABB)
-        that closes the central access port of the Hollow Root Vault in Trunk_Base
-      - 4x ventilation louvers for thermal convection
-      - 4x captive CA001 magnet sockets (Ø 4.25 x 2.20 mm) on the 4 bayonet tabs
-      - Central & rear sight/access ports for the M5Stack status RGB LED & programmable button
-    """
-    disk = bd.Cylinder(
-        radius=22.5,
-        height=BASE_BOTTOM_COVER_THICK,  # 3.0 mm thick
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # 4x quarter-turn bayonet / magnet tabs at 45°, 135°, 225°, 315°
-    for deg in (45.0, 135.0, 225.0, 315.0):
-        rad = math.radians(deg)
-        tx = 21.5 * math.cos(rad)
-        ty = 21.5 * math.sin(rad)
-        tab = bd.Pos(tx, ty, 0.0) * bd.Cylinder(
-            radius=4.5,
-            height=BASE_BOTTOM_COVER_THICK,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-        disk = disk + tab
-
-    # Cut 4x captive magnet pockets (Ø 4.25 x 2.20 mm) on the top face (Z = 0.80..3.10 mm) of the 4 tabs
-    for deg in (45.0, 135.0, 225.0, 315.0):
-        rad = math.radians(deg)
-        tx = 21.5 * math.cos(rad)
-        ty = 21.5 * math.sin(rad)
-        mag_pocket = bd.Pos(tx, ty, BASE_BOTTOM_COVER_THICK - MAGNET_DEPTH) * bd.Cylinder(
-            radius=MAGNET_DIA / 2.0,
-            height=MAGNET_DEPTH + 0.1,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-        disk = disk - mag_pocket
-
-    # Cut 4x ventilation louvers (16.0 x 2.4 mm through-slots)
-    for ly in (-11.0, -4.5, 4.5, 11.0):
-        louver = bd.Pos(0.0, ly, -0.1) * bd.Box(
-            16.0 if abs(ly) > 6.0 else 12.0,
-            2.4,
-            BASE_BOTTOM_COVER_THICK + 0.2,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-        disk = disk - louver
-
-    # Central Ø 5.0 mm button/LED access port + rear cable notch
-    center_port = bd.Pos(0.0, 0.0, -0.1) * bd.Cylinder(
-        radius=2.5,
-        height=BASE_BOTTOM_COVER_THICK + 0.2,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    rear_notch = bd.Pos(-21.5, 0.0, -0.1) * bd.Box(
-        6.0,
-        6.0,
-        BASE_BOTTOM_COVER_THICK + 0.2,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    # Upward Snap-In Hollow Retaining Collar (Ø 23.60 mm OD / Ø 19.60 mm ID x 2.8 mm tall, Z = 3.0..5.8 mm)
-    # Snaps concentrically inside Trunk_Base's central Ø 24.00 mm (R = 12.00 mm) motor shroud bore
-    # with 0.20 mm radial clearance so Base_Bottom_Cover locks in place even without magnets!
-    snap_collar_outer = (
-        bd.Pos(0.0, 0.0, BASE_BOTTOM_COVER_THICK)
-        * bd.Cylinder(
-            radius=11.80,
-            height=2.2,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-        + bd.Pos(0.0, 0.0, BASE_BOTTOM_COVER_THICK + 2.2)
-        * bd.Cone(
-            bottom_radius=11.80,
-            top_radius=11.20,
-            height=0.6,
-            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-        )
-    )
-    snap_collar_inner = bd.Pos(0.0, 0.0, BASE_BOTTOM_COVER_THICK - 0.1) * bd.Cylinder(
-        radius=9.80,
-        height=3.2,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    snap_collar_slots = (
-        bd.Pos(-11.0, 0.0, BASE_BOTTOM_COVER_THICK - 0.1)
-        * bd.Box(8.0, 7.0, 3.2, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
-        + bd.Pos(0.0, -11.0, BASE_BOTTOM_COVER_THICK - 0.1)
-        * bd.Box(7.5, 8.0, 3.2, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
-    )
-    snap_collar = snap_collar_outer - snap_collar_inner - snap_collar_slots
-    cover = (disk - center_port - rear_notch) + snap_collar
-    return assign_toolhead(cover.solid(), "Base_Bottom_Cover", 1)
-
-
-def build_conduit_cover_strip() -> bd.Solid:
-    """Build the snap-on brown cover strip (`Conduit_Cover_Strip`, Toolhead 1 - Dark Wood Brown #4A2F1D)
-    for the oversized 10.0 mm wide x 8.0 mm deep rear Connector-Pass-Through trunk wiring conduit:
-      - Printed flat on the bed (Z = 0.0, 100% support-free): 68.0 mm long x 11.2 mm wide x 2.6 mm thick
-      - Features a 11.2 mm wide outer depth-stop flange (+0.6 mm per side over the 10.0 mm conduit)
-        and twin snap-fit retention rails (9.80 mm across outer ribs with 6.8 mm central flex gap)
-        that press-fit snugly into the 10.0 mm wide rear trunk channel after threading pre-terminated plugs.
+def _make_single_conduit_cover_strip(name: str, length_mm: float) -> bd.Solid:
+    """Build a section-matched snap-on brown cover strip (Toolhead 1 - Dark Wood Brown #4A2F1D)
+    for the 150° `WIRE_CONDUIT_W = 10.6 mm` Connector-Pass-Through trunk wiring conduit:
+      - Printed flat on the bed (Z = 0.0, 100% support-free): `11.8 mm` wide x `length_mm` long x `2.6 mm` thick
+      - Outer depth-stop flange (`11.8 mm`, +0.6 mm per side) and twin retention rails
+        (`10.50 mm` outer span inside the `10.60 mm` conduit channel) along the smooth 150° bark strip.
     """
     face_plate = bd.Box(
-        11.2,
-        CONDUIT_COVER_STRIP_H,      # 68.0 mm
+        11.8,
+        length_mm,
         1.2,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    left_rail = bd.Pos(-4.15, 0.0, 1.2) * bd.Box(
+    left_rail = bd.Pos(-4.50, 0.0, 1.2) * bd.Box(
         1.5,
-        CONDUIT_COVER_STRIP_H - 4.0,
+        max(10.0, length_mm - 4.0),
         1.4,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    right_rail = bd.Pos(4.15, 0.0, 1.2) * bd.Box(
+    right_rail = bd.Pos(4.50, 0.0, 1.2) * bd.Box(
         1.5,
-        CONDUIT_COVER_STRIP_H - 4.0,
+        max(10.0, length_mm - 4.0),
         1.4,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     strip = face_plate + left_rail + right_rail
-    return assign_toolhead(strip.solid(), "Conduit_Cover_Strip", 1)
+    return assign_toolhead(strip.solid(), name, 1)
 
 
-def build_battery_cover() -> bd.Solid:
-    """Build the printable Battery_Cover latch plate (Toolhead 1 - Dark Wood Brown #4A2F1D)
-    for the bottom electronics bay in Trunk_Base (fits Bambu IA005 Power Hub, M5Stack Atomic
-    H-Driver ESP32 K050, or 14500 Battery Pack), with 2x M2.5 (AA050) counterbored through-holes
-    at X = ±30.0 mm and a central Ø 5.0 mm status-LED / button access port.
+def build_conduit_cover_strips() -> dict[str, bd.Solid]:
+    """Return all 3 section-matched 150° wire conduit cover strips:
+      - `Conduit_Cover_Strip_Base` (`L = 100.0 mm`, trunk_base Z = 50..150)
+      - `Conduit_Cover_Strip_Mid`  (`L = 144.0 mm`, trunk_mid  Z = 3..147)
+      - `Conduit_Cover_Strip_Top`  (`L = 144.0 mm`, trunk_top  Z = 3..147)
     """
-    plate = bd.Box(
-        66.0,
-        34.0,
-        2.6,
+    return {
+        "Conduit_Cover_Strip_Base": _make_single_conduit_cover_strip("Conduit_Cover_Strip_Base", CONDUIT_STRIP_LEN_BASE),
+        "Conduit_Cover_Strip_Mid": _make_single_conduit_cover_strip("Conduit_Cover_Strip_Mid", CONDUIT_STRIP_LEN_MID),
+        "Conduit_Cover_Strip_Top": _make_single_conduit_cover_strip("Conduit_Cover_Strip_Top", CONDUIT_STRIP_LEN_TOP),
+    }
+
+
+def build_bottom_electronics_lid() -> bd.Solid:
+    """Build the upright `Bottom_Electronics_Lid` tray (Toolhead 1 - Dark Wood Brown #4A2F1D):
+      - `Ø 134.6 mm x 2.80 mm` (`BOTTOM_TRAY_OUTER_DIA` x `BOTTOM_TRAY_THICK`) flat circular
+        base tray nesting flush inside `trunk_base`'s `Ø 135.0 mm` vault rabbet (`Z = 0.00..2.80 mm`).
+      - `4x` diagonal outer flange tabs (`BOTTOM_TRAY_TAB_COORDS` at `R = 71.0 mm`, 45°/135°/225°/315°)
+        with `Ø 2.75 mm` through + `Ø 5.00 mm` counterbores for `AA050` `M2.5 x 6 mm` BHCS screws.
+      - Concentric cutouts clearing `motor_shroud_tower` (`Ø 28.6 mm` at center) and
+        `wand_pillar` (`Ø 19.6 mm` at `(+45.03, +26.00)`), plus `14 x 14 mm` `C008` LED/button port.
+      - Upward open-top `1.6 mm`-wall snap cradles (100% support-free flat bed printing):
+          * `UCTRONICS` B07XXWQ49N at `(-2.0, +36.0)` with open ±X terminal/cap space & 1.2 mm standoffs
+          * Unstacked `2x WAGO 221-415` at `(+46.0, -2.5)` (+5V bus) and `(-32.5, 0.0)` (GND bus)
+            with open `-X` wire portals & >16 mm lever flip clearance
+          * `A092+C008` at `(-2.0, -33.0)` with open `-X/+X` (+22 mm A096 / +16 mm HT3.96-4P) ends
+      - Debossed `"A"`, `"12"`, `"G"` orientation glyphs via `make_engraved_label_solid()`.
+    """
+    t_tray = BOTTOM_TRAY_THICK
+    tray = bd.Cylinder(
+        radius=BOTTOM_TRAY_OUTER_DIA / 2.0,
+        height=t_tray,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    lip = bd.Pos(0.0, 0.0, 2.6) * bd.Box(
-        53.6,
-        30.6,
-        1.4,
+
+    # 4x diagonal mounting tabs at R = 71.0 mm (45°, 135°, 225°, 315°)
+    for tx, ty in BOTTOM_TRAY_TAB_COORDS:
+        tdeg = math.degrees(math.atan2(ty, tx))
+        tab_tip = bd.Pos(tx, ty, 0.0) * bd.Cylinder(
+            radius=5.0,
+            height=t_tray,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        tab_neck = bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, tdeg)) * (
+            bd.Pos(68.0, 0.0, 0.0)
+            * bd.Box(6.5, 10.0, t_tray, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+        )
+        tray = tray + tab_tip + tab_neck
+
+    # Upward snap cradles on top surface (Z = t_tray = 2.80 mm):
+    wall_t = 1.6
+
+    # (1) UCTRONICS U6223 (63.0 x 27.0 x 12.0 mm) at (-2.0, +36.0), pocket 63.6 x 27.6 mm
+    #     Long ±Y rails (length 44 mm) leave ±X screw terminals & -X 1000 uF capacitor completely open
+    ux, uy = -2.0, 36.0
+    for sy in (-1.0, 1.0):
+        rail = bd.Pos(ux, uy + sy * (27.6 / 2.0 + wall_t / 2.0), t_tray) * bd.Box(
+            44.0, wall_t, 10.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+        )
+        tray = tray + rail
+    for sx in (-1.0, 1.0):
+        for sy in (-1.0, 1.0):
+            standoff = bd.Pos(ux + sx * 27.5, uy + sy * 10.5, t_tray) * bd.Cylinder(
+                radius=2.2, height=1.2, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+            )
+            corner_post = bd.Pos(ux + sx * (63.6 / 2.0 + wall_t / 2.0), uy + sy * 12.0, t_tray) * bd.Box(
+                wall_t, 4.0, 8.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+            )
+            tray = tray + standoff + corner_post
+
+    # (2) Unstacked 2x WAGO 221-415 cradles (18.6 x 30.0 x 8.4 mm -> pocket 19.2 x 30.6 mm)
+    #     Wire entry ports face -X (left open); backstop walls + side ±Y rails hold blocks snugly
+    for wx, wy in ((46.0, -2.5), (-32.5, 0.0)):
+        back_wall = bd.Pos(wx + 19.2 / 2.0 + wall_t / 2.0, wy, t_tray) * bd.Box(
+            wall_t, 30.6 + 2.0 * wall_t, 8.4, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+        )
+        tray = tray + back_wall
+        for sy in (-1.0, 1.0):
+            side_rail = bd.Pos(wx + 1.5, wy + sy * (30.6 / 2.0 + wall_t / 2.0), t_tray) * bd.Box(
+                16.2, wall_t, 8.4, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+            )
+            front_lip = bd.Pos(wx - 19.2 / 2.0 - 0.6, wy + sy * (30.6 / 2.0 - 1.5), t_tray) * bd.Box(
+                1.4, 3.0, 6.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+            )
+            tray = tray + side_rail + front_lip
+
+    # (3) A092+C008 cradle (48.0 x 24.0 x 19.0 mm -> pocket 48.6 x 24.6 mm) centered at (0.0, -31.0)
+    #     Seated flush on Z = 2.80 mm around the 14 x 14 mm C008 LED/button port; long ±Y rails
+    #     (length 38 mm) leave -X (+22 mm A096/USB) and +X (+16 mm HT3.96-4P) plugs 100% open
+    ax, ay = 0.0, -31.0
+    for sy in (-1.0, 1.0):
+        a_rail = bd.Pos(ax, ay + sy * (24.6 / 2.0 + wall_t / 2.0), t_tray) * bd.Box(
+            38.0, wall_t, 12.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+        )
+        tray = tray + a_rail
+
+    # Concentric holes for motor_shroud_tower (0,0), wand_pillar (+45.03,+26.00), and 14x14 C008 port
+    wand_x = 52.0 * math.cos(math.radians(30.0))
+    wand_y = 52.0 * math.sin(math.radians(30.0))
+    center_hole = bd.Pos(0.0, 0.0, -0.2) * bd.Cylinder(
+        radius=MOTOR_SHROUD_OD / 2.0 + 0.30,  # Ø 28.6 mm
+        height=t_tray + 0.4,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    cover = plate + lip
-    status_port = bd.Pos(0.0, 0.0, -0.1) * bd.Cylinder(
-        radius=2.5,
-        height=5.0,
+    wand_hole = bd.Pos(wand_x, wand_y, -0.2) * bd.Cylinder(
+        radius=9.80,  # Ø 19.6 mm (0.30 mm radial clearance around R = 9.5 mm wand_pillar)
+        height=t_tray + 0.4,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    cover = cover - status_port
-    for bx in (-30.0, 30.0):
-        thru = bd.Pos(bx, 0.0, -0.1) * bd.Cylinder(
+    c008_port = bd.Pos(ax, ay, -0.2) * bd.Box(
+        14.0, 14.0, t_tray + 0.4, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN)
+    )
+    tray = tray - center_hole - wand_hole - c008_port
+
+    # 4x Counterbored M2.5 mounting holes in the 4 outer diagonal tabs
+    for tx, ty in BOTTOM_TRAY_TAB_COORDS:
+        thru = bd.Pos(tx, ty, -0.2) * bd.Cylinder(
             radius=AA050_M25_THROUGH_DIA / 2.0,
-            height=5.0,
+            height=t_tray + 0.4,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        cbore = bd.Pos(bx, 0.0, -0.1) * bd.Cylinder(
+        cbore = bd.Pos(tx, ty, -0.2) * bd.Cylinder(
             radius=AA050_M25_CBORE_DIA / 2.0,
-            height=1.3,
+            height=1.5,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
         )
-        cover = cover - thru - cbore
-    return assign_toolhead(cover.solid(), "Battery_Cover", 1)
+        tray = tray - thru - cbore
+
+    # Debossed "A" (A092 side), "12" (DC-099 12V -X side), "G" (WAGO_2_W GND side) labels on top deck
+    glyph_a = bd.Pos(0.0, -52.5, t_tray) * make_engraved_label_solid("A", char_h=4.4, depth=0.65)
+    glyph_12 = bd.Pos(-50.0, 0.0, t_tray) * make_engraved_label_solid("12", char_h=4.4, depth=0.65)
+    glyph_g = bd.Pos(-32.5, -19.0, t_tray) * make_engraved_label_solid("G", char_h=4.4, depth=0.65)
+    tray = tray - glyph_a - glyph_12 - glyph_g
+
+    return assign_toolhead(tray.solid(), "Bottom_Electronics_Lid", 1)
 
 
 def build_trunk_mid() -> bd.Solid:
@@ -1177,9 +1098,11 @@ def build_trunk_top() -> bd.Solid:
     """Build Section 3 (trunk_top): local Z = 0..150 mm (global Z = 300..450 mm).
     Features:
       - Ø 41.0 mm auger bore + Ø 26.6 mm (-Y) vertical ball guide flute
-      - Sloped Ø 28.0 mm Upper Ball Discharge Chute at local Z = 134.5 -> 131.5 mm
-        (global Z = 434.5 -> 431.5 mm, completely underneath the Z = 450.0 mm Bambu LED Lamp Puck!)
-        that discharges rising marbles directly onto track_seg_14_top_entry at 1665° (-135°).
+      - Sloped Ø 27.6 mm Upper Ball Discharge Chute (global Z = 436.2 -> 430.83 mm) into
+        curved swept-ball exit relief along `1710° -> 1650°` at `TOP_FEEDER_START_R = 47.0 mm`
+      - Flat unpinned horizontal `1710°` spout cradle shelf (Z_local = 99.0..109.35 mm with 45°
+        support-free underside gusset) clearing the shortened gothic viewing window (Z <= 93 mm)
+      - 150° Sparkleiot topper LED wire exit slot + Ø 59.40 x 4.0 mm `crown_collar` socket tenon
     """
     body = _make_bark_textured_trunk_column(
         z_min=0.0,
@@ -1187,9 +1110,31 @@ def build_trunk_top() -> bd.Solid:
         z_global_offset=2.0 * TRUNK_SECTION_HEIGHT,
     )
 
-    # Female socket at bottom (Z = 0..15.2 mm + 45-deg roof)
+    # Female socket at bottom (Z = 0..15.2 mm + 45-deg roof) with 150° conduit flat
     socket_cutter = make_keyed_female_socket_cutter(z_base=-0.1, height=TENON_HEIGHT + 0.1)
     body = body - socket_cutter
+
+    # Flat unpinned horizontal cradle shelf beneath track_seg_14's 1710° spout collar (inboard solid shoulder)
+    top_feeder_local_z = (HELIX_Z_END + TOP_FEEDER_RISE_Z) - 2.0 * TRUNK_SECTION_HEIGHT  # 125.0 mm
+    z_shelf_top = top_feeder_local_z + TRACK_BASE_Y - 1.15  # 108.35 mm (clears sloped -X seg_14 downhill ramp by >=0.17 mm)
+    z_shelf_bot = z_shelf_top - 10.35  # 99.0 mm (45° underside gusset from Y=-33.0 out to Y=-42.5)
+    shelf_pts = [
+        (-33.0, z_shelf_bot),
+        (-42.5, z_shelf_top),
+        (-32.0, z_shelf_top),
+        (-32.0, z_shelf_bot),
+        (-33.0, z_shelf_bot),
+    ]
+
+    def _shelf_wire(x_pos: float) -> bd.Wire:
+        return bd.Wire(
+            [bd.Edge.make_line((x_pos, shelf_pts[i][0], shelf_pts[i][1]),
+                               (x_pos, shelf_pts[i + 1][0], shelf_pts[i + 1][1]))
+             for i in range(len(shelf_pts) - 1)]
+        )
+
+    top_spout_shelf = bd.Solid.make_loft([_shelf_wire(-8.0), _shelf_wire(8.0)], ruled=True)
+    body = body + top_spout_shelf
 
     # Continuous Ø 41.0 mm vertical through-bore + Ø 26.6 mm (-Y) vertical ball guide flute
     bore = bd.Cylinder(
@@ -1207,11 +1152,11 @@ def build_trunk_top() -> bd.Solid:
         height=12.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    # Sloped Upper Ball Discharge Chute along -Y (global Z = 436.2 -> 432.2 mm, below Z = 450 mm Lamp Puck!)
-    # Discharges rising marbles straight along -Y into track_seg_14_top_entry's enclosed catch basin at 1710° (0, -42.5)
+
+    # Sloped Upper Ball Discharge Chute along -Y + curved swept-ball exit relief along 1710° -> 1650°
     p_chute_start = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 136.2)
-    p_chute_end = bd.Vector(0.0, -42.5, 132.2)
-    chute_vec = p_chute_end - p_chute_start
+    p_chute_mouth = bd.Vector(0.0, -TOP_FEEDER_START_R, top_feeder_local_z + 5.83)
+    chute_vec = p_chute_mouth - p_chute_start
     chute_plane = bd.Plane(origin=p_chute_start, z_dir=chute_vec.normalized())
     upper_discharge_chute = (
         (bd.Pos(p_chute_start.X, p_chute_start.Y, p_chute_start.Z) * bd.Sphere(radius=13.8))
@@ -1219,7 +1164,7 @@ def build_trunk_top() -> bd.Solid:
             chute_plane
             * bd.Cylinder(
                 radius=13.8,
-                height=chute_vec.length + 4.0,
+                height=chute_vec.length,
                 align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
             )
         )
@@ -1233,16 +1178,40 @@ def build_trunk_top() -> bd.Solid:
             )
         )
     )
+    swept_thetas = [1710.0 - 10.0 * idx for idx in range(7)]  # 1710° -> 1650°
+    swept_pts = [
+        closed_loop_track_point(th) + bd.Vector(0.0, 0.0, 5.83 - 2.0 * TRUNK_SECTION_HEIGHT)
+        for th in swept_thetas
+    ]
+    for i in range(len(swept_pts) - 1):
+        pa, pb = swept_pts[i], swept_pts[i + 1]
+        seg_v = pb - pa
+        seg_pl = bd.Plane(origin=pa, z_dir=seg_v.normalized())
+        upper_discharge_chute = (
+            upper_discharge_chute
+            + (bd.Pos(pa.X, pa.Y, pa.Z) * bd.Sphere(radius=13.8))
+            + (
+                seg_pl
+                * bd.Cylinder(
+                    radius=13.8,
+                    height=seg_v.length,
+                    align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+                )
+            )
+        )
+    upper_discharge_chute = upper_discharge_chute + (
+        bd.Pos(swept_pts[-1].X, swept_pts[-1].Y, swept_pts[-1].Z) * bd.Sphere(radius=13.8)
+    )
     body = body - bore - flute_cutter - flute_roof - upper_discharge_chute
 
-    # Rear vertical 4.0 x 3.0 mm wire conduit
+    # 150° vertical 10.6 x 8.5 mm wire conduit
     body = _cut_rear_wire_conduit(body, TRUNK_SECTION_HEIGHT)
 
-    # Front vertical gothic-arched auger viewing window slot (Z = 28..116 mm along -Y, 14.0 mm inner width < 25.0 mm ball)
-    view_slot = _make_arched_viewing_window_cutter(z_min=28.0, straight_h=81.0)
+    # Lowered front vertical gothic-arched viewing window slot (Z = 28..93 mm) + ruler below spout shelf
+    view_slot = _make_arched_viewing_window_cutter(z_min=28.0, straight_h=56.0)
     body = body - view_slot
 
-    # 60-degree helical female dovetail sockets for global Z in [300, 450]
+    # 60-degree helical female dovetail sockets (including b25 at 1500° and b26 at 1560°)
     body = _cut_helical_dovetails_for_section(
         body,
         z_section_min=2.0 * TRUNK_SECTION_HEIGHT,
@@ -1251,29 +1220,23 @@ def build_trunk_top() -> bd.Solid:
         local_z_max_safe=TRUNK_SECTION_HEIGHT - DOVETAIL_SLOT_H - 12.0,
     )
 
-    # Cut front (-Y) vertical elevation ruler ticks alongside viewing window (global Z = 325..400 mm)
     body = _cut_front_elevation_ruler_for_section(
-        body, z_section_min=2.0 * TRUNK_SECTION_HEIGHT, local_z_min=24.0, local_z_max=118.0
+        body, z_section_min=2.0 * TRUNK_SECTION_HEIGHT, local_z_min=24.0, local_z_max=90.0
     )
 
-    # Recessed Ø 46.2 x 2.5 mm Topper LED Ring Seat on top rim (Z = 147.5..150.0 mm, R = 20.5..23.1 mm)
-    # Cradles the Ø 45.0 mm Sparkleiot 16-Bit WS2812 RGB LED Ring (B09YTMNGTD) flat and centered
-    # 12 mm above the auger, with a 6.5 mm wide rear (-X) wire exit channel into the rear trunk conduit
-    topper_ring_seat = bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT - 2.5) * bd.Cylinder(
-        radius=23.1,
-        height=3.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    topper_ring_wire_slot = bd.Pos(-29.0, 0.0, TRUNK_SECTION_HEIGHT - 3.2) * bd.Box(
-        18.0,
-        WIRE_CONDUIT_W,
-        8.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    # Topper wire exit notch aligned at 150° into trunk_top's wire conduit
+    topper_ring_wire_slot = bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, WIRE_CONDUIT_ANGLE_DEG)) * (
+        bd.Pos(29.5, 0.0, TRUNK_SECTION_HEIGHT - 3.5)
+        * bd.Box(
+            14.0,
+            WIRE_CONDUIT_W,
+            10.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
     )
 
     # Upward Crown Centering Tenon Collar (Ø 59.40 mm OD / Ø 50.00 mm ID x 4.0 mm tall, Z = 150.0..154.0 mm)
-    # Mates concentrically inside golden_apple_topper's Ø 60.00 mm (R = 30.00 mm) bottom socket with
-    # 0.30 mm radial clearance so the Apple Topper locks positively onto trunk_top and cannot slide off!
+    # Mates concentrically inside golden_apple_topper's Ø 60.00 x 4.6 mm `CROWN_SOCKET`
     crown_collar_outer = (
         bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT - 0.2)
         * bd.Cylinder(
@@ -1297,28 +1260,27 @@ def build_trunk_top() -> bd.Solid:
     crown_collar = crown_collar_outer - crown_collar_inner
     body = body + crown_collar
 
-    # Engrave hidden assembly number "3" on the flat top annular rim of the Crown Centering Tenon Collar
-    # (Z = 154.0 mm, Y = +27.1 mm — 100% covered underneath golden_apple_topper once assembled!)
+    # Engrave hidden assembly number "3" on top rim of Crown Centering Tenon Collar
     num_3 = bd.Pos(0.0, 27.1, TRUNK_SECTION_HEIGHT + 4.0) * make_engraved_label_solid(
         "3", char_h=3.6, depth=0.85
     )
-    body = body - topper_ring_seat - topper_ring_wire_slot - num_3
+    body = body - topper_ring_wire_slot - num_3
 
     return body.solid()
 
 
 def build_all_trunk_parts() -> dict[str, bd.Solid]:
-    """Return dictionary of all 3 stackable trunk sections, Base_Bottom_Cover,
-    Conduit_Cover_Strip, and Battery_Cover (Toolhead 1 - Dark Wood Brown #4A2F1D).
+    """Return dictionary of all 3 stackable trunk sections, Bottom_Electronics_Lid,
+    and 3 section-matched 150° Conduit_Cover_Strip_* parts (Toolhead 1 - Dark Wood Brown #4A2F1D).
     """
-    return {
+    parts: dict[str, bd.Solid] = {
         "trunk_base": assign_toolhead(build_trunk_base(), "trunk_base", 1),
         "trunk_mid": assign_toolhead(build_trunk_mid(), "trunk_mid", 1),
         "trunk_top": assign_toolhead(build_trunk_top(), "trunk_top", 1),
-        "Base_Bottom_Cover": build_base_bottom_cover(),
-        "Conduit_Cover_Strip": build_conduit_cover_strip(),
-        "Battery_Cover": build_battery_cover(),
+        "Bottom_Electronics_Lid": build_bottom_electronics_lid(),
     }
+    parts.update(build_conduit_cover_strips())
+    return parts
 
 
 if __name__ == "__main__":

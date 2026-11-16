@@ -795,12 +795,12 @@ async function init() {
 
   statusEl.textContent = "Fetching CAD scene manifest...";
   progBar.style.width = "25%";
-  const manifestResp = await fetch("assets/manifest.json?v=45", { cache: "no-store" });
+  const manifestResp = await fetch("assets/manifest.json?v=46", { cache: "no-store" });
   manifest = await manifestResp.json();
 
   statusEl.textContent = "Downloading B-Rep binary mesh buffer...";
   progBar.style.width = "55%";
-  const binResp = await fetch(`${manifest.binary_file}?v=45`, { cache: "no-store" });
+  const binResp = await fetch(`${manifest.binary_file}?v=46`, { cache: "no-store" });
   const arrayBuffer = await binResp.arrayBuffer();
 
   statusEl.textContent = "Constructing Three.js WebGL geometries & physics actors...";
@@ -1349,22 +1349,22 @@ function buildHardwareOverlay() {
     cobLights.push(cLight);
   });
 
-  // 7. Step 9a: 3-Pin JST-SM Extension Cable (B0CT827QQC) inside Rear -X Trunk Groove (X = -32.2, Y = 0, Z = 8..449 mm) -> M5Stack Grove GPIO32
+  // 7. Step 9a: 3-Pin JST-SM Extension Cable (B0CT827QQC) inside unobstructed 150° Trunk Conduit (10.6×8.5 mm, Z = 8..449 mm) -> M5Stack Grove GPIO32
   const cordGeom = new THREE.CylinderGeometry(1.6, 1.6, 441.0, 12);
   cordGeom.rotateX(Math.PI / 2);
   addElectronicActor(
     cordGeom,
     { color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.45 },
-    [-32.2, 0, 228.5],
+    [-26.4, 15.25, 228.5],
     {
       name: "hw_Topper_Rear_Cable",
-      label: "3-Pin JST-SM Extension Cable (B0CT827QQC — Pressed into Rear -X Trunk Groove from Topper Ring down to M5Stack Grove GPIO32)",
+      label: "3-Pin JST-SM Extension Cable (B0CT827QQC — Dropped into Unobstructed 150° Trunk Conduit from Topper Ring down to M5Stack Grove GPIO32)",
       subsystem: "topper",
       step: 9,
       sub_delay: 0.0,
       anim_dur: 0.65,
-      insert_offset: [-55, 0, 0],
-      explode: [-95, 0, 40],
+      insert_offset: [-47.6, 27.5, 0],
+      explode: [-82.3, 47.5, 40],
     }
   );
 
@@ -1409,13 +1409,13 @@ function buildHardwareOverlay() {
 
   // 10. Step 10: 8x Bambu Lab Single LED Magnetic Control Switch Lights (ordered #8 Neptune -> #1 Mercury)
   const planetSpecs = [
-    { key: "planet_neptune", name: "Neptune (#8)", deg: 60.0, color: 0x60a5fa, order: 0 },
-    { key: "planet_uranus", name: "Uranus (#7)", deg: 300.0, color: 0x2dd4bf, order: 1 },
-    { key: "planet_saturn", name: "Saturn (#6)", deg: 540.0, color: 0xfacc15, order: 2 },
-    { key: "planet_jupiter", name: "Jupiter (#5)", deg: 660.0, color: 0xfdba74, order: 3 },
-    { key: "planet_mars", name: "Mars (#4)", deg: 900.0, color: 0xf87171, order: 4 },
-    { key: "planet_earth", name: "Earth (#3)", deg: 1140.0, color: 0x38bdf8, order: 5 },
-    { key: "planet_venus", name: "Venus (#2)", deg: 1380.0, color: 0xfde047, order: 6 },
+    { key: "planet_neptune", name: "Neptune (#8)", deg: -15.0, color: 0x60a5fa, order: 0 },
+    { key: "planet_uranus", name: "Uranus (#7)", deg: 240.0, color: 0x2dd4bf, order: 1 },
+    { key: "planet_saturn", name: "Saturn (#6)", deg: 480.0, color: 0xfacc15, order: 2 },
+    { key: "planet_jupiter", name: "Jupiter (#5)", deg: 600.0, color: 0xfdba74, order: 3 },
+    { key: "planet_mars", name: "Mars (#4)", deg: 840.0, color: 0xf87171, order: 4 },
+    { key: "planet_earth", name: "Earth (#3)", deg: 1080.0, color: 0x38bdf8, order: 5 },
+    { key: "planet_venus", name: "Venus (#2)", deg: 1320.0, color: 0xfde047, order: 6 },
     { key: "planet_mercury", name: "Mercury (#1)", deg: 1590.0, color: 0xfbbf24, order: 7 },
   ];
   const ledCylGeom = new THREE.CylinderGeometry(3.75, 3.75, 6.0, 18);
@@ -1544,14 +1544,14 @@ const TRACK_PIECE_SPECS = [
     camLook: [12, -35, 56],
     portRow: {
       tag: "🟢 START PORT (-90°)",
-      html: "<strong>How Seg 01 Connects to Trunk Base (#1):</strong> From <code>θ = 0°</code> down to <code>-90°</code>, Seg 01 curves smoothly inward from <code>R = 145.0 mm</code> to <code>R = 42.0 mm</code> at the <code>-Y</code> front face of <code>trunk_base</code>. Its inner rail (<code>R = 34.25 mm</code>) hugs the <code>R = 34.0 mm</code> trunk cylinder with a tight <strong><code>0.25 mm</code> radial gap</strong>, while its high wrap-around <strong><code>bot_endcap_wall</code> bumper</strong> stops every marble and funnels it <code>+Y</code> inward (<code>Z = 56.8 → 54.5 mm</code>, a <code>-2.3 mm</code> downhill drop) straight into the Archimedes auger flute!",
+      html: "<strong>How Seg 01 Connects to Trunk Base (#1):</strong> From <code>θ = 0°</code> down to <code>-90°</code>, Seg 01 curves smoothly inward from <code>R = 145.0 mm</code> to <code>R = 42.0 mm</code> at the <code>-Y</code> front face of <code>trunk_base</code> with root-flare relief and a <code>56.2 mm²</code> Z=0 base pad, funneling marbles smoothly down to <code>Z = 54.5 mm</code> into the Archimedes auger flute!",
     },
     downhillHtml:
-      "<strong>Bottom Intake Chute (<code>θ = -90°</code>):</strong> Seats flush against <code>trunk_base</code>'s <code>-Y</code> bottom intake window. Houses the <code>10×16 mm</code> BTF-LIGHTING LED starter feed pocket underneath at <code>θ = -70°</code> and Timing Gate <code>G5</code> at <code>15°</code>.",
+      "<strong>Bottom Intake Chute (<code>θ = -90°</code>):</strong> Drops vertically into <code>trunk_base</code>'s <code>-Y</code> bottom intake port. Houses the <code>10×16 mm</code> BTF-LIGHTING LED starter feed pocket at <code>θ = -70°</code>, <strong>Neptune (#8)</strong> at <code>-15°</code>, and Timing Gate <code>G5</code> at <code>15°</code>.",
     bracketHtml:
-      "<strong>2× Tier 4 Cantilever Brackets (<code>#4</code>):</strong> Underside <code>Ø4.40 mm</code> socket holes snap onto the <strong><code>θ = 60°</code> (<code>Z = 50.6 mm</code>)</strong> midpoint bracket pegs (plus Neptune <code>#8</code> balcony) AND the <strong><code>θ = 120°</code> (<code>Z = 63.8 mm</code>)</strong> seam bracket pegs.",
+      "<strong>2× Tier 4 Cantilever Brackets (<code>#4</code>):</strong> Underside <code>Ø4.40 mm</code> socket holes snap onto the <strong><code>θ = 60°</code> (<code>Z = 50.6 mm</code>)</strong> split-tine bracket pegs AND the <strong><code>θ = 120°</code> (<code>Z = 63.8 mm</code>)</strong> seam bracket pegs.",
     uphillHtml:
-      "<strong>Uphill 15° Scarf Joint (<code>θ = 120° → Seg 02</code>):</strong> Presents <strong>Twin <code>Ø3.80×5.0 mm</code> Male Snap-Lock Tenon Pegs</strong> (at <code>u = ±14.2 mm, v = -4.2 mm</code> with <code>Ø4.08 mm</code> detent beads) + <strong>Inner/Outer Sidewall Tongues</strong> pointing uphill to receive <strong>Seg 02</strong>.",
+      "<strong>Uphill 8.0° Stepped Half-Lap (<code>θ = 120° → Seg 02</code>):</strong> Presents a lower <code>3.2+ mm</code> shoulder flange across <code>120°..128°</code> so <strong>Seg 02</strong> drops straight down (<code>-Z</code>) cleanly above Bracket #2.",
   },
   {
     pieceIdx: 1,
@@ -1559,49 +1559,32 @@ const TRACK_PIECE_SPECS = [
     actorName: "asm_track_seg_02",
     chipLabel: "Seg 02",
     chipClass: "",
-    title: "Seg 02 — Lower Helical Track (Clicks onto Seg 01 at 120°)",
+    title: "Seg 02 — Lower Helical Track (Drops Onto Seg 01 at 120°)",
     spanBadge: "θ = 120° → 240° | Z = 63.8 → 90.2 mm",
     camPos: [-225, 130, 132],
     camLook: [-65, 38, 72],
     downhillHtml:
-      "<strong>Downhill 15° Scarf Joint (<code>θ = 120° ← Seg 01</code>):</strong> Slide Seg 02 downhill along the <code>15°</code> scarf angle so its <strong>Twin <code>Ø4.30×5.6 mm</code> Female Snap-Lock Sockets + Sidewall Slots</strong> click directly onto <strong>Seg 01's Twin Male Tenon Pegs + Tongues</strong>.",
+      "<strong>Downhill 8.0° Stepped Half-Lap (<code>θ = 120° ← Seg 01</code>):</strong> Lower <strong>Seg 02</strong> straight down (<code>-Z</code>) so its upper half-lap shoulder seats flush on <strong>Seg 01</strong> while snapping onto the <code>120°</code> split-tine bracket pegs.",
     bracketHtml:
       "<strong>3× Tier 4 Bracket Stations (<code>#4</code>):</strong> Shares the <strong><code>120°</code> seam bracket</strong> with Seg 01, snaps onto the <strong><code>180°</code> (<code>Z = 77.0 mm</code>) midpoint bracket</strong>, and seats onto the <strong><code>240°</code> (<code>Z = 90.2 mm</code>) seam bracket</strong>.",
     uphillHtml:
-      "<strong>Uphill 15° Scarf Joint (<code>θ = 240° → Seg 03</code>):</strong> Exposes <strong>Twin <code>Ø3.80×5.0 mm</code> Male Snap-Lock Tenon Pegs + Sidewall Tongues</strong> at <code>240°</code> ready for <strong>Seg 03</strong>.",
-  },
-  {
-    pieceIdx: 2,
-    segNum: 0,
-    actorName: "asm_Track_Joint_Clip",
-    chipLabel: "📎 Clip",
-    chipClass: "",
-    title: "Track_Joint_Clip — Under-Seam U-Cradle Splice Clamp (120° Demo & Retrofit)",
-    spanBadge: "θ = 120° Seam | 16 mm Span",
-    camPos: [-195, 115, 108],
-    camLook: [-68, 40, 62],
-    downhillHtml:
-      "<strong>Snap-On U-Cradle Splice Clamp:</strong> Bridges <code>16 mm</code> across the underside and outer sidewalls of any track-to-track scarf joint (shown at the <code>120°</code> seam between <strong>Seg 01</strong> and <strong>Seg 02</strong>).",
-    bracketHtml:
-      "<strong>Open LED Dovetail Arch:</strong> Central <code>10.8×4.2 mm</code> underside arch keeps the continuous <code>8.0×3.6 mm</code> BTF-LIGHTING Pebble Wire channel <strong>100% unobstructed</strong> across the seam.",
-    uphillHtml:
-      "<strong>Retrofits Older Prints:</strong> If you printed an earlier track revision without male tenon pegs, push two <code>11 mm</code> snippets of raw <code>1.75 mm</code> filament into the <code>Ø2.20 mm</code> dowel holes and snap this clip underneath!",
+      "<strong>Uphill 8.0° Stepped Half-Lap (<code>θ = 240° → Seg 03</code>):</strong> Exposes its lower shoulder flange at <code>240°</code> ready for <strong>Seg 03</strong> to drop vertically onto.",
   },
 ];
 
 // Dynamically populate Seg 03 .. Seg 13 specs
 const SEG_EXTRAS = {
-  3: "Houses <strong>Uranus (#7)</strong> balcony peg at <code>300°</code> &amp; Gravity Timing Gate <strong><code>G4</code></strong> at <code>270°</code>.",
+  3: "Houses <strong>Uranus (#7)</strong> balcony peg at <code>240°</code> &amp; Gravity Timing Gate <strong><code>G4</code></strong> at <code>270°</code>.",
   4: "Smooth 120° helical arc completing Turn 1.33 above the lower trunk.",
-  5: "Houses <strong>Saturn (#6)</strong> ringed planet balcony peg at <code>540°</code>.",
-  6: "Houses <strong>Jupiter (#5)</strong> balcony peg at <code>660°</code> &amp; Gravity Timing Gate <strong><code>G3</code></strong> at <code>630°</code>.",
+  5: "Houses <strong>Saturn (#6)</strong> ringed planet balcony peg at <code>480°</code>.",
+  6: "Houses <strong>Jupiter (#5)</strong> balcony peg at <code>600°</code> &amp; Gravity Timing Gate <strong><code>G3</code></strong> at <code>630°</code>.",
   7: "Smooth 120° mid-tree helical arc transitioning from Tier 3 to Tier 2 brackets.",
-  8: "Houses <strong>Mars (#4)</strong> red planet balcony peg at <code>900°</code>.",
+  8: "Houses <strong>Mars (#4)</strong> red planet balcony peg at <code>840°</code>.",
   9: "Houses front-spine Gravity Timing Gate <strong><code>G2</code></strong> at <code>990°</code>.",
-  10: "Houses <strong>Earth (#3)</strong> balcony peg at <code>1140°</code>.",
+  10: "Houses <strong>Earth (#3)</strong> balcony peg at <code>1080°</code>.",
   11: "Smooth 120° upper-mid helical arc entering Tier 1 upper brackets.",
-  12: "Houses <strong>Venus (#2)</strong> balcony peg at <code>1380°</code> &amp; Gravity Timing Gate <strong><code>G1</code></strong> at <code>1350°</code>.",
-  13: "Final standard helical segment (<code>1440° → 1560°</code>); presents the uphill <code>1560°</code> male tenons that anchor <strong>Seg 14 (Top Entry)</strong>!",
+  12: "Houses <strong>Venus (#2)</strong> balcony peg at <code>1320°</code> &amp; Gravity Timing Gate <strong><code>G1</code></strong> at <code>1350°</code>.",
+  13: "Final standard helical segment (<code>1440° → 1560°</code>); supported by <strong>Bracket #25 (1500°)</strong> &amp; <strong>#26 (1560°)</strong> with its <code>1560°</code> stepped half-lap ready for <strong>Seg 14</strong>!",
 };
 
 for (let k = 3; k <= 13; k++) {
@@ -1613,12 +1596,12 @@ for (let k = 3; k <= 13; k++) {
   const radSeam = (thStart * Math.PI) / 180.0;
   const tierNum = thMid <= 360 ? 4 : thMid <= 720 ? 3 : thMid <= 1080 ? 2 : 1;
   TRACK_PIECE_SPECS.push({
-    pieceIdx: k,
+    pieceIdx: k - 1,
     segNum: k,
     actorName: `asm_track_seg_${String(k).padStart(2, "0")}`,
     chipLabel: `Seg ${String(k).padStart(2, "0")}`,
     chipClass: "",
-    title: `Seg ${String(k).padStart(2, "0")} — Clicks onto Seg ${String(k - 1).padStart(2, "0")} at ${thStart}° → Feeds Seg ${String(k + 1).padStart(2, "0")} at ${thEnd}°`,
+    title: `Seg ${String(k).padStart(2, "0")} — Drops (-Z) onto Seg ${String(k - 1).padStart(2, "0")} at ${thStart}° → Supports Seg ${String(k + 1).padStart(2, "0")} at ${thEnd}°`,
     spanBadge: `θ = ${thStart}° → ${thEnd}° | Z = ${ptStart.z.toFixed(1)} → ${ptEnd.z.toFixed(1)} mm`,
     camPos: [
       Math.round(ptStart.x + 155 * Math.cos(radSeam - 0.38)),
@@ -1630,17 +1613,17 @@ for (let k = 3; k <= 13; k++) {
       Math.round(ptStart.y * 0.82),
       Math.round(ptStart.z + 8),
     ],
-    downhillHtml: `<strong>Downhill 15° Scarf Joint (<code>θ = ${thStart}° ← Seg ${String(k - 1).padStart(2, "0")}</code>):</strong> Slide <strong>Seg ${String(k).padStart(2, "0")}</strong> downhill along the <code>15°</code> scarf angle so its <strong>Twin <code>Ø4.30×5.6 mm</code> Female Snap-Lock Sockets + Sidewall Slots</strong> click onto <strong>Seg ${String(k - 1).padStart(2, "0")}'s Twin <code>Ø3.80 mm</code> Male Tenon Pegs + Tongues</strong>.`,
-    bracketHtml: `<strong>Tier #${tierNum} Cantilever Brackets:</strong> Underside <code>Ø4.40 mm</code> sockets seat onto the <strong><code>${thStart}°</code> seam bracket</strong>, snap onto the <strong><code>${thMid}°</code> (<code>Z = ${(0.5 * (ptStart.z + ptEnd.z)).toFixed(1)} mm</code>) midpoint bracket</strong>, and rest on the <strong><code>${thEnd}°</code> seam bracket</strong>. ${SEG_EXTRAS[k] || ""}`,
-    uphillHtml: `<strong>Uphill 15° Scarf Joint (<code>θ = ${thEnd}° → Seg ${String(k + 1).padStart(2, "0")}</code>):</strong> Presents <strong>Twin <code>Ø3.80×5.0 mm</code> Male Snap-Lock Tenon Pegs</strong> (<code>u = ±14.2 mm, v = -4.2 mm</code>) + <strong>Inner/Outer Sidewall Tongues</strong> pointing uphill to receive <strong>Seg ${String(k + 1).padStart(2, "0")}</strong>.`,
+    downhillHtml: `<strong>Downhill 8.0° Stepped Half-Lap (<code>θ = ${thStart}° ← Seg ${String(k - 1).padStart(2, "0")}</code>):</strong> Lower <strong>Seg ${String(k).padStart(2, "0")}</strong> straight down (<code>-Z</code>) onto <strong>Seg ${String(k - 1).padStart(2, "0")}'s lower shoulder</strong> and click onto the split-tine bracket pegs.`,
+    bracketHtml: `<strong>Tier #${tierNum} Cantilever Brackets:</strong> Underside <code>Ø4.40 mm</code> sockets lock onto the <strong><code>${thStart}°</code> seam bracket</strong>, split-tine <strong><code>${thMid}°</code> (<code>Z = ${(0.5 * (ptStart.z + ptEnd.z)).toFixed(1)} mm</code>) midpoint bracket</strong>, and <strong><code>${thEnd}°</code> seam bracket</strong>. ${SEG_EXTRAS[k] || ""}`,
+    uphillHtml: `<strong>Uphill 8.0° Stepped Half-Lap (<code>θ = ${thEnd}° → Seg ${String(k + 1).padStart(2, "0")}</code>):</strong> Exposes its lower shoulder flange at <code>${thEnd}°</code> to support <strong>Seg ${String(k + 1).padStart(2, "0")}</strong>.`,
   });
 }
 
-// Piece 14: Seg 14 (Last Segment — Top Entry Catch Basin & Trunk Top Discharge Spout)
+// Piece 13: Seg 14 (Last Segment — Top Entry Catch Basin & Trunk Top Discharge Spout)
 TRACK_PIECE_SPECS.push({
-  pieceIdx: 14,
+  pieceIdx: 13,
   segNum: 14,
-  actorName: "asm_track_seg_14",
+  actorName: "asm_track_seg_14_top_entry",
   chipLabel: "🔴 14 [End]",
   chipClass: "special-last",
   title: "Seg 14 — Top Entry Catch Basin & Trunk Top Discharge Spout (LAST PIECE)",
@@ -1649,14 +1632,14 @@ TRACK_PIECE_SPECS.push({
   camLook: [6, -32, 422],
   portRow: {
     tag: "🔴 END PORT (1710° / -90°)",
-    html: "<strong>How Seg 14 Connects to Trunk Top (#3):</strong> From <code>θ = 1620°</code> to <code>1710°</code> (<code>-90°</code>), Seg 14 curves inward from <code>R = 60.0 mm</code> to <code>R = 42.5 mm</code> at the <code>-Y</code> front face of <code>trunk_top</code>. Its inner rail (<code>R = 34.25 mm</code> collar) hugs <code>trunk_top</code>'s <code>R = 34.0 mm</code> cylinder (<code>0.25 mm</code> gap) directly underneath the sloped <code>-Y</code> <strong>Upper Discharge Spout (<code>Z = 435.5 → 431.8 mm</code>)</strong>, while its high wrap-around <strong><code>top_endcap_wall</code> upstream bumper</strong> catches every marble ejected by the auger!",
+    html: "<strong>How Seg 14 Connects to Trunk Top (#3):</strong> From <code>θ = 1620°</code> to <code>1710°</code> (<code>-90°</code>), Seg 14 curves inward from <code>R = 60.0 mm</code> to <code>R = 47.0 mm</code> around <code>trunk_top</code> beneath the sloped <code>-Y</code> <strong>Upper Discharge Spout (<code>Z = 435.5 → 431.8 mm</code>)</strong>, while its wrap-around <strong><code>top_endcap_wall</code> bumper</strong> guides every marble downhill!",
   },
   downhillHtml:
-    "<strong>Downhill 15° Scarf Joint (<code>θ = 1560° ← Seg 13</code>):</strong> Slide <strong>Seg 14</strong> downhill along the <code>15°</code> scarf joint so its <strong>Twin <code>Ø4.30×5.6 mm</code> Female Snap-Lock Sockets + Sidewall Slots</strong> click onto <strong>Seg 13's Twin <code>Ø3.80 mm</code> Male Tenon Pegs + Tongues</strong>.",
+    "<strong>Downhill 8.0° Stepped Half-Lap (<code>θ = 1560° ← Seg 13</code>):</strong> Lower <strong>Seg 14</strong> vertically (<code>-Z</code>) onto <strong>Seg 13</strong>'s shoulder and <strong>Bracket #26 (1560°)</strong>.",
   bracketHtml:
-    "<strong>2× Tier 1 Top Brackets (<code>#1</code>):</strong> Underside <code>Ø4.40 mm</code> sockets snap onto the <strong><code>1560°</code> (<code>Z = 404.8 mm</code>) seam bracket</strong> AND the topmost <strong><code>1620°</code> (<code>Z = 418.0 mm</code>) cantilever bracket</strong>. Houses <strong>Mercury (#1)</strong> at <code>1590°</code> &amp; Start Timing Gate <strong><code>G0</code></strong> at <code>1605°</code>.",
+    "<strong>Anchored by Bracket #26 (1560°):</strong> Supported directly at the <code>1560°</code> seam above Trunk_Top's upper catch collar. Houses <strong>Mercury (#1)</strong> at <code>1590°</code> &amp; Start Timing Gate <strong><code>G0</code></strong> at <code>1605°</code>.",
   uphillHtml:
-    "<strong>Enclosed Upper Catch Basin (<code>θ = 1710° ← Trunk Top Spout</code>):</strong> Marbles exiting the auger drop <code>-3.7 mm</code> onto Seg 14's trough floor (<code>Z_marble = 431.4 mm</code>) and immediately accelerate downhill toward Seg 13.",
+    "<strong>Enclosed Upper Catch Basin (<code>θ = 1710° ← Trunk Top Spout</code>):</strong> Marbles exiting the auger drop into Seg 14's catch basin (58.3 mm² printable base pad) and accelerate downhill toward Seg 13.",
 });
 
 function buildTrackJointVisualizer() {
@@ -1717,7 +1700,7 @@ function buildTrackJointVisualizer() {
     center: new THREE.Vector3(0, -34.5, 56.2),
   });
 
-  // 2. Markers 1..13: All 13 Track-to-Track 15° Scarf Joints (120°, 240°, ..., 1560°)
+  // 2. Markers 1..13: All 13 Track-to-Track 8.0° Stepped Half-Lap Joints (120°, 240°, ..., 1560°)
   for (let k = 1; k <= 13; k++) {
     const seamDeg = k * 120.0;
     const rad = (seamDeg * Math.PI) / 180.0;
@@ -1748,43 +1731,34 @@ function buildTrackJointVisualizer() {
     localFrame.position.copy(pt);
     localFrame.quaternion.setFromRotationMatrix(basisMat);
 
-    // Scarf seam collar ring around track cross-section
+    // Stepped half-lap seam collar ring around track cross-section
     const ringMesh = new THREE.Mesh(seamRingGeom, seamMat);
     ringMesh.rotation.x = Math.PI / 2;
     ringMesh.position.set(0, 0, 2.5);
     localFrame.add(ringMesh);
 
-    // Twin Ø3.80 x 5.0 mm Male Snap-Lock Tenon Pegs at u = ±14.2 mm, v = -4.2 mm
-    [-14.2, 14.2].forEach((uOff) => {
+    // Twin Ø4.0 mm Split-Tine Cantilever Bracket Snap Peg markers at u = ±10.6 mm
+    [-10.6, 10.6].forEach((uOff) => {
       const pegMesh = new THREE.Mesh(tenonGeom, tenonMat);
-      pegMesh.position.set(uOff, 2.4, -4.2);
+      pegMesh.position.set(uOff, 0.0, -4.5);
+      pegMesh.rotation.x = Math.PI / 2;
       localFrame.add(pegMesh);
-
-      const beadMesh = new THREE.Mesh(beadGeom, tenonMat);
-      beadMesh.position.set(uOff, 5.1, -4.2);
-      localFrame.add(beadMesh);
     });
 
-    // Twin Inner/Outer Sidewall Anti-Torsion Tongues at u = ±13.6 mm, v = +6.2 mm
-    [-13.6, 13.6].forEach((uOff) => {
-      const tMesh = new THREE.Mesh(tongueGeom, seamMat);
-      tMesh.position.set(uOff, 2.0, 6.2);
-      localFrame.add(tMesh);
-    });
-
-    // Downhill 15° Slide-In Direction Arrow above the seam (shows Seg k+1 sliding -tHat into Seg k)
+    // Vertical (-Z) Drop-In Direction Arrow above the seam
     const shaftMesh = new THREE.Mesh(arrowShaftGeom, seamMat);
-    shaftMesh.position.set(0, 8.5, 19.5);
+    shaftMesh.rotation.x = Math.PI / 2;
+    shaftMesh.position.set(0, 0, 24.0);
     localFrame.add(shaftMesh);
 
     const headMesh = new THREE.Mesh(arrowHeadGeom, seamMat);
-    headMesh.position.set(0, 0.5, 19.5);
-    headMesh.rotation.z = Math.PI; // Points -Y in localFrame (-tHat downhill into Seg k)
+    headMesh.rotation.x = -Math.PI / 2; // Points -Z straight down onto stepped half-lap shoulder & split-tine pegs
+    headMesh.position.set(0, 0, 15.0);
     localFrame.add(headMesh);
 
     seamGroup.add(localFrame);
-    const nextPieceIdx = k === 1 ? 1 : k + 1;
-    const seamLabel = `Track Seam #${k} (θ = ${seamDeg}°, Z = ${pt.z.toFixed(1)} mm): Seg ${String(k + 1).padStart(2, "0")}'s Twin Ø4.30mm Female Sockets + Sidewall Slots slide downhill onto Seg ${String(k).padStart(2, "0")}'s Twin Ø3.80mm Male Snap-Lock Tenon Pegs (cyan) + Sidewall Tongues (gold) & ${seamDeg}° Bracket Pegs!`;
+    const nextPieceIdx = k + 1;
+    const seamLabel = `Track Seam #${k} (θ = ${seamDeg}°, Z = ${pt.z.toFixed(1)} mm): Seg ${String(k + 1).padStart(2, "0")}'s 8.0° upper half-lap drops vertically (-Z) onto Seg ${String(k).padStart(2, "0")}'s lower shoulder directly onto ${seamDeg}° Bracket Split-Tine Snap Pegs!`;
     seamGroup.traverse((c) => {
       c.userData = { label: seamLabel, track_piece_idx: nextPieceIdx };
     });
@@ -3136,7 +3110,7 @@ function applyExplodeAndVisibility() {
           const easeU = 1.0 - Math.pow(1.0 - rawU, 3);
           if (rawU < 0.996 && ud.insertVec) {
             if (itemStep === 6 && ud.name && ud.name.startsWith("asm_bracket_")) {
-              // Keyhole Drop-In L-Path for 24x Cantilever Brackets:
+              // Keyhole Drop-In L-Path for 26x Cantilever Brackets:
               //   Stage 1 (rawU 0..0.55): Push tenon radially inward into the upper keyhole entry window (Z +16.0 mm)
               //   Stage 2 (rawU 0.55..1.00): Drop -Z down into the 45° dovetail wedge over the ±Y neck detent bumps
               if (rawU < 0.55) {
@@ -3153,25 +3127,9 @@ function applyExplodeAndVisibility() {
                 insertOffset.set(0.0, 0.0, 16.0 * (1.0 - p2));
               }
             } else if (itemStep === 7 && ud.name && ud.name.startsWith("asm_track_seg_")) {
-              // Two-stage Helical Scarf-Joint Slide-In for Track Segments (Seg 01 -> Seg 14):
-              // Stage 1 (rawU 0..0.55): Approach radially toward cantilever brackets while displaced uphill along helix tangent
-              // Stage 2 (rawU 0.55..1.0): Slide tangentially downhill along 15° scarf angle onto previous segment's Twin Ø3.8mm Male Tenons & drop onto bracket pegs!
-              const segIdx = parseInt(ud.name.replace("asm_track_seg_", ""), 10) || 1;
-              const seamDeg = segIdx === 1 ? -45.0 : (segIdx - 1) * 120.0;
-              const seamRad = (seamDeg * Math.PI) / 180.0;
-              const radialPart = Math.max(0.0, (0.62 - rawU) / 0.62);
+              // Single vertical (-Z) Drop-In for Track Segments (Seg 01 -> Seg 14) onto 8.0° stepped half-laps & split-tine bracket pegs:
               const slidePart = 1.0 - easeU;
-              const tangDist = segIdx === 1 ? 0.0 : 28.0 * slidePart;
-              const rDist = 42.0 * radialPart * radialPart;
-              insertOffset.set(
-                rDist * Math.cos(seamRad) - tangDist * Math.sin(seamRad),
-                rDist * Math.sin(seamRad) + tangDist * Math.cos(seamRad),
-                20.0 * slidePart
-              );
-              if (segIdx === 1) {
-                // Seg 01 approaches along -Y and slides +Y into Trunk_Base intake port while dropping onto 60°/120° brackets
-                insertOffset.set(16.0 * radialPart, -46.0 * slidePart, 22.0 * slidePart);
-              }
+              insertOffset.set(0.0, 0.0, 42.0 * slidePart);
             } else {
               insertOffset.copy(ud.insertVec).multiplyScalar(1.0 - easeU);
             }
@@ -3265,11 +3223,7 @@ function applyExplodeAndVisibility() {
           if (activeSpec && ud.name === activeSpec.actorName) {
             ud.material.emissive.setHex(0x10b981);
             ud.material.emissiveIntensity = isConnectingNow ? 0.48 : 0.28;
-          } else if (
-            (prevActorName && ud.name === prevActorName) ||
-            (state.activeTrackPieceIdx === 2 &&
-              (ud.name === "asm_track_seg_01" || ud.name === "asm_track_seg_02"))
-          ) {
+          } else if (prevActorName && ud.name === prevActorName) {
             ud.material.emissive.setHex(0xd4af37);
             ud.material.emissiveIntensity = 0.26;
           } else {
@@ -3330,18 +3284,18 @@ const STEP_WIRING_GUIDE = {
     ],
   },
   3: {
-    title: "🔩 Step 3 Mechanical Joint — Direct Hex Coupler & Snap-In Bottom Cover",
-    badge: "D-SHAFT + SNAP RING",
+    title: "🔩 Step 3 Mechanical Joint — Direct D-Shaft Clamp Coupler & Flush Bottom Lid",
+    badge: "M2.5 CLAMP + FLUSH LID",
     rows: [
       {
         pillClass: "wire-yellow",
-        pillText: "⚙️ D-Shaft Fit",
-        html: "Press the gold <strong>Motor_Clutch_Driver</strong> onto the N20 motor's <code>Ø3.0 mm</code> D-shaft inside the <code>Z = 26.2 mm</code> coupler chamber so its top <code>4.85 mm AF</code> male hex peg points straight up.",
+        pillText: "⚙️ D-Shaft Clamp",
+        html: "Lower the Brown PLA <strong>Motor_Clutch_Driver</strong> onto the N20 motor's <code>Ø3.0 mm</code> D-shaft at <code>Z = 26.2 mm</code> and tighten <code>1× M2.5×6 mm</code> BHCS radial pinch screw into the split clamp ear.",
       },
       {
         pillClass: "wire-motor",
-        pillText: "🛡️ Primary Lid",
-        html: "Use <strong>Battery_Cover</strong> with <code>2× M2.5×6 mm</code> screws; omit <code>Base_Bottom_Cover</code> (audit shows it overlaps <code>Battery_Cover</code> by <code>438.8 mm³</code> and <code>CA001</code> magnets are unused).",
+        pillText: "🛡️ Flush Lid",
+        html: "Drop the upright <strong>Bottom_Electronics_Lid</strong> (<code>Ø134.6×2.8 mm</code>) into the vault rabbet and fasten with <code>4× M2.5×6 mm</code> BHCS screws (100% flush with <code>Z=0</code> root pads).",
       },
     ],
   },
@@ -3363,44 +3317,39 @@ const STEP_WIRING_GUIDE = {
       {
         pillClass: "wire-motor",
         pillText: "🌲 #1 → #2 → #3",
-        html: "Stack <strong>trunk_mid (#2)</strong> onto <code>trunk_base (#1)</code> and <strong>trunk_top (#3)</strong> onto <code>trunk_mid (#2)</code> using the <code>15.0 mm</code> tall keyed male tenons (<code>+X/-X</code> anti-rotation flats keep the ball flute, viewing windows &amp; rear <code>10×8 mm</code> wire conduit aligned).",
+        html: "Stack <strong>trunk_mid (#2)</strong> onto <code>trunk_base (#1)</code> and <strong>trunk_top (#3)</strong> onto <code>trunk_mid (#2)</code> using the <code>15.0 mm</code> tall keyed male tenons (<code>+X/-X</code> anti-rotation flats keep the ball flute, viewing windows &amp; <code>150°</code> <code>10.6×8.5 mm</code> wire conduit aligned).",
       },
     ],
   },
   6: {
-    title: "🌿 Step 6 Mechanical Joint — 24× Keyhole Drop-In Brackets (Tiers #4 → #1)",
+    title: "🌿 Step 6 Mechanical Joint — 26× Keyhole Drop-In Brackets (Tiers #4 → #1)",
     badge: "KEYHOLE DROP-IN",
     rows: [
       {
-        pillClass: "wire-red",
-        pillText: "⚠️ Wire FIRST",
-        html: "Thread the <strong>1m 3-pin JST-SM topper cable</strong> through the rear <code>-X</code> conduit BEFORE seating any <code>180°</code> bracket (<code>#3, #9, #15, #21</code>) whose tenon crosses the groove.",
+        pillClass: "wire-green",
+        pillText: "✅ 150° Clear Conduit",
+        html: "With the wiring conduit relocated to <code>150°</code> (midway between <code>120°</code> and <code>180°</code> brackets), every one of the 26 brackets clears the wiring channel completely!",
       },
       {
         pillClass: "wire-motor",
         pillText: "🔢 Keyhole L-Drop",
-        html: "Push each tenon radially inward into the upper <code>16.2×4.85×18.6 mm</code> keyhole entry window, then slide down <code>16 mm</code> into the <code>45°</code> dovetail over the <code>±Y</code> neck bumps. Pre-fix trunks: saw roofs using <code>Trunk_Keyhole_Cutting_Jig.stl</code>.",
+        html: "Push each tenon radially inward into the upper <code>16.2×4.85×18.6 mm</code> keyhole entry window, then slide down <code>16 mm</code> into the <code>45°</code> dovetail over the <code>±Y</code> neck bumps (#25 @ <code>1500°</code> &amp; #26 @ <code>1560°</code> anchor Seg 13/14).",
       },
     ],
   },
   7: {
-    title: "🎢 Step 7 Mechanical Joint — Snap-Lock Track Interlocks (1 → 14) + Retrofit Clip",
-    badge: "4-POINT SNAP-LOCK",
+    title: "🎢 Step 7 Mechanical Joint — Vertical -Z Stepped Half-Lap Seams (1 → 14)",
+    badge: "8.0° STEPPED HALF-LAP",
     rows: [
       {
         pillClass: "wire-wireless",
-        pillText: "🔗 Built-In Snap",
-        html: "Each uphill segment end (<code>1..13</code>) has <strong>Twin <code>Ø3.80×5.0 mm</code> Male Snap-Lock Tenon Pegs</strong> (at <code>u = ±14.2 mm, v = -4.2 mm</code> with <code>Ø4.08 mm</code> detent beads) + <strong>Inner/Outer Sidewall Anti-Torsion Tongues</strong> that click directly into the next segment's <code>Ø4.30×5.6 mm</code> female sockets!",
+        pillText: "🔗 Vertical Drop",
+        html: "Drop each segment (<code>2..14</code>) vertically (<code>-Z</code>) so its uphill <code>8.0°</code> stepped shoulder half-lap seats flush onto the previous segment's downhill shoulder directly above its <code>60°</code> cantilever bracket.",
       },
       {
         pillClass: "wire-motor",
-        pillText: "🌿 Seam Brackets",
-        html: "Every segment also has underside <code>Ø4.40 mm</code> bracket peg sockets at <strong>both</strong> midpoint stations (<code>60°, 180°, ...</code>) and seam stations (<code>120°, 240°, ...</code>), so the even-<code>60°</code> cantilever brackets lock directly under every track joint!",
-      },
-      {
-        pillClass: "wire-white",
-        pillText: "📎 Retrofit Clip",
-        html: "<strong>Already printed older track segments without male pegs?</strong> Print <code>Track_Joint_Clip.stl</code> (Plate 3) and snap it across the underside &amp; sidewalls of any seam (with two <code>11 mm</code> snippets of <code>1.75 mm</code> filament in the <code>Ø2.2 mm</code> dowel holes)—its central arch leaves the LED wire channel 100% open!",
+        pillText: "🌿 Split-Tine Pegs",
+        html: "Every underside <code>Ø4.40 mm</code> socket clicks over a flexible <code>Ø4.0×4.5 mm</code> split-tine cantilever bracket peg (<code>0.60 mm</code> center slot + <code>0.26 mm</code> retention ridge) at midpoint and seam stations.",
       },
     ],
   },
@@ -3432,7 +3381,7 @@ const STEP_WIRING_GUIDE = {
       {
         pillClass: "wire-yellow",
         pillText: "🟡 Yellow → DATA",
-        html: "Thread the <code>1 m</code> 3-pin <code>JST-SM</code> extension cable (<code>B0CT827QQC</code>) from the Topper Ring straight down the <code>10×8 mm</code> rear (<code>-X</code>) trunk conduit into the base vault. Connect the <strong>Yellow DuPont pin (<code>GPIO32</code>)</strong> from the <code>A096</code> Grove cable to its <strong>Center <code>DATA</code> pin</strong>.",
+        html: "Drop the <code>1 m</code> 3-pin <code>JST-SM</code> extension cable (<code>B0CT827QQC</code>) from the Topper Ring straight down the unobstructed <code>10.6×8.5 mm</code> <code>150°</code> trunk conduit into the base vault. Connect the <strong>Yellow DuPont pin (<code>GPIO32</code>)</strong> from the <code>A096</code> Grove cable to its <strong>Center <code>DATA</code> pin</strong>.",
       },
       {
         pillClass: "wire-red",
@@ -3441,8 +3390,8 @@ const STEP_WIRING_GUIDE = {
       },
       {
         pillClass: "wire-motor",
-        pillText: "🍎 Crown Tenon",
-        html: "Press-fit <strong>Conduit_Cover_Strip</strong> (with its <code>11.2 mm</code> depth-stop flange) into the rear conduit, then seat <strong>golden_apple_topper (#4)</strong> onto <code>trunk_top (#3)</code>'s upward <strong><code>Ø59.4×4.0 mm</code> Crown Centering Tenon Collar</strong> so the Apple Topper locks concentrically onto the trunk!",
+        pillText: "🍎 Crown + Leaf",
+        html: "Snap the section-matched <strong>Conduit_Cover_Strip_Base / Mid / Top</strong> covers flush over the <code>150°</code> conduit, seat <strong>golden_apple_topper</strong> onto <code>trunk_top (#3)</code>'s <code>Ø59.4×4.0 mm</code> Crown Collar, and snap the standalone Translucent Emerald Green PETG <strong>apple_green_leaf</strong> (Plate 13) into the brown stem socket!",
       },
     ],
   },
@@ -3578,12 +3527,12 @@ function selectBuildPlate(plateIdx) {
   if (plateIdx === -1) {
     plateGroups.forEach((g, idx) => {
       g.visible = true;
-      const col = idx % 4;
-      const row = Math.floor(idx / 4);
-      g.position.set((col - 1.5) * 324.0, (1.0 - row) * 324.0, 0);
+      const col = idx % 5;
+      const row = Math.floor(idx / 5);
+      g.position.set((col - 2.0) * 324.0, (1.5 - row) * 324.0, 0);
     });
     camAnim = {
-      targetPos: new THREE.Vector3(0, -1080, 860),
+      targetPos: new THREE.Vector3(0, -1250, 1020),
       targetLook: new THREE.Vector3(0, 0, 20),
       timeLeft: 0.7,
     };
@@ -4167,7 +4116,7 @@ function initUI() {
   const allBtn = document.createElement("button");
   allBtn.className = "plate-select-btn";
   allBtn.dataset.plate = "-1";
-  allBtn.innerHTML = `<strong>All 12 Build Plates (OrcaSlicer 4×3 Grid — 324 mm Stride)</strong><span>View complete GravMass_Tree_Ultimate_U1.3mf 2D layout</span>`;
+  allBtn.innerHTML = `<strong>All 18 Build Plates (OrcaSlicer 5×4 Grid — 324 mm Stride)</strong><span>View complete GravMass_Tree_Ultimate_U1.3mf 2D layout</span>`;
   allBtn.addEventListener("click", () => selectBuildPlate(-1));
   plateList.appendChild(allBtn);
 
@@ -4189,9 +4138,9 @@ function initUI() {
       const z = Number(btn.dataset.z);
       setSliceZ(z);
       if (z < 5.0) {
-        selectBuildPlate(10); // Plate 11 (Warm & Gas-Giant Planets)
+        selectBuildPlate(16); // Plate 17 (Warm & Gas-Giant Planets)
       } else if (z < 30.0) {
-        selectBuildPlate(8); // Plate 9 (Red Apple Marbles)
+        selectBuildPlate(14); // Plate 15 (Red Apple Marbles)
       }
     });
   });

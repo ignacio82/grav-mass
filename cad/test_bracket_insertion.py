@@ -1,7 +1,7 @@
-"""Phase 1 Reproduction & Regression Test: Rigid Insertion-Path Verification for Brackets 01..24.
+"""Regression Test: Rigid Insertion-Path Verification for Brackets 01..26.
 
 Sweeps candidate rigid insertion axes and multi-stage paths (step <= 0.5 mm) from the
-final seated pose of every bracket (bracket_01..24) against the actual trunk B-Rep solids
+final seated pose of every bracket (bracket_01..26) against the actual trunk B-Rep solids
 (both stacked and unstacked section-by-section) and checks boolean intersection volume at
 every substep.
 
@@ -22,10 +22,11 @@ CAD_DIR = Path(__file__).resolve().parent
 if str(CAD_DIR) not in sys.path:
     sys.path.insert(0, str(CAD_DIR))
 
-from brackets import build_all_24_station_brackets
+from brackets import build_all_station_brackets
 from common_params import (
+    BRACKET_STATION_COUNT,
     DOVETAIL_ANGULAR_STEP_DEG,
-    HELIX_TOTAL_DEG,
+    DOVETAIL_SLOT_Z_OFFSET,
     TRUNK_OUTER_R,
     TRUNK_SECTION_HEIGHT,
     helix_z,
@@ -233,13 +234,13 @@ def run_insertion_audit(stations: list[int] | None = None) -> tuple[bool, list[d
     tt = build_trunk_top()
     tm_placed = tm.moved(bd.Location((0.0, 0.0, TRUNK_SECTION_HEIGHT)))
     tt_placed = tt.moved(bd.Location((0.0, 0.0, 2.0 * TRUNK_SECTION_HEIGHT)))
-    brackets = build_all_24_station_brackets()
-    print(f"Built trunk & 24 brackets in {time.time() - t0:.2f}s")
+    brackets = build_all_station_brackets()
+    print(f"Built trunk & {BRACKET_STATION_COUNT} brackets in {time.time() - t0:.2f}s")
 
     stacked_sections = [("trunk_base", tb), ("trunk_mid", tm_placed), ("trunk_top", tt_placed)]
 
     if stations is None:
-        stations = list(range(1, 25))
+        stations = list(range(1, BRACKET_STATION_COUNT + 1))
 
     rows: list[dict[str, object]] = []
     all_stacked_pass = True
@@ -252,7 +253,7 @@ def run_insertion_audit(stations: list[int] | None = None) -> tuple[bool, list[d
 
     for k in stations:
         deg = float(k * DOVETAIL_ANGULAR_STEP_DEG)
-        z_slot = helix_z(deg) - 30.0
+        z_slot = helix_z(deg) + DOVETAIL_SLOT_Z_OFFSET
         b = brackets[f"bracket_{k:02d}"]
 
         # Identify which trunk section(s) cover [z_slot, z_slot + 23]

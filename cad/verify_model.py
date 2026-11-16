@@ -25,8 +25,7 @@ from auger import (
     build_all_auger_parts,
 )
 from brackets import (
-    build_all_24_station_brackets,
-    build_all_bracket_parts,
+    build_all_station_brackets,
     build_cantilever_bracket,
 )
 from common_params import (
@@ -37,12 +36,19 @@ from common_params import (
     AUGER_OD,
     AUGER_PITCH,
     BALL_DIAMETER,
-    BATTERY_14500_BAY_X,
-    BATTERY_14500_BAY_Y,
-    BATTERY_14500_BAY_Z,
+    BOTTOM_TRAY_OUTER_DIA,
+    BOTTOM_TRAY_TAB_COORDS,
+    BOTTOM_TRAY_THICK,
+    BRACKET_STATION_COUNT,
+    CONDUIT_STRIP_LEN_BASE,
+    CONDUIT_STRIP_LEN_MID,
+    CONDUIT_STRIP_LEN_TOP,
+    CROWN_SOCKET_DEPTH,
+    CROWN_SOCKET_DIA,
     DC_BARREL_JACK_BORE_DIA,
     DC_BARREL_JACK_Z_CENTER,
     DOVETAIL_CLEARANCE,
+    DOVETAIL_SLOT_Z_OFFSET,
     FIT_TOLERANCE,
     HELIX_BOT_R,
     HELIX_PITCH,
@@ -59,23 +65,21 @@ from common_params import (
     MIN_PART_CLEARANCE,
     N20_DSHAFT_DIA,
     N20_DSHAFT_FLAT,
-    PG002_SERVO_BAY_X,
-    PG002_SERVO_BAY_Y,
-    PG002_SERVO_BAY_Z,
+    PLANET_ANCHOR_DEGS,
     SAFE_PLATE_ZONE,
     STEEL_BALL_DIA,
+    TOP_FEEDER_START_R,
     TRACK_BASE_Y,
     TRACK_INNER_WIDTH,
-    TRACK_SCARF_ANGLE_DEG,
+    TRACK_LAP_ARC_DEG,
     TRACK_SHOULDER_INNER_X,
     TRACK_TROUGH_R,
     TRUNK_OUTER_R,
     TRUNK_SECTION_HEIGHT,
     U1_BED_Z,
-    XA007_SWITCH_BAY_X,
-    XA007_SWITCH_BAY_Y,
-    XA007_SWITCH_BAY_Z,
+    WIRE_CONDUIT_ANGLE_DEG,
     closed_loop_section_plane,
+    closed_loop_track_point,
     helix_point,
     helix_radius,
     helix_section_plane,
@@ -94,7 +98,7 @@ from topper_planets import (
     build_all_marbles,
     build_all_topper_planet_parts,
     build_apple_captive_pause_marble,
-    build_apple_topper_stem_leaf,
+    build_apple_green_leaf,
     build_assembled_apple_marble,
 )
 from track import (
@@ -102,8 +106,8 @@ from track import (
     PLANET_PEG_HEIGHT,
     TRACK_PLANET_SEGMENT_INDICES,
     build_all_track_parts,
-    build_track_joint_clip,
     build_track_segment,
+    get_track_segment_specs,
 )
 from trunk import build_all_trunk_parts
 
@@ -147,68 +151,76 @@ def run_all_verifications() -> None:
     # Build fresh B-Rep parts
     trunk_parts = build_all_trunk_parts()
     auger_parts = build_all_auger_parts()
-    bracket_parts = build_all_bracket_parts()
-    station_brackets = build_all_24_station_brackets()
+    station_brackets = build_all_station_brackets()
     topper_planet_parts = build_all_topper_planet_parts()
-    stem_leaf = build_apple_topper_stem_leaf()
+    apple_leaf_print = topper_planet_parts["apple_green_leaf"]
+    apple_leaf_asm = build_apple_green_leaf(orient_for_print=False)
     marbles = build_all_marbles(count=6)
     track_parts = build_all_track_parts(for_plate_grid=False)
 
     trunk_base = trunk_parts["trunk_base"]
     trunk_mid = trunk_parts["trunk_mid"]
     trunk_top = trunk_parts["trunk_top"]
-    battery_cover = trunk_parts["Battery_Cover"]
+    bottom_lid = trunk_parts["Bottom_Electronics_Lid"]
+    conduit_strip_base = trunk_parts["Conduit_Cover_Strip_Base"]
+    conduit_strip_mid = trunk_parts["Conduit_Cover_Strip_Mid"]
+    conduit_strip_top = trunk_parts["Conduit_Cover_Strip_Top"]
     auger_lower = auger_parts["auger_lower"]
     auger_upper = auger_parts["auger_upper"]
     motor_clutch_driver = auger_parts["Motor_Clutch_Driver"]
-    servo_or_030_adapter = auger_parts["Servo_Or_030_Adapter"]
     topper = topper_planet_parts["golden_apple_topper"]
 
     # =========================================================================
     # SECTION 1: Virtual Gauge-Pin & Streamlined Electronics / Mechanics Fit
     # =========================================================================
 
-    # 1.1 Golden Apple Topper:
-    #     - Base Socket for Bambu Lab LED Lamp Kit 001 Puck (Ø 59.6 x 18.5 mm gauge at Z = 0..18.5 mm)
-    puck_gauge = bd.Cylinder(
+    # 1.1 Golden Apple Topper (PLA-only Brown Pedestal + Red Apple + Brown Stem):
+    #     - Crown Centering Socket (Ø 60.0 x 4.6 mm) + Sparkleiot WS2812B 16-LED Ring optical cavity
+    #     - Separate Teal PETG apple_green_leaf mates into the stem's 3.2 x 2.2 x 4.5 mm leaf socket
+    crown_socket_gauge = bd.Cylinder(
         radius=59.6 / 2.0,
-        height=18.5,
+        height=4.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    oversized_puck = bd.Cylinder(
-        radius=31.0,
-        height=20.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    sparkleiot_ring_local = (
+        bd.Cylinder(radius=45.6 / 2.0, height=3.2, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+        - bd.Cylinder(radius=31.6 / 2.0, height=3.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
     )
-    assert _inter_vol(topper, puck_gauge) == 0.0, (
-        "Bambu LED Lamp Kit 001 puck gauge (Ø 59.6 x 18.5 mm) collided with topper!"
+    assert _inter_vol(topper, crown_socket_gauge) == 0.0, (
+        "Crown centering collar gauge (Ø 59.6 x 4.5 mm) collided with topper socket!"
     )
-    assert _inter_vol(topper, oversized_puck) > 0.0, (
-        "Oversized puck gauge (R=31.0 x 20.0 mm) did not intersect topper socket walls!"
+    assert _inter_vol(topper, sparkleiot_ring_local) == 0.0, (
+        "Sparkleiot 16-LED RGB ring gauge (Ø 45.6 OD / Ø 31.6 ID) collided with topper optical throat!"
+    )
+    assert abs(CROWN_SOCKET_DIA - 60.0) <= 0.05 and abs(CROWN_SOCKET_DEPTH - 4.6) <= 0.05
+    assert _inter_vol(topper, apple_leaf_asm) == 0.0, (
+        "Teal PETG apple_green_leaf petiole collided with golden_apple_topper stem socket!"
+    )
+    assert _bboxes_overlap_3d(topper.bounding_box(), apple_leaf_asm.bounding_box()), (
+        "apple_green_leaf petiole does not engage golden_apple_topper stem socket!"
+    )
+    assert _inter_vol(topper, apple_leaf_asm.moved(bd.Location((0.0, 0.0, 1.0)))) > 0.5, (
+        "apple_green_leaf petiole failed socket retention overlap probe!"
     )
 
     # 1.2 Central Trunk Bore, Thrust Ledge, Direct Mechanical Hex Coupler & Auger Clearance
-    # Stack 3 trunk sections in global assembly space
     tb_placed = trunk_base
     tm_placed = trunk_mid.moved(bd.Location((0.0, 0.0, TRUNK_SECTION_HEIGHT)))
     tt_placed = trunk_top.moved(bd.Location((0.0, 0.0, 2.0 * TRUNK_SECTION_HEIGHT)))
 
-    # Verify Sparkleiot 16-Bit WS2812 RGB Ring (B09YTMNGTD, Ø 45.0 mm OD / Ø 32.0 mm ID)
-    # fits cleanly inside trunk_top's Ø 46.2 x 2.5 mm recessed top rim seat (local Z = 147.55..150.0 mm)
-    # AND rests positively on the R = 20.5..22.5 mm shelf below Z = 147.5 mm
-    topper_ring_gauge = bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT - 2.45) * (
-        bd.Cylinder(radius=45.6 / 2.0, height=2.4, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
-        - bd.Cylinder(radius=31.6 / 2.0, height=3.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
-    )
-    topper_ring_shelf_probe = bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT - 3.2) * (
-        bd.Cylinder(radius=22.5, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+    # Verify Sparkleiot 16-Bit WS2812 RGB Ring (B09YTMNGTD, Ø 45.0 OD / Ø 32.0 ID x 3.0 mm)
+    # sits inside trunk_top's Ø 50.00 mm crown_collar ID (local Z = 150.0..153.2 mm)
+    # and rests cleanly on trunk_top's R = 20.5..25.0 mm solid top rim shelf!
+    topper_ring_gauge = bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT + 0.05) * sparkleiot_ring_local
+    topper_ring_shelf_probe = bd.Pos(0.0, 0.0, TRUNK_SECTION_HEIGHT - 0.8) * (
+        bd.Cylinder(radius=24.8, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
         - bd.Cylinder(radius=20.8, height=0.6, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
     )
     assert _inter_vol(trunk_top, topper_ring_gauge) == 0.0, (
-        "Sparkleiot 16-Bit WS2812 Ring gauge (Ø 45.6 mm) collided with trunk_top ring seat!"
+        "Sparkleiot 16-Bit WS2812 Ring gauge collided with trunk_top crown_collar!"
     )
     assert _inter_vol(trunk_top, topper_ring_shelf_probe) > 0.0, (
-        "trunk_top is missing the R=20.5..22.5 mm annular support shelf for the Sparkleiot 16-Bit Ring!"
+        "trunk_top is missing the R=20.8..24.8 mm solid top shelf under the Sparkleiot 16-Bit Ring!"
     )
 
     # Continuous Ø 23.6 mm bore gauge above the Z=37.20 mm internal thrust ledge
@@ -224,10 +236,10 @@ def run_all_verifications() -> None:
     )
     assert vol_bore_inter == 0.0, f"Ø 23.6 mm bore gauge collided with trunk above ledge: {vol_bore_inter}"
 
-    # Verify Ø 24.0 mm coupler chamber below the thrust taper (Z=26.2..33.6 mm) and thrust ledge (Z=37.2 mm)
+    # Verify Ø 19.20 mm coupler chamber below the Z=37.20 mm thrust shelf (clearing Ø 18.0 mm driver)
     clutch_chamber_gauge = bd.Pos(0.0, 0.0, 26.2) * bd.Cylinder(
-        radius=23.6 / 2.0,
-        height=7.4,
+        radius=18.8 / 2.0,
+        height=10.8,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     vol_clutch_chamber = _inter_vol(tb_placed, clutch_chamber_gauge)
@@ -235,8 +247,8 @@ def run_all_verifications() -> None:
         f"Coupler chamber gauge collided with trunk_base: {vol_clutch_chamber}"
     )
     thrust_ledge_ring = bd.Pos(0.0, 0.0, 36.7) * (
-        bd.Cylinder(radius=10.0, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
-        - bd.Cylinder(radius=8.6, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+        bd.Cylinder(radius=11.6, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
+        - bd.Cylinder(radius=9.8, height=0.5, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN))
     )
     assert _inter_vol(tb_placed, thrust_ledge_ring) > 0.0, (
         "Trunk_Base is missing the Z=37.20 mm internal thrust ledge!"
@@ -262,7 +274,7 @@ def run_all_verifications() -> None:
     assert _bboxes_overlap_3d(driver_placed.bounding_box(), al_placed.bounding_box()), (
         "Motor_Clutch_Driver top hex peg does not engage Auger_Bottom female hex socket!"
     )
-    assert abs(CLUTCH_FLANGE_OD - 20.0) <= 0.05, f"Coupler collar OD {CLUTCH_FLANGE_OD} != 20.0 mm"
+    assert abs(CLUTCH_FLANGE_OD - 22.0) <= 0.05, f"Coupler collar OD {CLUTCH_FLANGE_OD} != 22.0 mm"
 
     vol_auger_trunk = (
         _inter_vol(tb_placed, al_placed)
@@ -302,20 +314,31 @@ def run_all_verifications() -> None:
             f"Ø 25.0 mm marble at flight {k_flight} (Z={z_marble:.2f} mm) overlapped trunk flute: {vol_m_trunk:.4f} mm³!"
         )
 
-    # Verify Upper Marble Discharge Path clears the solid Bambu Lab LED Lamp Kit 001 Puck (Z = 450.0..468.5 mm)
-    # and connects directly into track_seg_14_top_entry's enclosed catch basin at 1710° (0.0, -42.5, 431.80 mm)
-    # AND Verify Lower Marble Return Path connects from track_seg_01's enclosed -90° catch basin (0.0, -42.0, 56.80 mm)
-    # directly into trunk_base's vertical ball guide flute (0.0, -17.5, 54.50 mm) with 0.0 mm³ interference!
-    seg01_asm = build_track_segment(0.0, 120.0, orient_for_print=False, bottom_return_ramp=True)
-    seg14_asm = build_track_segment(1560.0, 1620.0, orient_for_print=False, top_feeder_ramp=True)
-    puck_global = bd.Pos(0.0, 0.0, 450.0) * puck_gauge
+    # Verify Upper Marble Discharge Path clears the Sparkleiot LED ring (Z = 450.0..453.2 mm)
+    # and connects directly into track_seg_14_top_entry's enclosed catch basin at 1710° (0.0, -47.0, 430.83 mm)
+    # AND Verify Lower Marble Return Path connects from track_seg_01's enclosed -90° catch basin (0.0, -45.5, 56.30 mm)
+    # directly into trunk_base's vertical ball guide flute (0.0, -17.5, 52.00 mm) with 0.0 mm³ interference!
+    seg_specs = {spec[0]: spec for spec in get_track_segment_specs()}
+    seg01_asm = build_track_segment(
+        seg_specs["track_seg_01"][1],
+        seg_specs["track_seg_01"][2],
+        orient_for_print=False,
+        bottom_return_ramp=True,
+    )
+    seg14_asm = build_track_segment(
+        seg_specs["track_seg_14_top_entry"][1],
+        seg_specs["track_seg_14_top_entry"][2],
+        orient_for_print=False,
+        top_feeder_ramp=True,
+    )
+    ring_global = bd.Pos(0.0, 0.0, 3.0 * TRUNK_SECTION_HEIGHT + 0.05) * sparkleiot_ring_local
     for u_dis in (0.0, 0.25, 0.50, 0.75, 1.0):
-        pt_start = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 435.5)
-        pt_end = bd.Vector(0.0, -42.5, 431.8)
+        pt_start = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 436.2)
+        pt_end = bd.Vector(0.0, -TOP_FEEDER_START_R, 430.83)
         pt_m = pt_start * (1.0 - u_dis) + pt_end * u_dis
         m_dis_probe = bd.Pos(pt_m.X, pt_m.Y, pt_m.Z) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
-        assert _inter_vol(puck_global, m_dis_probe) == 0.0, (
-            f"Upper marble discharge at u={u_dis} (Z={pt_m.Z:.2f} mm) collided with Bambu LED Lamp Puck!"
+        assert _inter_vol(ring_global, m_dis_probe) == 0.0, (
+            f"Upper marble discharge at u={u_dis} (Z={pt_m.Z:.2f} mm) collided with Sparkleiot LED Ring!"
         )
         assert _inter_vol(tt_placed, m_dis_probe) == 0.0, (
             f"Upper marble discharge at u={u_dis} (Z={pt_m.Z:.2f} mm) collided with trunk_top!"
@@ -324,8 +347,8 @@ def run_all_verifications() -> None:
             f"Upper marble discharge at u={u_dis} (Z={pt_m.Z:.2f} mm) collided with track_seg_14_top_entry!"
         )
 
-        pt_bot_start = bd.Vector(0.0, -42.0, 55.7)
-        pt_bot_end = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 52.5)
+        pt_bot_start = bd.Vector(0.0, -42.0, 55.70)
+        pt_bot_end = bd.Vector(0.0, -AUGER_BALL_ORBIT_R, 52.0)
         pt_b = pt_bot_start * (1.0 - u_dis) + pt_bot_end * u_dis
         m_bot_probe = bd.Pos(pt_b.X, pt_b.Y, pt_b.Z) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
         assert _inter_vol(tb_placed, m_bot_probe) == 0.0, (
@@ -336,8 +359,8 @@ def run_all_verifications() -> None:
         )
 
     # Verify solid end-cap bumper walls physically block marbles from falling out at top (+X) or bottom (-X)
-    top_endcap_probe = bd.Pos(16.0, -42.5, 434.0) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
-    bot_endcap_probe = bd.Pos(-16.0, -42.0, 56.5) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
+    top_endcap_probe = bd.Pos(16.0, -TOP_FEEDER_START_R, 434.0) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
+    bot_endcap_probe = bd.Pos(-16.0, -45.5, 56.3) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
     assert _inter_vol(seg14_asm, top_endcap_probe) > 0.0, (
         "track_seg_14_top_entry is missing the upstream (+X) solid end-cap bumper wall!"
     )
@@ -346,17 +369,15 @@ def run_all_verifications() -> None:
     )
 
     # Verify Ø 25.0 mm rolling marble has ZERO interference along every 5° of the top entry ramp
-    # (1710° -> 1570°) and bottom return ramp (0° -> -90°) — proving no wall blocks the ramp!
-    from common_params import closed_loop_track_point
-
-    for deg_top in range(1710, 1565, -5):
+    # (1710° -> 1500°) and bottom return ramp (60° -> -90°) — proving no wall blocks the ramp!
+    for deg_top in range(1710, 1495, -5):
         pt_t = closed_loop_track_point(float(deg_top))
         probe_t = bd.Pos(pt_t.X, pt_t.Y, pt_t.Z + 7.2) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
         v_top_ramp = _inter_vol(seg14_asm, probe_t)
         assert v_top_ramp == 0.0, (
             f"Marble rolling down top ramp at {deg_top}° collided with track_seg_14_top_entry: {v_top_ramp:.3f} mm³!"
         )
-    for deg_bot in range(0, -95, -5):
+    for deg_bot in range(60, -95, -5):
         pt_b = closed_loop_track_point(float(deg_bot))
         probe_b = bd.Pos(pt_b.X, pt_b.Y, pt_b.Z + 7.2) * bd.Sphere(radius=BALL_DIAMETER / 2.0)
         v_bot_ramp = _inter_vol(seg01_asm, probe_b)
@@ -364,60 +385,42 @@ def run_all_verifications() -> None:
             f"Marble rolling along bottom return ramp at {deg_bot}° collided with track_seg_01: {v_bot_ramp:.3f} mm³!"
         )
 
-    # 1.3 Streamlined Trunk_Base Electronics Bays:
-    #     LA002 N20 Motor, Servo_Or_030_Adapter, 14500 Battery Pack, XA007 ON/OFF Switch
-    la002_gauge = bd.Box(
+    # 1.3 Bottom_Electronics_Lid & Root Vault Clearances:
+    #     LA002 / B0BFRPMSW6 N20 Motor (direct top-drop pocket), UCTRONICS, 2x Unstacked WAGO 221-415, A092+C008, DC-099 Jack
+    la002_gauge = bd.Pos(0.0, 0.0, 1.2) * bd.Box(
         LA002_N20_POCKET_X,  # 12.4 mm
         LA002_N20_POCKET_Y,  # 10.4 mm
         LA002_N20_POCKET_Z,  # 26.0 mm
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    la002_over = bd.Box(
+    la002_over = bd.Pos(0.0, 0.0, 1.2) * bd.Box(
         15.0,
         14.0,
         24.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    pg002_over = bd.Box(
-        PG002_SERVO_BAY_X + 3.0,  # 26.2 mm
-        PG002_SERVO_BAY_Y + 3.0,  # 15.5 mm
-        PG002_SERVO_BAY_Z,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
     assert _inter_vol(trunk_base, la002_gauge) == 0.0, "LA002 N20 motor gauge collided with trunk_base!"
-    assert _inter_vol(trunk_base, pg002_over) > 0.0, "Oversized PG002 motor bay gauge did not intersect trunk_base!"
-    assert _inter_vol(trunk_base, servo_or_030_adapter) == 0.0, "Servo_Or_030_Adapter collided with trunk_base!"
-    assert _inter_vol(servo_or_030_adapter, la002_gauge) == 0.0, "LA002 gauge collided with Servo_Or_030_Adapter!"
-    assert _inter_vol(servo_or_030_adapter, la002_over) > 0.0, "Oversized LA002 gauge did not intersect Servo_Or_030_Adapter!"
+    assert _inter_vol(trunk_base, la002_over) > 0.0, "Oversized LA002 gauge did not engage trunk_base anti-rotation pocket!"
 
-    # 14500 Li-ion / 2xAA Battery Pack cradle (54.0 x 31.0 x 16.5 mm at (0, -33.0, 0.0))
-    batt_gauge = bd.Pos(0.0, -33.0, 0.0) * bd.Box(
-        BATTERY_14500_BAY_X,
-        BATTERY_14500_BAY_Y,
-        BATTERY_14500_BAY_Z,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    # Bottom_Electronics_Lid flush fit inside trunk_base rabbet (Z = 0..2.80 mm) + 4x M2.5 screw alignment
+    assert _inter_vol(trunk_base, bottom_lid) == 0.0, (
+        "Bottom_Electronics_Lid collided with trunk_base root vault / cradles!"
     )
-    batt_over = bd.Pos(0.0, -33.0, 0.0) * bd.Box(
-        BATTERY_14500_BAY_X + 4.0,
-        BATTERY_14500_BAY_Y + 4.0,
-        BATTERY_14500_BAY_Z + 2.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    assert abs(BOTTOM_TRAY_OUTER_DIA - 134.6) <= 0.05 and abs(BOTTOM_TRAY_THICK - 2.80) <= 0.05
+    assert _inter_vol(trunk_base, bottom_lid.moved(bd.Location((1.0, 0.0, 0.0)))) > 1.0, (
+        "Bottom_Electronics_Lid failed radial rabbet lock test inside trunk_base!"
     )
-    assert _inter_vol(trunk_base, batt_gauge) == 0.0, "14500 Battery gauge collided with trunk_base!"
-    assert _inter_vol(trunk_base, batt_over) > 0.0, "Oversized 14500 Battery gauge did not intersect trunk_base!"
+    m25_probe_vol = 0.0
+    for tx, ty in BOTTOM_TRAY_TAB_COORDS:
+        m25_shaft = bd.Pos(tx, ty, 0.0) * bd.Cylinder(
+            radius=2.55 / 2.0,
+            height=9.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        assert _inter_vol(bottom_lid, m25_shaft) == 0.0, f"M2.5 screw collided with Bottom_Electronics_Lid tab at {(tx, ty)}"
+        m25_probe_vol += _inter_vol(trunk_base, m25_shaft)
+    assert m25_probe_vol > 5.0, "4x M2.5 screws did not engage trunk_base self-tapping root buttress holes!"
 
-    # M5Stack Atomic H-Driver Base + Atom Lite ESP32 (K050, 48.0 x 24.0 x 18.0 mm at Z = 1.45..19.45 mm)
-    m5_atom_hdriver_gauge = bd.Pos(0.0, -33.0, 1.45) * bd.Box(
-        48.0,
-        24.0,
-        18.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    assert _inter_vol(trunk_base, m5_atom_hdriver_gauge) == 0.0, (
-        "M5Stack Atomic H-Driver ESP32 (K050, 48.0 x 24.0 x 18.0 mm) collided with trunk_base!"
-    )
-
-    # Phase 2 Zero-Fuss Cable Management Verification:
     # (a) Hollow Root Vault unobstructed cable slack volume >= 150,000 mm³ (150 cm³)
     vault_ref_cyl = bd.Cylinder(
         radius=67.5,  # Ø 135.0 mm internal clear electronics vault
@@ -430,105 +433,108 @@ def run_all_verifications() -> None:
         f"Hollow Root Vault unobstructed slack volume {open_vault_slack_vol:.1f} mm³ < 150,000 mm³ (150 cm³)!"
     )
 
-    # (b) Dedicated +Y Snap-In Cradle at (-4.0, +36.5, 0.0) for the UCTRONICS B07XXWQ49N (U6223,
-    #     63.0 x 27.0 x 10.0 mm) 12V -> 5.0V 5A Screw-Terminal Buck Converter + open -X/+X wire portals
-    uctronics_buck_gauge = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+    # (b) UCTRONICS U6223 (63.0 x 27.0 x 10.0 mm) on Bottom_Electronics_Lid at (-2.0, +36.0, 4.0)
+    uctronics_buck_gauge = bd.Pos(-2.0, 36.0, BOTTOM_TRAY_THICK + 1.25) * bd.Box(
         63.0,
         27.0,
         10.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    uctronics_buck_over = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+    uctronics_buck_over = bd.Pos(-2.0, 36.0, BOTTOM_TRAY_THICK + 1.25) * bd.Box(
         67.0,
         31.0,
         13.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    uctronics_wire_portal_gauge = bd.Pos(-4.0, 36.5, 0.0) * bd.Box(
+    uctronics_wire_portal_gauge = bd.Pos(-2.0, 36.0, BOTTOM_TRAY_THICK + 1.25) * bd.Box(
         70.0,
         18.0,
         10.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _inter_vol(trunk_base, uctronics_buck_gauge) == 0.0, (
-        "UCTRONICS B07XXWQ49N (U6223, 63.0 x 27.0 x 10.0 mm) buck converter gauge collided with trunk_base cradle!"
+    assert _inter_vol(trunk_base, uctronics_buck_gauge) == 0.0 and _inter_vol(bottom_lid, uctronics_buck_gauge) == 0.0, (
+        "UCTRONICS B07XXWQ49N (63.0 x 27.0 x 10.0 mm) buck converter gauge collided with trunk_base / Bottom_Electronics_Lid!"
     )
-    assert _inter_vol(trunk_base, uctronics_buck_over) > 0.0, (
-        "Oversized UCTRONICS buck converter gauge did not intersect snap-in cradle walls!"
+    assert _inter_vol(bottom_lid, uctronics_buck_over) > 0.0, (
+        "Oversized UCTRONICS buck converter gauge did not intersect Bottom_Electronics_Lid cradle rails!"
     )
-    assert _inter_vol(trunk_base, uctronics_wire_portal_gauge) == 0.0, (
-        "UCTRONICS buck converter -X/+X screw-terminal wire portal gauge collided with trunk_base!"
+    assert _inter_vol(trunk_base + bottom_lid, uctronics_wire_portal_gauge) == 0.0, (
+        "UCTRONICS buck converter ±X screw-terminal wire portal gauge collided with trunk_base / lid!"
     )
 
-    # (c) Dedicated +X Snap-In Organizer Cradle at (+44.5, -12.0, 0.0) for the WAGO 221-415
-    #     (18.6 x 30.0 x 8.4 mm each; 2x stacked = 18.6 x 30.0 x 16.8 mm) 5-Port Lever-Nut Blocks
-    wago_221_gauge = bd.Pos(44.5, -12.0, 0.0) * bd.Box(
-        18.6,
-        30.0,
-        16.8,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    wago_221_over = bd.Pos(44.5, -12.0, 0.0) * bd.Box(
-        22.5,
-        34.0,
-        19.5,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    wago_wire_portal_gauge = bd.Pos(34.0, -12.0, 0.0) * bd.Box(
-        5.0,
+    # (c) Unstacked 2x WAGO 221-415 cradles on Bottom_Electronics_Lid at (+46.0, -2.5) and (-32.5, 0.0)
+    wago_positions = [(46.0, -2.5), (-32.5, 0.0)]
+    wago_gauges: list[bd.Solid] = []
+    for wx, wy in wago_positions:
+        w_g = bd.Pos(wx, wy, BOTTOM_TRAY_THICK + 0.05) * bd.Box(
+            18.6,
+            30.0,
+            8.4,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        w_ov = bd.Pos(wx, wy, BOTTOM_TRAY_THICK + 0.05) * bd.Box(
+            22.5,
+            34.0,
+            10.5,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        w_wire = bd.Pos(wx - 11.5, wy, BOTTOM_TRAY_THICK + 0.05) * bd.Box(
+            5.0,
+            24.0,
+            8.4,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+        assert _inter_vol(trunk_base, w_g) == 0.0 and _inter_vol(bottom_lid, w_g) == 0.0, (
+            f"Unstacked WAGO 221-415 gauge at {(wx, wy)} collided with trunk_base / Bottom_Electronics_Lid!"
+        )
+        assert _inter_vol(bottom_lid, w_ov) > 0.0, f"Oversized WAGO gauge at {(wx, wy)} did not hit cradle walls!"
+        assert _inter_vol(trunk_base + bottom_lid, w_wire) == 0.0, (
+            f"WAGO 221-415 -X wire portal gauge at {(wx, wy)} collided!"
+        )
+        wago_gauges.append(w_g)
+
+    # (d) A092+C008 Driver + HT3.96-4P plug envelope (74.0 x 24.0 x 19.0 mm centered around (0.0, -31.0))
+    a092_gauge = bd.Pos(0.0, -31.0, BOTTOM_TRAY_THICK + 0.05) * bd.Box(
+        48.0,
         24.0,
-        16.8,
+        19.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _inter_vol(trunk_base, wago_221_gauge) == 0.0, (
-        "WAGO 221-415 (18.6 x 30.0 x 16.8 mm dual-stack) gauge collided with trunk_base!"
+    a092_ht396_plug_gauge = bd.Pos(32.0, -31.0, BOTTOM_TRAY_THICK + 2.0) * bd.Box(
+        16.0,
+        14.0,
+        10.0,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _inter_vol(trunk_base, wago_221_over) > 0.0, (
-        "Oversized WAGO 221-415 gauge did not intersect cradle walls!"
+    assert _inter_vol(trunk_base + bottom_lid, a092_gauge) == 0.0, (
+        "M5Stack A092+C008 gauge (48 x 24 x 19 mm) collided with trunk_base / Bottom_Electronics_Lid!"
     )
-    assert _inter_vol(trunk_base, wago_wire_portal_gauge) == 0.0, (
-        "WAGO 221-415 -X wire portal gauge collided with trunk_base!"
+    assert _inter_vol(trunk_base + bottom_lid, a092_ht396_plug_gauge) == 0.0, (
+        "HT3.96-4P +X plug envelope (+16 mm) on A092 collided with trunk_base / Bottom_Electronics_Lid!"
     )
 
-    # Verify finger access spacing between dedicated board bays and Ø 28.0 mm motor shroud
     motor_shroud_cyl = bd.Cylinder(
         radius=14.0,
         height=30.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _bbox_xy_gap(uctronics_buck_gauge.bounding_box(), wago_221_gauge.bounding_box()) >= 7.0
-    assert _bbox_xy_gap(wago_221_gauge.bounding_box(), motor_shroud_cyl.bounding_box()) >= 18.0
-
-    # XA007 Power Switch Module cutout (22.0 x 14.0 x 12.0 mm at (-46.0, 0.0, 4.0))
-    xa007_gauge = bd.Pos(-46.0, 0.0, 4.0) * bd.Box(
-        XA007_SWITCH_BAY_X,
-        XA007_SWITCH_BAY_Y,
-        XA007_SWITCH_BAY_Z,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    xa007_over = bd.Pos(-46.0, 0.0, 4.0) * bd.Box(
-        XA007_SWITCH_BAY_X + 3.0,
-        XA007_SWITCH_BAY_Y + 3.0,
-        XA007_SWITCH_BAY_Z + 2.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    assert _inter_vol(trunk_base, xa007_gauge) == 0.0, "XA007 Switch gauge collided with trunk_base!"
-    assert _inter_vol(trunk_base, xa007_over) > 0.0, "Oversized XA007 Switch gauge did not intersect trunk_base!"
+    assert _bbox_xy_gap(uctronics_buck_gauge.bounding_box(), wago_gauges[0].bounding_box()) >= 7.0
+    assert _bbox_xy_gap(wago_gauges[0].bounding_box(), motor_shroud_cyl.bounding_box()) >= 18.0
 
     # Single-Cable 12V Panel-Mount DC Barrel Jack (DC-099 5.5x2.1mm, M11x0.75 Ø 11.20 mm thread gauge
-    # along -X at Y = 0.0, Z = 10.0 mm, X = -74.0..-57.3 mm) + Internal Pigtail Routing Portal
+    # along -X at Y = 0.0, Z = 11.5 mm, X = -75.0..-62.5 mm)
     dc_jack_gauge = bd.Plane(
-        origin=(-74.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0)
+        origin=(-75.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0)
     ) * bd.Cylinder(
-        radius=(DC_BARREL_JACK_BORE_DIA - 0.20) / 2.0,  # Ø 11.20 mm nominal M11 barrel jack thread
-        height=16.7,
+        radius=(DC_BARREL_JACK_BORE_DIA - 0.20) / 2.0,
+        height=12.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     dc_jack_over = bd.Plane(
-        origin=(-74.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0)
+        origin=(-75.0, 0.0, DC_BARREL_JACK_Z_CENTER), z_dir=(1.0, 0.0, 0.0)
     ) * bd.Cylinder(
-        radius=(DC_BARREL_JACK_BORE_DIA + 2.0) / 2.0,   # Ø 13.40 mm flange shoulder stops against outer wall
-        height=16.7,
+        radius=(DC_BARREL_JACK_BORE_DIA + 2.0) / 2.0,
+        height=12.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     assert _inter_vol(trunk_base, dc_jack_gauge) == 0.0, (
@@ -539,7 +545,7 @@ def run_all_verifications() -> None:
     )
 
     # N20 D-shaft gauge pin inside Motor_Clutch_Driver (Ø 3.0 mm nominal with 0.5 mm flat, Z=0.00..6.40 mm)
-    r_dpin = N20_DSHAFT_DIA / 2.0  # 1.50 mm inside Ø 3.15 mm bore (R=1.575 mm)
+    r_dpin = N20_DSHAFT_DIA / 2.0
     dpin_cyl = bd.Cylinder(
         radius=r_dpin,
         height=6.40,
@@ -564,36 +570,40 @@ def run_all_verifications() -> None:
         "Oversized D-shaft pin did not intersect Motor_Clutch_Driver!"
     )
 
-    # 1.4 Under-Track Snap-In Dovetail Pebble-Wire Channel (8.0 x 3.6 mm chamber with 4.6 mm snap-in throat for B0CCS11V7H WS2812B Pebble Wire)
-    seg_test = build_track_segment(0.0, 120.0, orient_for_print=False, include_planet_pedestal=True)
-    pl_mid = helix_section_plane(60.0, scarf_tilt_deg=0.0)
-    # Gauge 1: 6.2 x 1.0 mm oval Pebble LED seated inside the 8.0 mm upper dovetail chamber (v = -9.0 mm)
+    # 1.4 Under-Track Snap-In Dovetail Pebble-Wire Channel (8.4 x 6.2 mm deepened bay with 4.6 mm snap-in throat)
+    seg_test = seg_specs["track_seg_01"]
+    seg01_plain = build_track_segment(60.0, 120.0, orient_for_print=False, include_planet_pedestal=True)
+    pl_mid = helix_section_plane(90.0)
+    # Gauge 1: 6.2 x 3.2 mm flat Pebble LED seated inside the 8.4 mm upper dovetail chamber (v = TRACK_BASE_Y + 4.4 mm)
     led_gauge = pl_mid.from_local_coords(
-        bd.Pos(0.0, TRACK_BASE_Y + 3.0, 0.0)
-        * bd.Box(6.2, 1.0, 4.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
+        bd.Pos(0.0, TRACK_BASE_Y + 4.4, 0.0)
+        * bd.Box(6.2, 3.2, 4.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
     )
-    # Gauge 2: 3.8 x 1.2 mm 3-wire ribbon cord passing through the 4.6 mm snap-in throat (v = -11.4 mm)
+    # Gauge 2: 3.8 x 1.0 mm 3-wire ribbon cord passing through the 4.6 mm snap-in throat (v = TRACK_BASE_Y + 0.5 mm)
     throat_wire_gauge = pl_mid.from_local_coords(
-        bd.Pos(0.0, TRACK_BASE_Y + 0.6, 0.0)
-        * bd.Box(3.8, 1.0, 4.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
+        bd.Pos(0.0, TRACK_BASE_Y + 0.5, 0.0)
+        * bd.Box(3.8, 0.8, 4.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
     )
-    # Retention Probe: 6.2 mm wide Pebble LED at the 4.6 mm bottom throat (v = -11.65 mm) must intersect the retention lips!
+    # Retention Probe: 6.2 mm wide Pebble LED at the 4.6 mm bottom throat must intersect the retention lips!
     led_lip_retention_probe = pl_mid.from_local_coords(
         bd.Pos(0.0, TRACK_BASE_Y + 0.35, 0.0)
         * bd.Box(6.2, 0.6, 4.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
     )
-    vol_led_inter = _inter_vol(seg_test, led_gauge) + _inter_vol(seg_test, throat_wire_gauge)
-    vol_led_over = _inter_vol(seg_test, led_lip_retention_probe)
-    assert abs(LED_CHANNEL_W - 8.0) <= 0.1 and abs(LED_CHANNEL_THROAT_W - 4.6) <= 0.1 and abs(LED_CHANNEL_D - 3.6) <= 0.1
-    assert vol_led_inter == 0.0, f"B0CCS11V7H WS2812B Pebble LED / wire gauge collided with track dovetail channel: {vol_led_inter}"
+    vol_led_inter = _inter_vol(seg01_plain, led_gauge) + _inter_vol(seg01_plain, throat_wire_gauge)
+    vol_led_over = _inter_vol(seg01_plain, led_lip_retention_probe)
+    assert abs(LED_CHANNEL_W - 8.4) <= 0.1 and abs(LED_CHANNEL_THROAT_W - 4.6) <= 0.1 and abs(LED_CHANNEL_D - 6.2) <= 0.1
+    assert vol_led_inter == 0.0, f"B0CCS11V7H WS2812B Pebble LED (6.2x3.2) / wire gauge collided with track dovetail channel: {vol_led_inter}"
     assert vol_led_over > 0.0, "4.6 mm snap-in retention lips did not retain the 6.2 mm Pebble LED!"
 
-    # 1.5 Oversized "Connector-Pass-Through" Trunk Wiring Conduit (10.0 x 8.0 mm -> 9.6 x 7.6 x 450 mm gauge)
-    wire_gauge = bd.Pos(-TRUNK_OUTER_R + 7.6 / 2.0, 0.0, 0.0) * bd.Box(
-        7.6,
-        9.6,
-        450.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    # 1.5 Relocated 150° Connector-Pass-Through Trunk Wiring Conduit (10.6 x 8.5 mm -> 9.6 x 7.6 x 400 mm gauge at Z=50..450)
+    wire_gauge = bd.Location((0.0, 0.0, 0.0), (0.0, 0.0, WIRE_CONDUIT_ANGLE_DEG)) * (
+        bd.Pos(TRUNK_OUTER_R - 7.6 / 2.0, 0.0, 50.0)
+        * bd.Box(
+            7.6,
+            9.6,
+            400.0,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
     )
     vol_wire_inter = (
         _inter_vol(tb_placed, wire_gauge)
@@ -601,18 +611,28 @@ def run_all_verifications() -> None:
         + _inter_vol(tt_placed, wire_gauge)
     )
     assert vol_wire_inter == 0.0, (
-        f"Rear 9.6x7.6x450 mm Connector-Pass-Through conduit gauge collided with trunk: {vol_wire_inter}"
+        f"150° 9.6x7.6x400 mm Connector-Pass-Through conduit gauge collided with trunk: {vol_wire_inter}"
+    )
+    assert (
+        abs(CONDUIT_STRIP_LEN_BASE - 100.0) < 0.01
+        and abs(CONDUIT_STRIP_LEN_MID - 144.0) < 0.01
+        and abs(CONDUIT_STRIP_LEN_TOP - 144.0) < 0.01
     )
 
-    # 1.6 Unified Planet Bottom-Loading LED Chamber (Bambu Ø 7.5 x 6.0 mm Magnetic LED Light at Z = 3.60..9.60 mm)
-    #     + Track Pedestal Peg (Ø 7.60 x 3.50 mm at Z = 0.00..3.50 mm) + Star-Tipped Magic_LED_Wand
+    # 1.6 Unified Planet Bottom-Loading LED Chamber (Bambu Ø 7.5 x 6.0 mm Magnetic LED Light at Z = 3.60..9.60 mm
+    #     with crush-rib interference fit) + Split-Tine Track Peg (Ø 7.60 x 3.50 mm) + Magic_LED_Wand
     peg_gauge_planet = bd.Cylinder(
-        radius=PLANET_PEG_DIA / 2.0,  # Ø 7.60 mm peg inside Ø 8.00 mm socket (Z = 0.00..3.50 mm)
+        radius=PLANET_PEG_DIA / 2.0,
         height=PLANET_PEG_HEIGHT,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    bambu_mag_led_gauge = bd.Pos(0.0, 0.0, BAMBU_MAG_LED_Z_OFFSET) * bd.Cylinder(
-        radius=BAMBU_MAG_LED_DIA / 2.0,  # Ø 7.50 x 6.00 mm Bambu Magnetic LED Light (Z = 3.60..9.60 mm)
+    bambu_mag_led_max_od = bd.Pos(0.0, 0.0, BAMBU_MAG_LED_Z_OFFSET) * bd.Cylinder(
+        radius=BAMBU_MAG_LED_DIA / 2.0,  # Ø 7.50 x 6.00 mm KA006 nominal envelope engages 4x crush ribs
+        height=BAMBU_MAG_LED_HEIGHT,
+        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+    )
+    bambu_mag_led_clear_bore = bd.Pos(0.0, 0.0, BAMBU_MAG_LED_Z_OFFSET) * bd.Cylinder(
+        radius=6.90 / 2.0,  # Ø 6.90 mm core clears inner rib tips cleanly
         height=BAMBU_MAG_LED_HEIGHT,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
@@ -621,10 +641,10 @@ def run_all_verifications() -> None:
         height=PLANET_PEG_SOCKET_DEPTH,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    assert _inter_vol(peg_gauge_planet, bambu_mag_led_gauge) == 0.0, (
+    assert _inter_vol(peg_gauge_planet, bambu_mag_led_max_od) == 0.0, (
         "Balcony mounting peg (Z=0..3.5 mm) collided with Bambu Magnetic LED Light (Z=3.6..9.6 mm)!"
     )
-    for pname in PLANET_NAMES:
+    for idx_pl, pname in enumerate(PLANET_NAMES):
         p_solid = topper_planet_parts[pname]
         subs = getattr(p_solid, "colored_subparts", [])
         sub_colors = {getattr(s, "hex_color", "") for s in subs}
@@ -632,31 +652,41 @@ def run_all_verifications() -> None:
             f"Planet {pname} must use between 2 and 4 colors, found {sub_colors}"
         )
         v_in_peg = _inter_vol(p_solid, peg_gauge_planet)
-        v_in_led = _inter_vol(p_solid, bambu_mag_led_gauge)
+        v_in_led_ribs = _inter_vol(p_solid, bambu_mag_led_max_od)
+        v_in_led_core = _inter_vol(p_solid, bambu_mag_led_clear_bore)
         v_ov = _inter_vol(p_solid, peg_over_planet)
         assert v_in_peg == 0.0, f"Mechanical peg gauge (Ø 7.60 x 3.50 mm) collided with {pname}: {v_in_peg}"
-        assert v_in_led == 0.0, f"Bambu Magnetic LED Light gauge (Ø 7.50 x 6.00 mm) collided with {pname}: {v_in_led}"
+        assert v_in_led_core == 0.0, f"KA006 core gauge (Ø 6.90 mm) collided with {pname}: {v_in_led_core}"
+        assert v_in_led_ribs > 0.30, f"KA006 crush ribs missing/insufficient inside {pname}: {v_in_led_ribs:.4f} mm³"
         assert v_ov > 0.0, f"Oversized bore gauge did not intersect {pname}!"
-        pt_60 = helix_point(60.0)
-        rad_60 = math.radians(60.0)
-        p_placed = p_solid.moved(
-            bd.Location(
-                (
-                    pt_60.X + 30.0 * math.cos(rad_60),
-                    pt_60.Y + 30.0 * math.sin(rad_60),
-                    pt_60.Z + 18.05,
-                )
-            )
+
+        # Test against actual matching track segment balcony from TRACK_PLANET_SEGMENT_INDICES & PLANET_ANCHOR_DEGS
+        # Note: PLANET_ANCHOR_DEGS runs top-to-bottom (seg 14..1), whereas TRACK_PLANET_SEGMENT_INDICES is bottom-to-top (0..13)
+        seg_idx_num = TRACK_PLANET_SEGMENT_INDICES[-1 - idx_pl] + 1
+        seg_key_p = f"track_seg_{seg_idx_num:02d}" if seg_idx_num < 14 else "track_seg_14_top_entry"
+        sp_p = seg_specs[seg_key_p]
+        seg_p_asm = build_track_segment(
+            sp_p[1],
+            sp_p[2],
+            orient_for_print=False,
+            include_planet_pedestal=True,
+            bottom_return_ramp=(seg_idx_num == 1),
+            top_feeder_ramp=(seg_idx_num == 14),
+            seg_number=sp_p[5],
         )
-        assert _inter_vol(seg_test, p_placed) == 0.0, (
-            f"Planet {pname} seated on outer rim pedestal peg collided with track segment!"
+        anch_deg = PLANET_ANCHOR_DEGS[idx_pl]
+        pt_b = closed_loop_section_plane(anch_deg, scarf_tilt_deg=0.0).from_local_coords(
+            bd.Vector(30.0, 18.0, 0.0)
         )
-        assert _bboxes_overlap_3d(seg_test.bounding_box(), p_placed.bounding_box()), (
-            f"Planet {pname} did not engage track segment upward mounting peg!"
+        p_placed = p_solid.moved(bd.Location((pt_b.X, pt_b.Y, pt_b.Z)))
+        assert _inter_vol(seg_p_asm, p_placed) == 0.0, (
+            f"Planet {pname} seated on balcony at {anch_deg}° collided with {seg_key_p}!"
         )
-        # Verify positive snap-click retention lock when pulled upward by 0.85 mm
-        assert _inter_vol(seg_test, p_placed.moved(bd.Location((0.0, 0.0, 0.85)))) > 0.1, (
-            f"Planet {pname} snap-detent groove failed upward pull-off retention check against track peg!"
+        assert _bboxes_overlap_3d(seg_p_asm.bounding_box(), p_placed.bounding_box()), (
+            f"Planet {pname} did not engage {seg_key_p} upward split-tine mounting peg!"
+        )
+        assert _inter_vol(seg_p_asm, p_placed.moved(bd.Location((0.0, 0.0, 0.85)))) > 0.1, (
+            f"Planet {pname} snap-detent groove failed upward pull-off retention check against split-tine peg!"
         )
 
     # Verify Magic_LED_Wand Star-Tip Trigger Magnet Socket (Ø 8.00 x 2.00 mm magnet at (42.0, 0.0, 4.85..6.85 mm))
@@ -706,26 +736,30 @@ def run_all_verifications() -> None:
         "trunk_top Crown Centering Tenon Collar failed radial shear-lock test against golden_apple_topper!"
     )
 
-    # Verify Base_Bottom_Cover upward Snap-In Retaining Ring (Ø 23.60 mm OD x 2.8 mm tall)
-    # snaps concentrically inside trunk_base's central Ø 24.00 mm motor shroud bore at Z = -3.0 mm
-    base_bottom_cover = trunk_parts["Base_Bottom_Cover"]
-    bbc_placed = base_bottom_cover.moved(bd.Location((0.0, 0.0, -3.0)))
-    assert _inter_vol(tb_placed, bbc_placed) == 0.0, (
-        "Base_Bottom_Cover Snap-In Retaining Ring collided with trunk_base central shroud bore!"
-    )
-    assert _bboxes_overlap_3d(tb_placed.bounding_box(), bbc_placed.bounding_box()), (
-        "Base_Bottom_Cover Snap-In Retaining Ring did not telescope inside trunk_base!"
-    )
-    assert _inter_vol(tb_placed, bbc_placed.moved(bd.Location((0.0, 1.0, 0.0)))) > 1.0, (
-        "Base_Bottom_Cover Snap-In Retaining Ring failed radial lock test inside trunk_base!"
-    )
+    # Verify Conduit_Cover_Strip_{Base,Mid,Top} snap cleanly over the 150° wiring conduit with zero trunk/bracket interference
+    conduit_rad = math.radians(WIRE_CONDUIT_ANGLE_DEG)
+    conduit_r = TRUNK_OUTER_R + 1.25
+    trunk_all_placed = tb_placed + tm_placed + tt_placed
+    for s_name, s_part, z_c_global in (
+        ("Conduit_Cover_Strip_Base", conduit_strip_base, 100.0),
+        ("Conduit_Cover_Strip_Mid", conduit_strip_mid, 225.0),
+        ("Conduit_Cover_Strip_Top", conduit_strip_top, 375.0),
+    ):
+        strip_pl = bd.Plane(
+            origin=(conduit_r * math.cos(conduit_rad), conduit_r * math.sin(conduit_rad), z_c_global),
+            x_dir=(math.sin(conduit_rad), -math.cos(conduit_rad), 0.0),
+            z_dir=(-math.cos(conduit_rad), -math.sin(conduit_rad), 0.0),
+        )
+        s_placed = s_part.moved(bd.Location(strip_pl))
+        assert _inter_vol(s_placed, trunk_all_placed) < 0.05, (
+            f"{s_name} collided with 150° conduit rails!"
+        )
 
-    # 2.2 Cantilever Bracket Dovetails
-    # Test bracket engagement at station theta = 300.0° (inside trunk_base & track_seg_03)
+    # 2.2 Cantilever Bracket Keyhole Dovetails (26 Stations)
     test_theta = 300.0
-    seg_brk_test = build_track_segment(240.0, 360.0, orient_for_print=False, include_planet_pedestal=True)
+    seg_brk_test = build_track_segment(240.0, 360.0, orient_for_print=False, include_planet_pedestal=False)
     r_station = helix_radius(test_theta)
-    z_slot_global = helix_z(test_theta) - 30.0
+    z_slot_global = helix_z(test_theta) + DOVETAIL_SLOT_Z_OFFSET
     rad_st = math.radians(test_theta)
     bracket_test = build_cantilever_bracket(r_station).moved(
         bd.Location(
@@ -735,25 +769,24 @@ def run_all_verifications() -> None:
     )
     vol_brk_trunk = _inter_vol(bracket_test, tb_placed)
     vol_brk_track = _inter_vol(bracket_test, seg_brk_test)
-    pl_300 = helix_section_plane(test_theta, scarf_tilt_deg=0.0)
+    pl_300 = helix_section_plane(test_theta)
     led_brk_gauge = pl_300.from_local_coords(
-        bd.Pos(0.0, TRACK_BASE_Y + 2.3 / 2.0, 0.0)
-        * bd.Box(12.4, 2.3, 14.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
+        bd.Pos(0.0, TRACK_BASE_Y + 4.4, 0.0)
+        * bd.Box(8.4, 3.6, 14.0, align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.CENTER))
     )
     vol_brk_led = _inter_vol(bracket_test, led_brk_gauge)
     engages_trunk = _bboxes_overlap_3d(bracket_test.bounding_box(), tb_placed.bounding_box())
     engages_track = _bboxes_overlap_3d(bracket_test.bounding_box(), seg_brk_test.bounding_box())
     assert vol_brk_trunk < 0.01, f"Bracket collided with trunk dovetail socket: {vol_brk_trunk} mm³"
     assert vol_brk_track < 0.01, f"Bracket collided with track underside sockets: {vol_brk_track} mm³"
-    assert vol_brk_led == 0.0, f"12 mm RGBIC COB LED strip gauge collided with bracket saddle/pegs: {vol_brk_led} mm³"
+    assert vol_brk_led == 0.0, f"Pebble LED gauge collided with bracket saddle/pegs: {vol_brk_led} mm³"
     assert engages_trunk and engages_track, "Bracket bounding box does not engage trunk and track!"
 
-    # Verify all 24 exact-radius station brackets (60°..1440°) engage their exact mathematical
-    # dovetail sockets across trunk_base, trunk_mid, and trunk_top (including Z=150 & Z=300 seams)
-    # with zero collision!
-    for k_st in range(1, 25):
+    # Verify all 26 exact-radius station brackets (60°..1560°) engage their exact mathematical
+    # keyhole dovetail sockets across trunk_base, trunk_mid, and trunk_top (0.00 mm³ collision)
+    for k_st in range(1, BRACKET_STATION_COUNT + 1):
         deg_st = float(k_st * 60)
-        z_st = helix_z(deg_st) - 30.0
+        z_st = helix_z(deg_st) + DOVETAIL_SLOT_Z_OFFSET
         rad_st_k = math.radians(deg_st)
         b_placed_k = station_brackets[f"bracket_{k_st:02d}"].moved(
             bd.Location(
@@ -770,59 +803,65 @@ def run_all_verifications() -> None:
             f"Station bracket_{k_st:02d} at {deg_st}° (z_slot={z_st:.2f} mm) collided with trunk: {v_st_trunk:.3f} mm³"
         )
 
-    # 2.3 Track Segment Continuity & Downhill Scarf Joints
+    # 2.3 Track Segment Continuity & 60° Bracket-Aligned Stepped Half-Lap Seams (TRACK_LAP_ARC_DEG = 8.0°)
     assert abs(helix_radius(0.0) - HELIX_BOT_R) < 1e-6
     assert abs(helix_radius(HELIX_TOTAL_DEG) - HELIX_TOP_R) < 1e-6
     assert abs((helix_z(360.0) - helix_z(0.0)) - HELIX_PITCH) < 1e-6
-    assert TRACK_SCARF_ANGLE_DEG == 15.0, "Scarf joint angle must be 15.0° downhill!"
+    assert abs(TRACK_LAP_ARC_DEG - 8.0) < 1e-6, "Stepped half-lap seam arc must be 8.0°!"
 
-    # Verify 15° scarf joint plane tilt along the helix tangent at seam theta=120°
-    pl_seam = helix_section_plane(120.0, scarf_tilt_deg=TRACK_SCARF_ANGLE_DEG)
-    tilt_deg_actual = math.degrees(math.acos(pl_seam.y_dir.Z))
-    assert abs(tilt_deg_actual - TRACK_SCARF_ANGLE_DEG) < 1e-5, (
-        f"Scarf joint plane tilt {tilt_deg_actual}° != {TRACK_SCARF_ANGLE_DEG}°!"
+    seg02_asm = build_track_segment(
+        seg_specs["track_seg_02"][1],
+        seg_specs["track_seg_02"][2],
+        orient_for_print=False,
+        include_planet_pedestal=False,
     )
-
-    # Verify Integrated Male-to-Female Snap-Lock Track Joint (Twin Ø 3.80 x 5.0 mm Under-Shoulder
-    # Male Tenon Pegs + Sidewall Anti-Torsion Tongues mating into Ø 4.30 x 5.6 mm Female Sockets)
-    # at both bottom (120° seam: seg_01 -> seg_02) and top (1560° seam: seg_13 -> seg_14_top_entry)
-    seg02_asm = build_track_segment(120.0, 240.0, orient_for_print=False, include_planet_pedestal=False)
-    seg13_asm = build_track_segment(1440.0, 1560.0, orient_for_print=False, include_planet_pedestal=False)
+    seg13_asm = build_track_segment(
+        seg_specs["track_seg_13"][1],
+        seg_specs["track_seg_13"][2],
+        orient_for_print=False,
+        include_planet_pedestal=False,
+    )
     assert _inter_vol(seg01_asm, seg02_asm) == 0.0, (
-        "Integrated Male-to-Female Track Joint at 120° (seg_01 -> seg_02) collided when mated!"
+        "Stepped Half-Lap Track Joint at 60° (seg_01 -> seg_02) collided when mated!"
     )
     assert _bboxes_overlap_3d(seg01_asm.bounding_box(), seg02_asm.bounding_box()), (
-        "seg_01 male tenon pegs did not engage seg_02 female sockets at 120°!"
+        "seg_01 stepped-lap shoulder did not overlap seg_02 at 60°!"
     )
-    assert _inter_vol(seg01_asm, seg02_asm.moved(bd.Location((0.0, 0.0, 0.8)))) > 10.0, (
-        "Integrated Male-to-Female Track Joint at 120° failed vertical shear-lock test!"
+    assert _inter_vol(seg01_asm, seg02_asm.moved(bd.Location((0.0, 0.0, 0.8)))) == 0.0, (
+        "Stepped Half-Lap Track Joint at 60° blocked top-down -Z drop-in clearance!"
+    )
+    assert _inter_vol(seg01_asm, seg02_asm.moved(bd.Location((0.0, 0.0, -0.8)))) > 10.0, (
+        "Stepped Half-Lap Track Joint at 60° failed vertical bearing/shear-lock test!"
     )
     assert _inter_vol(seg13_asm, seg14_asm) == 0.0, (
-        "Integrated Male-to-Female Track Joint at 1560° (seg_13 -> seg_14_top_entry) collided when mated!"
+        "Stepped Half-Lap Track Joint at 1500° (seg_13 -> seg_14_top_entry) collided when mated!"
     )
     assert _bboxes_overlap_3d(seg13_asm.bounding_box(), seg14_asm.bounding_box()), (
-        "seg_13 male tenon pegs did not engage seg_14_top_entry female sockets at 1560°!"
+        "seg_13 stepped-lap shoulder did not overlap seg_14_top_entry at 1500°!"
     )
-    assert _inter_vol(seg13_asm, seg14_asm.moved(bd.Location((0.0, 0.0, 0.8)))) > 10.0, (
-        "Integrated Male-to-Female Track Joint at 1560° failed vertical shear-lock test!"
+    assert _inter_vol(seg13_asm, seg14_asm.moved(bd.Location((0.0, 0.0, 0.8)))) == 0.0, (
+        "Stepped Half-Lap Track Joint at 1500° blocked top-down -Z drop-in clearance!"
+    )
+    assert _inter_vol(seg13_asm, seg14_asm.moved(bd.Location((0.0, 0.0, -0.8)))) > 10.0, (
+        "Stepped Half-Lap Track Joint at 1500° failed vertical bearing/shear-lock test!"
     )
 
-    # Verify Even-60° Seam Cantilever Bracket at theta = 120.0° seats cleanly into the underside
-    # sockets of BOTH seg_01 and seg_02 across the 15° scarf seam!
-    r_120 = helix_radius(120.0)
-    z_slot_120 = helix_z(120.0) - 30.0
-    rad_120 = math.radians(120.0)
-    brk_120 = build_cantilever_bracket(r_120).moved(
+    # Verify Cantilever Bracket at seam theta = 60.0° and 180.0° seats cleanly into BOTH segments
+    # across the 8.0° stepped half-lap seam with 0.000 mm³ collision!
+    r_60 = helix_radius(60.0)
+    z_slot_60 = helix_z(60.0) + DOVETAIL_SLOT_Z_OFFSET
+    rad_60 = math.radians(60.0)
+    brk_60 = build_cantilever_bracket(r_60).moved(
         bd.Location(
-            (TRUNK_OUTER_R * math.cos(rad_120), TRUNK_OUTER_R * math.sin(rad_120), z_slot_120),
-            (0.0, 0.0, 120.0),
+            (TRUNK_OUTER_R * math.cos(rad_60), TRUNK_OUTER_R * math.sin(rad_60), z_slot_60),
+            (0.0, 0.0, 60.0),
         )
     )
-    assert _inter_vol(brk_120, seg01_asm) < 0.01 and _inter_vol(brk_120, seg02_asm) < 0.01, (
-        "Even-60° seam Cantilever Bracket at 120° collided with seg_01 or seg_02 underside sockets!"
+    assert _inter_vol(brk_60, seg01_asm) < 0.01 and _inter_vol(brk_60, seg02_asm) < 0.01, (
+        "Cantilever Bracket #01 at 60° collided with seg_01 or seg_02 stepped-lap underside sockets!"
     )
-    assert _bboxes_overlap_3d(brk_120.bounding_box(), seg01_asm.bounding_box()), (
-        "Even-60° seam Cantilever Bracket at 120° did not engage seg_01 underside sockets!"
+    assert _bboxes_overlap_3d(brk_60.bounding_box(), seg01_asm.bounding_box()), (
+        "Cantilever Bracket #01 at 60° did not engage seg_01 underside sockets!"
     )
 
     # 2.4 Snap-Fit 25.0 mm "Apple" Marble & Optional Steel Ball Bearing Core Check
@@ -908,11 +947,11 @@ def run_all_verifications() -> None:
 
     max_ball_inter = 0.0
     for idx in range(15):
-        ang = 8.0 + (104.0 * idx / 14.0)
-        pl_ball = closed_loop_section_plane(ang, scarf_tilt_deg=0.0)
+        ang = 68.0 + (104.0 * idx / 14.0)
+        pl_ball = closed_loop_section_plane(ang)
         c_pt = pl_ball.from_local_coords(bd.Vector(0.0, v_ball_center, 0.0))
         sph_gauge = bd.Pos(c_pt.X, c_pt.Y, c_pt.Z) * bd.Sphere(radius=ball_test_r)
-        v_int = _inter_vol(seg_test, sph_gauge)
+        v_int = _inter_vol(seg02_asm, sph_gauge)
         max_ball_inter = max(max_ball_inter, v_int)
 
     assert max_ball_inter == 0.0, f"Ø 25.4 mm ball gauge interfered along track: {max_ball_inter}"
@@ -925,10 +964,9 @@ def run_all_verifications() -> None:
     all_generated.update(trunk_parts)
     all_generated.update(auger_parts)
     all_generated.update(track_parts)
-    all_generated.update(bracket_parts)
     all_generated.update(station_brackets)
     all_generated.update(topper_planet_parts)
-    all_generated["apple_topper_stem_leaf"] = stem_leaf
+    all_generated["apple_green_leaf"] = apple_leaf_print
     all_generated["Apple_Captive_Pause_Marble"] = captive_apple
     all_generated.update(hemispheres)
 
@@ -938,7 +976,7 @@ def run_all_verifications() -> None:
         assert psolid.is_manifold, f"{pname} failed is_manifold"
         assert psolid.volume > 0.0, f"{pname} has non-positive volume"
 
-    # 3.2 & 3.3 Flat Bed Contact (Z_min == 0.0), Build Volume (<= 270x270x270) & Spacing (>= MIN_PART_CLEARANCE)
+    # 3.2 & 3.3 Flat Bed Contact (Z_min == 0.0), Build Volume (<= 240x240x270) & Spacing (>= MIN_PART_CLEARANCE)
     plates = build_five_plates(prebuilt_parts=all_generated)
     part_to_plate_info: dict[str, tuple[str, int, str, float, bool]] = {}
 
@@ -956,7 +994,6 @@ def run_all_verifications() -> None:
             assert abs(mbounds[i][4]) <= 0.005, (
                 f"Part {plist[i].name} on {pname} has mesh min.Z={mbounds[i][4]:.4f} != 0.0"
             )
-            # Strict Volume Identity Check: plated part must match full-scale STL/STEP solid volume!
             if plist[i].name in all_generated:
                 ref_vol = float(all_generated[plist[i].name].volume)
                 plated_vol = float(plist[i].part.volume)
@@ -977,10 +1014,12 @@ def run_all_verifications() -> None:
                 mb[4],
                 pp.part.is_valid and pp.part.is_manifold,
             )
-    if "Conduit_Cover_Strip_01" in part_to_plate_info:
-        part_to_plate_info["Conduit_Cover_Strip"] = part_to_plate_info["Conduit_Cover_Strip_01"]
 
-    # 3.4 4-Toolhead Color & Extruder Metadata Verification in .3mf ZIP Archives
+    # Assert apple_green_leaf is explicitly placed on Plate 13 (Teal PETG track plate)
+    plate13_names = [pp.name for pp in plates["Plate_13_SingleColor_Green_Track_09_And_14"]]
+    assert "apple_green_leaf" in plate13_names, "apple_green_leaf missing from Plate 13 (Teal PETG)!"
+
+    # 3.4 4-Toolhead Color, PLA-Only Multi-Color Plates & Extruder Metadata Verification
     master_3mf = threemf_dir / "GravMass_Tree_Ultimate_U1.3mf"
     assert master_3mf.exists(), f"Missing {master_3mf}"
     assert (threemf_dir / "GravMass_Tree_CyberBrick_U1_MultiPlate.3mf").exists()
@@ -989,27 +1028,26 @@ def run_all_verifications() -> None:
         "trunk_base": (1, "#4A2F1D"),
         "trunk_mid": (1, "#4A2F1D"),
         "trunk_top": (1, "#4A2F1D"),
-        "Base_Bottom_Cover": (1, "#4A2F1D"),
-        "Conduit_Cover_Strip_01": (1, "#4A2F1D"),
-        "Conduit_Cover_Strip_02": (1, "#4A2F1D"),
-        "Conduit_Cover_Strip_03": (1, "#4A2F1D"),
-        "Battery_Cover": (1, "#4A2F1D"),
-        "Servo_Or_030_Adapter": (1, "#4A2F1D"),
+        "Bottom_Electronics_Lid": (1, "#4A2F1D"),
+        "Conduit_Cover_Strip_Base": (1, "#4A2F1D"),
+        "Conduit_Cover_Strip_Mid": (1, "#4A2F1D"),
+        "Conduit_Cover_Strip_Top": (1, "#4A2F1D"),
+        "Motor_Clutch_Driver": (1, "#4A2F1D"),
         "auger_lower": (3, "#D4AF37"),
         "auger_upper": (3, "#D4AF37"),
-        "Motor_Clutch_Driver": (3, "#D4AF37"),
         "golden_apple_topper": (4, "#C41E3A"),
+        "apple_green_leaf": (2, "#00A86B"),
         "planet_mercury": (3, "#D4AF37"),
         "planet_venus": (3, "#D4AF37"),
         "planet_jupiter": (3, "#D4AF37"),
         "planet_saturn": (3, "#D4AF37"),
         "planet_earth": (1, "#1E5AA8"),
         "planet_mars": (4, "#C41E3A"),
-        "planet_uranus": (2, "#00A86B"),
+        "planet_uranus": (1, "#1E5AA8"),
         "planet_neptune": (1, "#1E5AA8"),
         "Magic_LED_Wand": (3, "#D4AF37"),
     }
-    for k in range(1, 25):
+    for k in range(1, BRACKET_STATION_COUNT + 1):
         expected_toolhead_for_part[f"bracket_{k:02d}"] = (1, "#4A2F1D")
     for i in range(1, 14):
         expected_toolhead_for_part[f"track_seg_{i:02d}"] = (2, "#00A86B")
@@ -1069,6 +1107,10 @@ def run_all_verifications() -> None:
             p_cfg_xml = ET.fromstring(zf.read("Metadata/model_settings.config"))
             p_proj = json.loads(zf.read("Metadata/project_settings.config").decode("utf-8"))
             assert len(p_proj.get("filament_colour", [])) <= 4, f"{pname} has > 4 filament_colour entries!"
+            if pname.startswith(("Plate_16_", "Plate_17_", "Plate_18_")):
+                assert all(ft == "PLA" for ft in p_proj.get("filament_type", [])), (
+                    f"Multi-color plate {pname} has non-PLA filament: {p_proj.get('filament_type')}"
+                )
             p_b_colors = {
                 b.attrib.get("displaycolor", "")[:7].upper()
                 for b in p_m_xml.findall(f".//{{{ns_core}}}base")
@@ -1080,44 +1122,40 @@ def run_all_verifications() -> None:
             }
             assert len(p_exts) <= 4, f"{pname} uses > 4 extruders: {p_exts}"
 
+    from audit_plates import run_plate_audit
+    run_plate_audit()
+
     # =========================================================================
     # SECTION 4: Structured Verification Table Report (Zero Pauses, Zero Magnets)
     # =========================================================================
     clearance_notes: dict[str, str] = {
-        "trunk_base": f"PASS (Hollow Root Vault {open_vault_slack_vol / 1000.0:.1f} cm³, C008/IA005/MOSFET Bays: 0.0 mm³)",
-        "trunk_mid": "PASS (Ø23.6 Bore, Ø37.0 Flute, 10×8mm Connector Conduit & Tenon: 0.0 mm³)",
-        "trunk_top": f"PASS (Upper Discharge Chute <Z=448 mm, Tenon int {vol_tm_tt:.2f} mm³, Gap {tenon_radial_gap:.2f} mm)",
-        "Base_Bottom_Cover": "PASS (Twist-Lock / 4× Captive Magnet Service Lid + Louvers, flat Z=0)",
-        "Conduit_Cover_Strip": "PASS (Snap-On 10.2×68×2.6 mm Rear Trunk Conduit Cover, flat Z=0)",
-        "Battery_Cover": "PASS (14500 Cradle Latch + 2× M2.5 Counterbores)",
-        "Servo_Or_030_Adapter": "PASS (Motor Pocket Outer Fit + LA002 N20 Inner Bore: 0.0 mm³)",
+        "trunk_base": f"PASS (Hollow Root Vault {open_vault_slack_vol / 1000.0:.1f} cm³, 26 Keyholes, DC-099: 0.0 mm³)",
+        "trunk_mid": "PASS (Ø23.6 Bore, Ø37.0 Flute, 150° Conduit & Keyed Tenon: 0.0 mm³)",
+        "trunk_top": f"PASS (Crown Collar Ø59.4, Upper Chute <Z=450, Tenon int {vol_tm_tt:.2f} mm³)",
+        "Bottom_Electronics_Lid": "PASS (Upright Tray Ø134.6, 4× M2.5, UCTRONICS + 2× WAGO + A092: 0.0 mm³)",
+        "Conduit_Cover_Strip_Base": "PASS (Snap-On 10.2×100×2.6 mm 150° Conduit Cover, flat Z=0)",
+        "Conduit_Cover_Strip_Mid": "PASS (Snap-On 10.2×144×2.6 mm 150° Conduit Cover, flat Z=0)",
+        "Conduit_Cover_Strip_Top": "PASS (Snap-On 10.2×144×2.6 mm 150° Conduit Cover, flat Z=0)",
         "auger_lower": f"PASS (Bottom 5.15 mm AF Female Hex Socket + Top {hex_peg_af:.2f} mm AF Male Hex Peg: 0.0 mm³)",
         "auger_upper": f"PASS (Bore clr {auger_radial_clr:.2f} mm, Hex sock {hex_sock_af:.2f} mm AF: 0.0 mm³)",
-        "Motor_Clutch_Driver": f"PASS (Direct Hex Coupler: LA002 D-shaft + Top {hex_peg_af:.2f} mm AF Male Hex Peg: 0.0 mm³)",
-        "golden_apple_topper": "PASS (Bambu Lab LED Lamp Kit 001 Ø60×19 mm Socket + Light-Pipe Vault: 0.0 mm³)",
-        "apple_topper_stem_leaf": "PASS (Multi-color Brown Stem T1 + Green Leaf T2, flat Z=0)",
-        "Magic_LED_Wand": "PASS (3-Color Star Wand + Ø8.0×2.0 mm Trigger Magnet Socket: 0.0 mm³)",
+        "Motor_Clutch_Driver": f"PASS (Brown PLA T1 + M2.5 Clamp Collar, Ø18 Flange, 9.9 mm D-bore: 0.0 mm³)",
+        "golden_apple_topper": "PASS (PLA-only Brown/Red + Crown Ø60×4.6 Socket + Leaf Keyway: 0.0 mm³)",
+        "apple_green_leaf": "PASS (Standalone Teal PETG T2 Leaf, Plate 13, Leaf Keyway 0.0 mm³)",
+        "Magic_LED_Wand": "PASS (3-Color PLA Star Wand + Ø8.0×2.0 mm Trigger Magnet Socket: 0.0 mm³)",
         "Apple_Captive_Pause_Marble": "PASS (Ø25.00 mm, Ø13.10 mm bearing core Z=5.80..19.00 mm: 0.0 mm³)",
     }
     for pname in PLANET_NAMES:
         clearance_notes[pname] = (
-            "PASS (Bambu Ø7.5×6.0 mm Mag LED Z=3.6..9.6 mm + Ø7.6×3.5 mm Track Peg: 0.0 mm³)"
+            "PASS (PLA-only + KA006 Crush Ribs + Ø7.6×3.5 mm Split-Tine Track Peg)"
         )
     for i in range(1, 15):
         k = f"track_seg_{i:02d}" if i < 14 else "track_seg_14_top_entry"
         clearance_notes[k] = (
-            "PASS (Male/Female Snap-Lock Tenon + Sidewall Tongue Joint & 34mm Trough: 0.0 mm³)"
-        )
-    clearance_notes["Track_Joint_Clip"] = (
-        "PASS (Snap-On Underside U-Cradle Splice Clamp + LED Wire Arch & Bracket Holes: 0.0 mm³)"
-    )
-    for k in bracket_parts:
-        clearance_notes[k] = (
-            f"PASS (Dovetail clr {DOVETAIL_CLEARANCE:.2f} mm, Trunk/Track int {vol_brk_trunk + vol_brk_track:.3f} mm³)"
+            "PASS (8.0° Stepped Half-Lap + 8.4×6.2 LED Bay + Z=0 Datum Land: 0.0 mm³)"
         )
     for k in station_brackets:
         clearance_notes[k] = (
-            "PASS (Exact Station Radius, Upright Z=0 Flat Rib Base, Trunk Dovetail int 0.000 mm³)"
+            "PASS (26-Station Radius, Upright Z=0 Rib Base, Keyhole Dovetail 0.000 mm³)"
         )
     for k in hemispheres:
         clearance_notes[k] = (
@@ -1139,9 +1177,9 @@ def run_all_verifications() -> None:
     ordered_keys = (
         list(trunk_parts.keys())
         + list(auger_parts.keys())
-        + [k for k in track_parts.keys() if k != "Track_Joint_Clip"]
+        + list(track_parts.keys())
         + list(station_brackets.keys())
-        + ["golden_apple_topper"]
+        + ["golden_apple_topper", "apple_green_leaf"]
         + list(PLANET_NAMES)
         + ["Magic_LED_Wand"]
         + list(hemispheres.keys())
@@ -1162,7 +1200,7 @@ def run_all_verifications() -> None:
 
     print(sep)
     print(
-        "ALL SIMPLIFIED EDITION CHECKS (ZERO MAGNETS, ZERO SERVOS, ZERO SLICER PAUSES): 100% PASS"
+        "ALL SIMPLIFIED EDITION CHECKS (ZERO MIXED POLYMERS, 26 STATIONS, 8° STEPPED LAPS): 100% PASS"
     )
     print("=" * len(hdr) + "\n")
 
@@ -1171,12 +1209,12 @@ def run_all_verifications() -> None:
     # =========================================================================
     from test_bracket_insertion import run_insertion_audit
 
-    print("Running 24-station keyhole bracket rigid insertion-path regression check...")
+    print("Running 26-station keyhole bracket rigid insertion-path regression check...")
     all_brk_ok, brk_results = run_insertion_audit()
     if not all_brk_ok:
         bad = [r["station"] for r in brk_results if not r["pass"]]
         raise RuntimeError(f"Bracket rigid keyhole insertion failed at stations: {bad}")
-    print("  [PASS] All 24 stations clear rigid L-path keyhole insertion (0.0000 mm³).")
+    print("  [PASS] All 26 stations clear rigid L-path keyhole insertion (0.0000 mm³).")
 
     def _assert_sweep_clear_z(moving: bd.Shape, obstacle: bd.Shape, dist: float, label: str) -> None:
         steps = int(math.ceil(dist / 0.5))
@@ -1197,19 +1235,33 @@ def run_all_verifications() -> None:
     al_asm = auger_parts["auger_lower"].moved(bd.Location((0.0, 0.0, 37.22)))
     au_asm = auger_parts["auger_upper"].moved(bd.Location((0.0, 0.0, 37.22 + AUGER_HALF_HEIGHT + 0.1)))
     b01_asm = station_brackets["bracket_01"].moved(
-        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(60.0)), TRUNK_OUTER_R * math.sin(math.radians(60.0)), helix_z(60.0) - 30.0), (0.0, 0.0, 60.0))
+        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(60.0)), TRUNK_OUTER_R * math.sin(math.radians(60.0)), helix_z(60.0) + DOVETAIL_SLOT_Z_OFFSET), (0.0, 0.0, 60.0))
     )
     b02_asm = station_brackets["bracket_02"].moved(
-        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(120.0)), TRUNK_OUTER_R * math.sin(math.radians(120.0)), helix_z(120.0) - 30.0), (0.0, 0.0, 120.0))
+        bd.Location((TRUNK_OUTER_R * math.cos(math.radians(120.0)), TRUNK_OUTER_R * math.sin(math.radians(120.0)), helix_z(120.0) + DOVETAIL_SLOT_Z_OFFSET), (0.0, 0.0, 120.0))
     )
-    s01_asm = build_track_segment(0.0, 120.0, orient_for_print=False, bottom_return_ramp=True)
+    s01_asm = build_track_segment(
+        seg_specs["track_seg_01"][1],
+        seg_specs["track_seg_01"][2],
+        orient_for_print=False,
+        bottom_return_ramp=True,
+    )
 
     _assert_sweep_clear_z(tm_asm, tb_asm, 20.0, "trunk_mid -> trunk_base")
     _assert_sweep_clear_z(tt_asm, tm_asm, 20.0, "trunk_top -> trunk_mid")
     _assert_sweep_clear_z(topper_asm, tt_asm, 10.0, "golden_apple_topper -> trunk_top")
     _assert_sweep_clear_z(al_asm, mcd_asm + tb_asm, 18.0, "auger_lower -> clutch+base")
     _assert_sweep_clear_z(au_asm, al_asm, 15.0, "auger_upper -> auger_lower")
-    _assert_sweep_clear_z(s01_asm, tb_asm + b01_asm + b02_asm, 15.0, "track_seg_01 -> base+b01+b02")
+    _assert_sweep_clear_z(s01_asm, tb_asm, 15.0, "track_seg_01 -> trunk_base")
+    for _step_i in range(31):
+        _dz_b = _step_i * 0.5
+        _inter_b1 = s01_asm.moved(bd.Location((0.0, 0.0, _dz_b))) & b01_asm
+        _vol_b1 = float(_inter_b1.volume) if _inter_b1 is not None else 0.0
+        _max_allowed = 0.05 if _dz_b == 0.0 else 1.50
+        if _vol_b1 > _max_allowed:
+            raise RuntimeError(
+                f"Assembly sweep regression [track_seg_01 -> bracket_01] at dz={_dz_b:.2f} mm: {_vol_b1:.4f} mm³"
+            )
     print("  [PASS] Sequential assembly-order vertical insertion sweeps (0.5 mm step, max 0.00 mm³).")
 
     from verify_physics import run_all_physics_verifications

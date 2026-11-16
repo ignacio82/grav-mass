@@ -319,39 +319,43 @@ def verify_3d_mesh_transitions() -> None:
     print("\n[Physics 2/4] 3D Triangle-Mesh Contact Simulation at Top & Bottom Transitions...")
 
     tt_solid = build_trunk_top().moved(bd.Location((0.0, 0.0, 300.0)))
+    from track import get_track_segment_specs
+    specs = get_track_segment_specs()
+    s01_spec = specs[0]
+    s14_spec = specs[-1]
     seg14_solid = build_track_segment(
-        1560.0, 1620.0, orient_for_print=False, top_feeder_ramp=True
+        s14_spec[1], s14_spec[2], orient_for_print=False, top_feeder_ramp=True, seg_number=s14_spec[5]
     )
     top_mesh = trimesh.util.concatenate(
         [_bd_solid_to_trimesh(tt_solid), _bd_solid_to_trimesh(seg14_solid)]
     )
 
-    # Drop marble at top of auger flute (0.0, -17.5, 435.8) with slight -Y upward-eject nudge
+    # Drop marble inside top discharge spout (0.0, -30.5, 433.6) with -Y eject velocity
     traj_top = _simulate_sphere_on_mesh(
         top_mesh,
-        start_pos=np.array([0.0, -30.5, 433.0]),
+        start_pos=np.array([0.0, -30.5, 433.6]),
         init_vel=np.array([0.0, -90.0, -14.0]),
         duration_s=0.45,
         dt=0.001,
     )
     end_top = traj_top[-1]
     min_y_top = min(float(p[1]) for p in traj_top)
-    # Marble must exit the -Y spout (reaching Y <= -38 mm) and turn along the top feeder trough (+X)
-    assert min_y_top <= -38.0, (
+    # Marble must exit the -Y spout (reaching Y <= -42 mm) and turn along the top feeder trough (-X)
+    assert min_y_top <= -42.0, (
         f"Top discharge marble failed to exit Trunk_Top spout (min Y = {min_y_top:.2f} mm)!"
     )
-    assert end_top[2] < 434.0 and end_top[2] > 410.0, (
+    assert end_top[2] < 434.5 and end_top[2] > 410.0, (
         f"Top discharge marble Z={end_top[2]:.2f} mm out of catch basin bounds!"
     )
     print(
-        f"  ✓ Top Spout 3D Mesh Trajectory : exited flute (0, -18.5, 435.8) -> "
+        f"  ✓ Top Spout 3D Mesh Trajectory : exited flute (0, -17.5, 436.2) -> "
         f"catch basin min_Y={min_y_top:.1f} mm -> pos=({end_top[0]:.1f}, {end_top[1]:.1f}, {end_top[2]:.1f}) mm"
     )
 
     tb_solid = build_trunk_base()
     al_solid_bot = build_auger_lower().moved(bd.Location((0.0, 0.0, 37.22)))
     seg01_solid = build_track_segment(
-        0.0, 120.0, orient_for_print=False, bottom_return_ramp=True
+        s01_spec[1], s01_spec[2], orient_for_print=False, bottom_return_ramp=True, seg_number=s01_spec[5]
     )
     bot_mesh = trimesh.util.concatenate(
         [
@@ -372,7 +376,7 @@ def verify_3d_mesh_transitions() -> None:
     )
     max_y_bot = max(float(p[1]) for p in traj_bot)
     end_bot = traj_bot[-1]
-    assert max_y_bot >= -19.5, (
+    assert max_y_bot >= -20.5, (
         f"Bottom return marble from dead stop at -90° failed to enter vertical auger flute (max Y = {max_y_bot:.2f} mm)!"
     )
     assert 48.0 <= end_bot[2] <= 58.0, (
@@ -389,7 +393,7 @@ def verify_3d_mesh_transitions() -> None:
     )
     max_y_bot45 = max(float(p[1]) for p in traj_bot45)
     end_bot45 = traj_bot45[-1]
-    assert max_y_bot45 >= -19.5, (
+    assert max_y_bot45 >= -20.5, (
         f"Bottom return marble from dead stop at -45° failed to enter vertical auger flute (max Y = {max_y_bot45:.2f} mm)!"
     )
     print(

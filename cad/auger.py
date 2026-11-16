@@ -8,8 +8,8 @@ coupler designed to run inside the Ø 41.0 mm trunk bore:
   2. auger_upper         : Ø 9.0 mm central shaft, 2.4 mm thick spiral blade extending
                            to Ø 38.0 mm (pitch 46.0 mm), and bottom 5.0 mm female hex
                            coupling socket with self-supporting conical roof.
-  3. Motor_Clutch_Driver : Direct mechanical N20 D-shaft to 5.0 mm male hex drive coupler.
-  4. Servo_Or_030_Adapter: Snap-in motor sleeve for the LA002 N20 gear motor.
+  3. Motor_Clutch_Driver : Direct mechanical N20 D-shaft to 5.0 mm male hex drive coupler
+                           with radial M2.5 × 6 mm D-flat clamping screw.
 """
 
 from __future__ import annotations
@@ -33,33 +33,34 @@ from common_params import (
     make_engraved_label_solid,
 )
 
-CLUTCH_FLANGE_OD = 20.0
+CLUTCH_FLANGE_OD = 22.0
 CLUTCH_AIR_GAP = 1.00
 
 
 def build_motor_clutch_driver() -> bd.Solid:
-    """Build the direct mechanical Motor_Clutch_Driver coupler (Toolhead 3 - Silk Gold #D4AF37):
-      - Lower motor boss: Ø 11.0 mm stem (Z = 0.00..3.50 mm) expanding at 45° (Z = 3.50..6.00 mm)
-        to a Ø 16.0 mm coupling flange (Z = 6.00..10.00 mm).
-      - Bottom N20 D-shaft bore: Ø 3.15 mm with 2.65 mm D-flat, 6.50 mm deep (Z = 0.00..6.50 mm)
-        with a 45° self-supporting conical roof.
+    """Build the direct mechanical Motor_Clutch_Driver coupler (Toolhead 1 - Dark Wood Brown PLA #4A2F1D):
+      - Lower hub collar: Ø 18.0 mm (Z = 0.00..6.50 mm) enclosing the N20 D-shaft bore
+        with a +X Ø 2.20 mm radial M2.5 clamp pilot bore at Z = 3.25 mm (7.925 mm thread wall).
+      - 45° transition taper (Z = 6.50..7.50 mm) into Ø 16.0 mm upper coupling flange (Z = 7.50..10.00 mm).
+      - Bottom N20 D-shaft bore: Ø 3.15 mm with 2.65 mm D-flat, 8.50 mm deep (Z = 0.00..8.50 mm)
+        with a 45° self-supporting conical roof to Z = 9.90 mm (clears 9.0 mm N20 D-shafts).
       - Upper male hex drive peg: 4.85 mm across-flats x 4.50 mm tall (Z = 10.00..14.50 mm)
         that engages the female hex socket in the base of auger_lower without magnets.
     """
-    stem = bd.Cylinder(
-        radius=5.5,
-        height=3.5,
+    lower_collar = bd.Cylinder(
+        radius=9.0,
+        height=6.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    taper = bd.Pos(0.0, 0.0, 3.5) * bd.Cone(
-        bottom_radius=5.5,
+    taper = bd.Pos(0.0, 0.0, 6.5) * bd.Cone(
+        bottom_radius=9.0,
         top_radius=8.0,
-        height=2.5,
+        height=1.0,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
-    collar = bd.Pos(0.0, 0.0, 6.0) * bd.Cylinder(
+    collar = bd.Pos(0.0, 0.0, 7.5) * bd.Cylinder(
         radius=8.0,
-        height=4.0,
+        height=2.5,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
 
@@ -67,30 +68,40 @@ def build_motor_clutch_driver() -> bd.Solid:
     hex_poly = bd.RegularPolygon(radius=apothem_peg, side_count=6, major_radius=False)
     hex_peg = bd.Pos(0.0, 0.0, 10.0) * bd.extrude(hex_poly, 4.5)
 
-    # Vertical N20 D-shaft bore (Ø 3.15 mm with 2.65 mm D-flat, Z = 0.00..6.50 mm + 45° conical roof)
+    # Vertical N20 D-shaft bore (Ø 3.15 mm with 2.65 mm D-flat, Z = 0.00..8.50 mm + 45° conical roof to 9.90 mm)
     r_d = 3.15 / 2.0  # 1.575 mm
     d_cyl = bd.Pos(0.0, 0.0, -0.1) * bd.Cylinder(
         radius=r_d,
-        height=6.60,
+        height=8.60,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     flat_x = 2.65 - r_d  # 1.075 mm
     keep_box = bd.Pos(flat_x - r_d, 0.0, -0.2) * bd.Box(
         2.0 * r_d,
         4.0 * r_d,
-        7.00,
+        9.00,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
     d_bore = d_cyl & keep_box
-    d_roof = bd.Pos(0.0, 0.0, 6.50) * bd.Cone(
+    d_roof = bd.Pos(0.0, 0.0, 8.50) * bd.Cone(
         bottom_radius=r_d,
         top_radius=0.2,
         height=1.40,
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
 
-    driver = (stem + taper + collar + hex_peg - d_bore - d_roof).solid()
-    return assign_toolhead(driver, "Motor_Clutch_Driver", 3)
+    # Radial +X M2.5 set-screw pilot bore at Z = 3.25 mm perpendicular to the D-flat (x = +1.075 mm)
+    m25_clamp_pilot = (
+        bd.Plane(origin=(0.5, 0.0, 3.25), z_dir=(1.0, 0.0, 0.0))
+        * bd.Cylinder(
+            radius=1.10,
+            height=9.2,
+            align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
+        )
+    )
+
+    driver = (lower_collar + taper + collar + hex_peg - d_bore - d_roof - m25_clamp_pilot).solid()
+    return assign_toolhead(driver, "Motor_Clutch_Driver", 1)
 
 
 def _build_auger_core(
@@ -112,17 +123,35 @@ def _build_auger_core(
         align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
     )
 
-    # Embed inner edge of blade 0.8 mm inside the central shaft for a robust boolean union
-    r_inner_embed = r_shaft - 0.8
-    blade_radial_w = (r_outer + 0.6) - r_inner_embed
+    # Embed inner edge of blade 0.8 mm inside the central shaft for a manifold boolean union
+    r_inner_embed = r_shaft - 0.8  # 3.7 mm
+    r_outer_margin = r_outer + 0.6  # 19.6 mm (trimmed cleanly to r_outer = 19.0 mm below)
+    blade_radial_w = r_outer_margin - r_inner_embed
     r_mid = r_inner_embed + blade_radial_w / 2.0
     z_margin = 0.0 if is_upper else 5.5
     z_top_margin = 3.0 if is_upper else 0.0
     helix_h = height - z_margin - z_top_margin
 
+    # Right-trapezoid blade profile spanning full blade radius:
+    #   - Horizontal top lift face at z_top = z_margin + 1.2 mm (exact pitch 46.0 mm)
+    #   - Outer thickness 2.4 mm at r_outer = 19.0 mm
+    #   - Continuous 45° inward-sloped underside (16.9 mm root thickness at r_shaft = 4.5 mm)
+    z_top = z_margin + AUGER_FLIGHT_THICKNESS / 2.0
+    z_under_outer = z_top - AUGER_FLIGHT_THICKNESS
+    z_under_inner = z_under_outer - (r_outer - r_inner_embed)
+    trap_pts = [
+        (r_inner_embed, z_top),
+        (r_outer_margin, z_top),
+        (r_outer_margin, z_under_outer),
+        (r_outer, z_under_outer),
+        (r_inner_embed, z_under_inner),
+        (r_inner_embed, z_top),
+    ]
+    trap_wire = bd.Wire([bd.Edge.make_line(trap_pts[i], trap_pts[i + 1]) for i in range(len(trap_pts) - 1)])
+    blade_profile = bd.Plane.XZ * bd.Face(trap_wire)
+
     # For a circular cylinder helix, the Frenet principal normal is strictly horizontal & radial
-    # toward the Z-axis everywhere, so is_frenet=True keeps the blade strictly horizontal radially
-    # at full r_outer from bottom to top!
+    # toward the Z-axis everywhere, so is_frenet=True keeps the top lift face strictly horizontal radially.
     helix_path = bd.Wire(
         [
             bd.Helix(
@@ -133,11 +162,6 @@ def _build_auger_core(
             )
         ]
     )
-    blade_profile = (
-        bd.Plane.XZ
-        * bd.Pos(r_mid, z_margin)
-        * bd.Rectangle(blade_radial_w, AUGER_FLIGHT_THICKNESS)
-    )
     blade = bd.sweep(
         blade_profile,
         path=helix_path,
@@ -147,7 +171,7 @@ def _build_auger_core(
         blade = bd.Rot(0.0, 0.0, start_angle_deg) * blade
 
     if is_upper:
-        # Clip cleanly to [0.0, height] cylinder so leading edge sits flat on Z=0 build plate
+        # Clip to [0.0, height] cylinder so leading edge sits flat on Z=0 build plate
         # and meets auger_lower's top blade edge with zero missing-blade gap
         bound_cyl = bd.Cylinder(
             radius=r_outer,
@@ -157,10 +181,11 @@ def _build_auger_core(
         blade_trimmed = blade & bound_cyl
     else:
         # Trim lower blade OD to r_outer with a 45° self-supporting bottom entry cone starting
-        # from the Ø 20.0 mm (R = 10.0 mm) base flange at Z = 4.5..13.5 mm (R = 10.0..19.0 mm)
-        taper_h = r_outer - 10.0  # 9.0 mm
+        # from the Ø 22.0 mm (R = 11.0 mm) base flange at Z = 4.5..12.5 mm (R = 11.0..19.0 mm)
+        r_flange = CLUTCH_FLANGE_OD / 2.0  # 11.0 mm
+        taper_h = r_outer - r_flange       # 8.0 mm
         lower_cone = bd.Pos(0.0, 0.0, 4.5) * bd.Cone(
-            bottom_radius=10.0,
+            bottom_radius=r_flange,
             top_radius=r_outer,
             height=taper_h,
             align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
@@ -231,37 +256,6 @@ def build_auger_lower() -> bd.Solid:
     return part.solid()
 
 
-def build_servo_or_030_adapter() -> bd.Solid:
-    """Build the snap-in Servo_Or_030_Adapter sleeve (Toolhead 1 - Dark Wood Brown #4A2F1D):
-    Allows the Trunk_Base dual-compatible motor bay to snugly sleeve the LA002
-    N20 Reduction Gear Motor (12.4 x 10.4 x 26.0 mm).
-    """
-    outer_box = bd.Box(
-        23.2,
-        12.5,
-        24.0,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    inner_n20_bore = bd.Pos(0.0, 0.0, -0.1) * bd.Box(
-        12.6,
-        10.6,
-        24.2,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    m25_left = bd.Pos(-9.0, 0.0, -0.1) * bd.Cylinder(
-        radius=2.25 / 2.0,
-        height=6.6,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    m25_right = bd.Pos(9.0, 0.0, -0.1) * bd.Cylinder(
-        radius=2.25 / 2.0,
-        height=6.6,
-        align=(bd.Align.CENTER, bd.Align.CENTER, bd.Align.MIN),
-    )
-    adapter = (outer_box - inner_n20_bore - m25_left - m25_right).solid()
-    return assign_toolhead(adapter, "Servo_Or_030_Adapter", 1)
-
-
 def build_auger_upper() -> bd.Solid:
     """Build upper half of the Archimedes screw with bottom 5.0 mm female hex socket,
     phase-matched to auger_lower so the helical flight is continuous across the joint.
@@ -296,14 +290,13 @@ def build_auger_upper() -> bd.Solid:
 
 
 def build_all_auger_parts() -> dict[str, bd.Solid]:
-    """Return dictionary of both printable Archimedes screw halves, the direct mechanical
-    Motor_Clutch_Driver coupler, and the Servo_Or_030_Adapter sleeve.
+    """Return dictionary of both printable Archimedes screw halves and the direct mechanical
+    Motor_Clutch_Driver coupler.
     """
     return {
         "auger_lower": assign_toolhead(build_auger_lower(), "auger_lower", 3),
         "auger_upper": assign_toolhead(build_auger_upper(), "auger_upper", 3),
         "Motor_Clutch_Driver": build_motor_clutch_driver(),
-        "Servo_Or_030_Adapter": build_servo_or_030_adapter(),
     }
 
 
