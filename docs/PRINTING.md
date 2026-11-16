@@ -31,16 +31,34 @@ All ready-to-print `.3mf` files are located in [`output/3mf/`](../output/3mf/), 
 
 ## Fit Validation & Retrofit Tools (`Test_Coupons_PLA.3mf`, `Test_Coupons_PETG.3mf` & Cutting Jig)
 
-Before committing multi-hour plates, print the polymer-separated fit coupon plates (`>= 8.8 mm` clearance across `0.10, 0.15, 0.20, 0.25 mm` radial steps):
+Before committing multi-hour plates, print the two quick single-polymer calibration plates (**15–45 min each**) at their native bed temperatures (`60 °C` PLA, `70–75 °C` PETG). Each stepped series is engraved with `10`, `15`, `20`, or `25` (`0.10`, `0.15`, `0.20`, `0.25 mm` radial clearance):
 
-1. **[`output/3mf/Test_Coupons_PLA.3mf`](../output/3mf/Test_Coupons_PLA.3mf)** (`24` single-polymer PLA coupons):
-   - **Keyhole Bracket Socket + Tenon** (`Coupon_Keyhole_Trunk_Slice` + `Coupon_Keyhole_Tenon_c10..c25`).
-   - **Bayonet Marble A/B** (`Coupon_Bayonet_B` + `Coupon_Bayonet_A_c10..c25`).
+1. **[`output/3mf/Test_Coupons_PLA.3mf`](../output/3mf/Test_Coupons_PLA.3mf)** (`24` single-polymer PLA pieces):
+   - **Keyhole Bracket Socket + Tenons** (`Coupon_Keyhole_Trunk_Slice` + `Coupon_Keyhole_Tenon_c10..c25`).
    - **Trunk Stack Keyed Tenon/Socket** (`Coupon_Trunk_Socket` + `Coupon_Trunk_Tenon_c10..c25`).
-   - **Planet `KA006` Bore w/ 4× Crush Ribs** (`Coupon_Planet_Bore_c10..c25` + `Coupon_N20_DShaft_c10..c25`).
-2. **[`output/3mf/Test_Coupons_PETG.3mf`](../output/3mf/Test_Coupons_PETG.3mf)** (`4` Translucent Teal PETG coupons, `>= 70 °C` bed):
-   - **Bracket Split-Tine Socket + Track Stepped Half-Lap** (`Coupon_Track_Bracket_Socket`, `Coupon_Stepped_Lap_Down/Up`, `Coupon_Planet_Peg`).
-3. **Pre-Fix Trunk Retrofit Tool:** If you already printed an older closed-pocket `trunk_base` (`k = 1..7`), slice and print **[`output/Trunk_Keyhole_Cutting_Jig.stl`](../output/Trunk_Keyhole_Cutting_Jig.stl)** (`0.20 mm` layer, `100%` infill or `6` walls in PLA/PETG) and follow **Step 5** in [`docs/ASSEMBLY.md`](ASSEMBLY.md).
+   - **Bracket Split-Tine Snap Pegs** (`Coupon_SplitTine_Pegs_c10..c25`, snaps into `Coupon_Track_Bracket_Socket` from the PETG plate).
+   - **Bayonet Marble A/B** (`Coupon_Bayonet_B` + `Coupon_Bayonet_A_c10..c25`).
+   - **Planet `KA006` Bore w/ 4× Crush Ribs** (`Coupon_Planet_Bore_c10..c25`, presses onto `Coupon_Planet_Peg` from the PETG plate).
+   - **Magic Wand Magnet Socket** (`Coupon_Wand_Magnet_Socket`, `Ø 8.05 × 2.20 mm` bore with rear `Ø 3.2 mm` push-out hole).
+2. **[`output/3mf/Test_Coupons_PETG.3mf`](../output/3mf/Test_Coupons_PETG.3mf)** (`4` Translucent Teal PETG pieces, `>= 70 °C` bed):
+   - **`8.0°` Stepped Half-Lap Track Pair + `WS2812B` Bay** (`Coupon_SteppedLap_Seg4` + `Coupon_SteppedLap_Seg5`).
+   - **Track Underside Split-Tine Socket** (`Coupon_Track_Bracket_Socket`).
+   - **Planet Balcony Snap Peg** (`Coupon_Planet_Peg`).
+
+### What to Physically Test With the Coupons
+1. **Test Keyhole Brackets (`Coupon_Keyhole_Trunk_Slice` + `10/15/20/25`):** Slide each tenon straight into the upper keyhole window and drop down `-Z`. It should glide effortlessly with light tactile click/friction at the neck bump (`15` = nominal production clearance; if `15` binds on your printer, test `20`). If you have an **older already-printed pre-fix `trunk_base` or brackets**, also test your old brackets against `Coupon_Keyhole_Trunk_Slice` and test [`Trunk_Keyhole_Cutting_Jig.stl`](../output/Trunk_Keyhole_Cutting_Jig.stl) over it before cutting.
+2. **Test Trunk Stack Seam (`Coupon_Trunk_Socket` + `10/15/20/25`):** Drop the male stub straight down onto the keyed socket — `15` or `20` should slide in by hand without malleting.
+3. **Test PETG Track Seam, Split-Tine Snap & `WS2812B` Pebble (`PETG` + `PLA`):**
+   - Drop `Coupon_SteppedLap_Seg5` vertically `-Z` onto `Coupon_SteppedLap_Seg4` (`0.0000 mm³` seam step).
+   - Press `Coupon_SplitTine_Pegs_c15` vertically into `Coupon_Track_Bracket_Socket` to verify a crisp tactile PETG-on-PLA snap (`15` = nominal).
+   - Twist one `6.2 × 3.2 mm` `WS2812B` pebble pill **`3.2 mm`-edge-first** through the `4.6 mm` underside slot and flatten it inside the deepened `8.4 × 6.2 mm` channel.
+4. **Test Marbles (`Coupon_Bayonet_B` + `10/15/20/25` + `KC013` LED):** Check that the internal overhang ceiling printed cleanly with `supports=OFF`, insert a `Ø 18 × 6.5 mm` `KC013` LED puck, align `Coupon_Bayonet_A` (`15` or `20`), and twist `-45°` to lock securely.
+5. **Test Planets (`Coupon_Planet_Bore_10..25` + `KA006` LED + `Coupon_Planet_Peg`):** Push a `Ø 7.5 mm` `KA006` magnetic LED light into the `4×` crush ribs inside `Coupon_Planet_Bore_15` (`<= 0.15 mm` should hold tightly without glue!), then press the cap onto `Coupon_Planet_Peg` until the snap bead clicks.
+6. **Test Magic Wand Magnet (`Coupon_Wand_Magnet_Socket` + `Ø 8.0 × 2.0 mm` Magnet):** Press the magnet in — add 1 drop of CA glue if it slides loosely (push out from the back hole if you need to remove it).
+7. **If Your Best Fit Isn't `15` (`0.15 mm`):** In OrcaSlicer, tune **`X-Y contour compensation`** / flow (`-0.05 mm` makes `15` fit like `20`) or update clearance constants in `cad/common_params.py` and re-run `cad/generate_all.py` before printing the 18 main plates!
+
+### Pre-Fix Trunk Retrofit Tool
+If you already printed an older closed-pocket `trunk_base` (`k = 1..7`), slice and print **[`output/Trunk_Keyhole_Cutting_Jig.stl`](../output/Trunk_Keyhole_Cutting_Jig.stl)** (`0.20 mm` layer, `100%` infill or `6` walls in PLA/PETG) and follow **Step 5** in [`docs/ASSEMBLY.md`](ASSEMBLY.md).
 
 > **💡 Pitch-Leveled Horizontal Track Orientation + `"On build plate only"`:**  
 > Every helical track segment (`track_seg_01`..`14`) is leveled so both ends rest flat on `Z = 0.0 mm` (`min_bed_contact_area >= 56.2 mm²` across every track plate). Enabling **"On build plate only"** (`tree(auto)`) and **"Don't support bridges"** keeps the `8.4 × 6.2 mm` underside LED dovetail chamber, stepped half-lap shelves, and split-tine bracket sockets free of support material.
