@@ -46,7 +46,9 @@ esp32:
   board: m5stack-atom
   framework:
     type: esp-idf
-
+    advanced:
+      flash_chip: generic
+      sram1_as_iram: true
 logger:
 
 api:
@@ -132,6 +134,7 @@ light:
     num_leds: ${strip_num_leds}
     chipset: WS2812
     rgb_order: GRB
+    rmt_symbols: 256
     max_refresh_rate: 33ms
     default_transition_length: 800ms
     gamma_correct: 2.2
@@ -333,6 +336,7 @@ light:
     num_leds: ${topper_num_leds}
     chipset: WS2812
     rgb_order: GRB
+    rmt_symbols: 128
     max_refresh_rate: 33ms
     default_transition_length: 800ms
     gamma_correct: 2.2
@@ -412,6 +416,7 @@ light:
     num_leds: 1
     chipset: SK6812
     rgb_order: GRB
+    rmt_symbols: 64
     internal: false
 
 # ------------------------------------------------------------------------------
